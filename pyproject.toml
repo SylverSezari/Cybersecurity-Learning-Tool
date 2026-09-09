@@ -1,0 +1,20 @@
+[project]
+name = "cybersecurity-learning-tool"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Marlon Anderes", email = "marlonsonny.anderes@uzh.ch" }
+]
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+    "pydantic-core==2.46.5",
+]
+
+[project.scripts]
+cybersecurity-learning-tool = "cybersecurity_learning_tool:main"
+
+[build-system]
+requires = ["uv_build>=0.12.11,<0.13.0"]
+build-backend = "uv_build"

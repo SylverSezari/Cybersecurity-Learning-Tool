@@ -15,6 +15,7 @@ class Exercise(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    html_filename: Mapped[str] = mapped_column(String, nullable=False)
     task: Mapped[bool] = mapped_column(Boolean, nullable=False)
     position: Mapped[int] = mapped_column(Integer, nullable=False)
     chapter_id: Mapped[int] = mapped_column(

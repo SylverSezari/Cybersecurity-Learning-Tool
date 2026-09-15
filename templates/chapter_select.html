@@ -1,0 +1,22 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="chapter-select" aria-labelledby="chapter-select-title">
+	<header class="chapter-select-header">
+		<p class="section-kicker">Learning path</p>
+		<h1 id="chapter-select-title">Chapter Select</h1>
+		<p>Choose a chapter to begin learning.</p>
+	</header>
+
+	<div class="chapter-grid">
+		{% for chapter in chapters %}
+		<article class="chapter-card">
+			<span class="chapter-number">{{ "%02d"|format(loop.index) }}</span>
+			<h2>{{ chapter.title }}</h2>
+		</article>
+		{% else %}
+		<p class="empty-state">No chapters are available yet.</p>
+		{% endfor %}
+	</div>
+</section>
+{% endblock content %}

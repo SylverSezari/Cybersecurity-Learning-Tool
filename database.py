@@ -1,3 +1,4 @@
+from sqlalchemy import inspect, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
@@ -12,6 +13,38 @@ AsyncSessionLocal = async_sessionmaker(
 
 class Base(DeclarativeBase):
     pass
+
+
+async def init_db():
+    import models
+
+    required_tables = {
+        models.Chapter.__tablename__,
+        models.Exercise.__tablename__,
+    }
+
+    async with engine.begin() as connection:
+        existing_tables = await connection.run_sync(
+            lambda sync_connection: set(inspect(sync_connection).get_table_names())
+        )
+
+        if not required_tables.issubset(existing_tables):
+            await connection.run_sync(Base.metadata.create_all)
+
+        exercise_columns = await connection.run_sync(
+            lambda sync_connection: {
+                column["name"]
+                for column in inspect(sync_connection).get_columns("exercises")
+            }
+        )
+
+        if "html_filename" not in exercise_columns:
+            await connection.execute(
+                text(
+                    "ALTER TABLE exercises "
+                    "ADD COLUMN html_filename VARCHAR NOT NULL DEFAULT ''"
+                )
+            )
 
 
 async def get_db():

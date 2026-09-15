@@ -7,6 +7,7 @@ from pydantic import BaseModel
 class ExerciseResponse(BaseModel):
     id: int
     title: str
+    html_file: str
     task: bool
     chapter_id: int
     position: int

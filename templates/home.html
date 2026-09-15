@@ -1,0 +1,17 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="home-options" aria-label="Learning options">
+	<a class="home-option home-option-link" href="{{ url_for('chapters') }}">
+		<span class="home-option-title">Chapter Select</span>
+		<span class="home-option-description">Learn the fundamentals step by step.</span>
+		<span class="home-option-arrow" aria-hidden="true">&#8594;</span>
+	</a>
+
+	<div class="home-option home-option-disabled" aria-disabled="true">
+		<span class="home-option-title">Challenge</span>
+		<span class="home-option-description">Test your knowledge with practical challenges.</span>
+		<span class="home-option-status">Coming soon</span>
+	</div>
+</section>
+{% endblock content %}

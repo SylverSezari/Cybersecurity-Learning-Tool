@@ -14,13 +14,12 @@ class Exercise(Base):
     __table_args__ = (UniqueConstraint("chapter_id", "position"),)
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
-    title: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    title: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
     html_filename: Mapped[str] = mapped_column(String, nullable=False)
     task: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    position: Mapped[int] = mapped_column(Integer, nullable=False)
+    position: Mapped[int] = mapped_column(Integer)
     chapter_id: Mapped[int] = mapped_column(
         ForeignKey("chapters.id"),
-        nullable=False,
         index=True,
     )
     chapter: Mapped[Chapter] = relationship(back_populates="exercises")

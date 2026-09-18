@@ -15,11 +15,12 @@ class Exercise(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(100), unique=True, nullable=False)
-    html_filename: Mapped[str] = mapped_column(String, nullable=False)
+    html_filename: Mapped[str] = mapped_column(String, unique=True, nullable=False)
     task: Mapped[bool] = mapped_column(Boolean, nullable=False)
-    position: Mapped[int] = mapped_column(Integer)
+    position: Mapped[int] = mapped_column(Integer, nullable=True)
     chapter_id: Mapped[int] = mapped_column(
         ForeignKey("chapters.id"),
+        nullable=True,
         index=True,
     )
     chapter: Mapped[Chapter] = relationship(back_populates="exercises")
@@ -34,4 +35,5 @@ class Chapter(Base):
     exercises: Mapped[list[Exercise]] = relationship(
         back_populates="chapter",
         order_by="Exercise.position",
+        lazy="selectin",
     )

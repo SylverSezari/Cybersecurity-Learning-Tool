@@ -13,4 +13,7 @@ class Settings(BaseSettings):
     secret_key: SecretStr
     algorithm: str = "HS256"
     
+    admin: str
+    admin_password: SecretStr
+    
 settings = Settings()  # Loaded from .env file

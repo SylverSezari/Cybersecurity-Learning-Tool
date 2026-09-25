@@ -9,7 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
 from database import engine, get_db, init_db
-from routers import chapters, exercises
+from routers import accounts, chapters, exercises
 
 
 @asynccontextmanager
@@ -28,6 +28,7 @@ templates = Jinja2Templates(directory="templates")
 
 app.include_router(chapters.router, prefix="/api/chapters", tags=["chapters"])
 app.include_router(exercises.router, prefix="/api/exercises", tags=["exercises"])
+app.include_router(accounts.router, prefix="/api/accounts", tags=["accounts"])
 
 
 # Web functions

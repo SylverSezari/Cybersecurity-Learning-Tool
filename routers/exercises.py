@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
 from database import get_db
-from schemas import ExerciseAssignment, ExercisePost, ExerciseResponse, ExercisePut
+from schemas import ExerciseAssignment, ExercisePost, ExercisePut, ExerciseResponse
 
 router = APIRouter()
 
@@ -96,9 +96,7 @@ async def create_exercise(
 
 
 ## Assign a chapter to an exercise
-@router.put(
-    "/assignment", response_model=ExerciseResponse
-)
+@router.put("/assignment", response_model=ExerciseResponse)
 async def assign_exercise(
     exercise_id: int,
     assignment: ExerciseAssignment,
@@ -126,10 +124,13 @@ async def assign_exercise(
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND, detail="Chapter not found"
             )
-            
+
         ## check if postion is not already assigned for this chapter
         result = await db.execute(
-            select(models.Exercise).where(models.Exercise.chapter_id == assignment.chapter_id, models.Exercise.position == assignment.position)
+            select(models.Exercise).where(
+                models.Exercise.chapter_id == assignment.chapter_id,
+                models.Exercise.position == assignment.position,
+            )
         )
 
         positioning = result.scalars().first()
@@ -137,7 +138,7 @@ async def assign_exercise(
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT, detail="Position already assigned"
             )
-    
+
     # assign the new values
     exercise.chapter_id = assignment.chapter_id
     exercise.position = assignment.position
@@ -149,7 +150,11 @@ async def assign_exercise(
 
 ## Update exercise name or filename
 @router.put("/update/{exercise_id}", response_model=ExerciseResponse)
-async def update_exercise(exercise_id: int, update_data: ExercisePut, db: Annotated[AsyncSession, Depends(get_db)]):
+async def update_exercise(
+    exercise_id: int,
+    update_data: ExercisePut,
+    db: Annotated[AsyncSession, Depends(get_db)],
+):
     # Check if exercise exists
     result = await db.execute(
         select(models.Exercise).where(models.Exercise.id == exercise_id)
@@ -160,11 +165,11 @@ async def update_exercise(exercise_id: int, update_data: ExercisePut, db: Annota
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
         )
-    
+
     exercise_data = update_data.model_dump(exclude_unset=True)
     for field, value in exercise_data.items():
         setattr(exercise, field, value)
-        
+
     await db.commit()
     await db.refresh(exercise)
     return exercise

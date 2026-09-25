@@ -41,7 +41,9 @@ class ExercisePut(BaseModel):
 ### for get requests
 class ChapterResponse(BaseModel):
     id: int
-    title: str = Field(min_length=1, max_length=100)
+    title: str
+    position: int
+    active: bool
     exercises: list[ExerciseResponse] = Field(default_factory=list)
 
 
@@ -52,4 +54,40 @@ class ChapterPost(BaseModel):
 
 ### for put requests
 class ChapterPut(BaseModel):
-    title: str= Field(min_length=1, max_length=100)
+    title: str = Field(min_length=1, max_length=100)
+
+
+class ChapterActivation(BaseModel):
+    chapter_id: int
+    position: int
+    active: bool
+
+
+class ChapterActivationChange(BaseModel):
+    chapters: list[ChapterActivation]
+
+
+## Accounts
+
+
+### for get requests
+class AccountResponse(BaseModel):
+    id: int
+    username: str
+
+
+### for post requests
+class AccountCreate(BaseModel):
+    username: str = Field(min_length=1, max_length=20)
+    password: str = Field(min_length=4)
+
+
+class AccountLogin(BaseModel):
+    username: str
+    password: str
+
+
+## token to remember user
+class Token(BaseModel):
+    access_token: str
+    token_type: str

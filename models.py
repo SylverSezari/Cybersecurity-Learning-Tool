@@ -32,8 +32,19 @@ class Chapter(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=True)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False)
     exercises: Mapped[list[Exercise]] = relationship(
         back_populates="chapter",
         order_by="Exercise.position",
         lazy="selectin",
     )
+
+
+## the accountse are defined here
+class Account(Base):
+    __tablename__= "accounts"
+    
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    username: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
+    password_hash: Mapped[str] = mapped_column(String(200), nullable=False)

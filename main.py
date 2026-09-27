@@ -40,6 +40,14 @@ async def home(request: Request):
     return templates.TemplateResponse(request, "home.html")
 
 
+## login
+@app.get("/login", include_in_schema=False, name="login_page")
+async def login_page(request: Request):
+    return templates.TemplateResponse(
+        request, "login.html", {"title": "Sign in"}
+    )
+
+
 ## chapter select
 @app.get("/chapters", include_in_schema=False, name="chapters")
 async def chapter_select(

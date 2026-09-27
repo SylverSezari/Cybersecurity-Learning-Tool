@@ -15,6 +15,7 @@ from security import (
     create_access_token,
     get_current_principal,
     hash_password,
+    require_admin,
     verify_password,
 )
 
@@ -29,11 +30,32 @@ async def get_all_accounts(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
-    _require_admin(principal)
+    require_admin(principal)
     result = await db.execute(select(models.Account))
 
     accounts = result.scalars().all()
     return accounts
+
+
+@router.get("/session")
+async def validate_session(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
+    if principal["role"] == "user":
+        result = await db.execute(
+            select(models.Account.id).where(
+                models.Account.id == principal["account_id"]
+            )
+        )
+        if result.scalar_one_or_none() is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Account no longer exists",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+
+    return {"valid": True}
 
 
 ## Get a single account
@@ -70,7 +92,7 @@ async def create_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
-    _require_admin(principal)
+    require_admin(principal)
 
     # check if account with name exists already
     result = await db.execute(
@@ -90,7 +112,7 @@ async def create_account(
         username=account.username,
         password_hash=password_hash,
     )
-    
+
     db.add(new_account)
     await db.commit()
     await db.refresh(new_account)
@@ -102,12 +124,9 @@ async def login(
     credentials: AccountLogin,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
-    if (
-        credentials.username == settings.admin
-        and hmac.compare_digest(
-            credentials.password.encode("utf-8"),
-            settings.admin_password.get_secret_value().encode("utf-8"),
-        )
+    if credentials.username == settings.admin and hmac.compare_digest(
+        credentials.password.encode("utf-8"),
+        settings.admin_password.get_secret_value().encode("utf-8"),
     ):
         access_token = create_access_token(
             subject=settings.admin,
@@ -136,11 +155,3 @@ async def login(
         role="user",
     )
     return Token(access_token=access_token, token_type="bearer")
-
-
-def _require_admin(principal: Principal) -> None:
-    if principal["role"] != "admin":
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Admin privileges required",
-        )

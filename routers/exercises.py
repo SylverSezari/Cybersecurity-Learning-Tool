@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import models
 from database import get_db
 from schemas import ExerciseAssignment, ExercisePost, ExercisePut, ExerciseResponse
+from security import Principal, get_current_principal, require_admin
 
 router = APIRouter()
 
@@ -15,7 +16,10 @@ router = APIRouter()
 
 ## Get all exercises
 @router.get("", response_model=list[ExerciseResponse])
-async def get_all_exercises(db: Annotated[AsyncSession, Depends(get_db)]):
+async def get_all_exercises(
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
     result = await db.execute(select(models.Exercise))
 
     exercises = result.scalars().all()
@@ -25,8 +29,11 @@ async def get_all_exercises(db: Annotated[AsyncSession, Depends(get_db)]):
 ## Get single exercise
 @router.get("/{exercise_id}", response_model=ExerciseResponse)
 async def get_single_exercise(
-    exercise_id: int, db: Annotated[AsyncSession, Depends(get_db)]
+    exercise_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    #check if exercise exists
     result = await db.execute(
         select(models.Exercise).where(models.Exercise.id == exercise_id)
     )
@@ -42,7 +49,9 @@ async def get_single_exercise(
 ## Get all exercises belonging to a single chapter ordered by position
 @router.get("/chapter/{chapter_id}", response_model=list[ExerciseResponse])
 async def get_exercises_belonging_to_chapter(
-    chapter_id: int, db: Annotated[AsyncSession, Depends(get_db)]
+    chapter_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     result = await db.execute(
         select(models.Exercise)
@@ -56,8 +65,13 @@ async def get_exercises_belonging_to_chapter(
 ## Create an exercise
 @router.post("", response_model=ExerciseResponse, status_code=status.HTTP_201_CREATED)
 async def create_exercise(
-    exercise: ExercisePost, db: Annotated[AsyncSession, Depends(get_db)]
+    exercise: ExercisePost,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    require_admin(principal)
+
+    #Check if exercise with title exists already
     result = await db.execute(
         select(models.Exercise).where(
             func.lower(models.Exercise.title) == exercise.title.lower()
@@ -70,6 +84,7 @@ async def create_exercise(
             detail="Exercise with this title already created",
         )
 
+    #Check if filename is already taken
     result = await db.execute(
         select(models.Exercise).where(
             func.lower(models.Exercise.html_filename) == exercise.html_filename.lower()
@@ -82,6 +97,7 @@ async def create_exercise(
             detail="Exercise with this filename already created",
         )
 
+    #create new exercise
     new_exercise = models.Exercise(
         title=exercise.title,
         html_filename=exercise.html_filename,
@@ -101,7 +117,10 @@ async def assign_exercise(
     exercise_id: int,
     assignment: ExerciseAssignment,
     db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    require_admin(principal)
+
     # Check if exercise exists
     result = await db.execute(
         select(models.Exercise).where(models.Exercise.id == exercise_id)
@@ -154,7 +173,10 @@ async def update_exercise(
     exercise_id: int,
     update_data: ExercisePut,
     db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    require_admin(principal)
+
     # Check if exercise exists
     result = await db.execute(
         select(models.Exercise).where(models.Exercise.id == exercise_id)
@@ -166,6 +188,7 @@ async def update_exercise(
             status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
         )
 
+    #Update exercise with relevant data
     exercise_data = update_data.model_dump(exclude_unset=True)
     for field, value in exercise_data.items():
         setattr(exercise, field, value)

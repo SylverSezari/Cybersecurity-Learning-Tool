@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="login-page" aria-labelledby="login-title">
+	<div class="login-copy">
+		<p class="section-kicker">Cybersecurity Learning Tool</p>
+		<h1 id="login-title">Your next lesson starts here.</h1>
+		<p>Sign in to continue your cybersecurity learning.</p>
+	</div>
+
+	<div class="login-panel">
+		<h2>Sign in</h2>
+		<form class="login-form" id="loginForm">
+			<label for="username">Username</label>
+			<input
+				id="username"
+				name="username"
+				autocomplete="username"
+				required
+				maxlength="20"
+			/>
+
+			<label for="password">Password</label>
+			<input
+				id="password"
+				name="password"
+				type="password"
+				autocomplete="current-password"
+				required
+			/>
+
+			<p class="login-error" id="loginError" role="alert" hidden></p>
+			<button class="login-submit" id="loginSubmit" type="submit">
+				Sign in
+			</button>
+		</form>
+	</div>
+</section>
+{% endblock content %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/login.js') }}" defer></script>
+{% endblock scripts %}

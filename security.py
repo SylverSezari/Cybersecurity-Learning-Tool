@@ -8,27 +8,33 @@ from pwdlib import PasswordHash
 
 from config import settings
 
+# Set up password hashing and bearer-token extraction for authentication.
 _password_hash = PasswordHash.recommended()
+# Handle missing credentials here so the dependency can return a consistent error.
 _bearer_scheme = HTTPBearer(auto_error=False)
 
 
+# The authenticated identity returned by the token-checking dependency.
 class Principal(TypedDict):
     role: Literal["admin", "user"]
     account_id: int | None
 
 
+# Convert a plain-text password into a hash suitable for storing in the database.
 def hash_password(password: str) -> str:
     return _password_hash.hash(password)
 
 
+# Check a plain-text password against the hash stored for an account.
 def verify_password(password: str, password_hash: str) -> bool:
     return _password_hash.verify(password, password_hash)
 
 
+# Create a signed JWT containing the subject, role, and a two-hour expiration time.
 def create_access_token(
     *, subject: str, role: Literal["admin", "user"]
 ) -> str:
-    expires_at = datetime.now(UTC) + timedelta(minutes=30)
+    expires_at = datetime.now(UTC) + timedelta(minutes=120)
     return jwt.encode(
         {"sub": subject, "role": role, "exp": expires_at},
         settings.secret_key.get_secret_value(),
@@ -36,12 +42,14 @@ def create_access_token(
     )
 
 
+# Validate the request's bearer token and return the authenticated principal.
 async def get_current_principal(
     credentials: Annotated[
         HTTPAuthorizationCredentials | None,
         Depends(_bearer_scheme),
     ],
 ) -> Principal:
+    # Use the same response for missing, malformed, invalid, and expired tokens.
     unauthorized = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
         detail="Invalid or expired authentication token",
@@ -51,6 +59,7 @@ async def get_current_principal(
     if credentials is None:
         raise unauthorized
 
+    # Decode verifies the token signature and expiration using the configured key and algorithm. Invalid JWTs are reported as an authentication failure.
     try:
         payload = jwt.decode(
             credentials.credentials,
@@ -62,12 +71,15 @@ async def get_current_principal(
 
     subject = payload.get("sub")
     role = payload.get("role")
+    # Both claims are needed to identify an allowed admin or user principal.
     if not isinstance(subject, str):
         raise unauthorized
 
+    # The admin token must identify the configured admin account.
     if role == "admin" and subject == settings.admin:
         return {"role": "admin", "account_id": None}
 
+    # User subjects contain their positive database account ID as a string.
     if role == "user":
         try:
             account_id = int(subject)
@@ -76,4 +88,12 @@ async def get_current_principal(
         if account_id > 0:
             return {"role": "user", "account_id": account_id}
 
+    # Reject unrecognized roles, mismatched admin subjects, and invalid user IDs.
     raise unauthorized
+
+def require_admin(principal: Principal) -> None:
+    if principal["role"] != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Admin privileges required",
+        )

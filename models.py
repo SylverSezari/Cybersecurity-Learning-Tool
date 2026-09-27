@@ -32,8 +32,8 @@ class Chapter(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     title: Mapped[str] = mapped_column(String(50), unique=True, nullable=False)
-    position: Mapped[int] = mapped_column(Integer, nullable=True)
-    active: Mapped[bool] = mapped_column(Boolean, nullable=False)
+    position: Mapped[int] = mapped_column(Integer, nullable=False, default=-1)
+    active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     exercises: Mapped[list[Exercise]] = relationship(
         back_populates="chapter",
         order_by="Exercise.position",

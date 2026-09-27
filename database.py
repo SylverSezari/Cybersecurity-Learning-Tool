@@ -21,6 +21,7 @@ async def init_db():
     required_tables = {
         models.Chapter.__tablename__,
         models.Exercise.__tablename__,
+        models.Account.__tablename__,
     }
 
     async with engine.begin() as connection:
@@ -30,6 +31,10 @@ async def init_db():
 
         if not required_tables.issubset(existing_tables):
             await connection.run_sync(Base.metadata.create_all)
+
+        await connection.execute(
+            text("UPDATE chapters SET position = -1 WHERE position IS NULL")
+        )
 
         exercise_columns = await connection.run_sync(
             lambda sync_connection: {

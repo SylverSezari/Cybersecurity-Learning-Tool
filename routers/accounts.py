@@ -9,7 +9,7 @@ from starlette.concurrency import run_in_threadpool
 import models
 from config import settings
 from database import get_db
-from schemas import AccountCreate, AccountLogin, AccountResponse, Token
+from schemas import AccountCreate, AccountLogin, AccountPut, AccountResponse, Token
 from security import (
     Principal,
     create_access_token,
@@ -55,7 +55,7 @@ async def validate_session(
                 headers={"WWW-Authenticate": "Bearer"},
             )
 
-    return {"valid": True}
+    return {"valid": True, "role": principal["role"]}
 
 
 ## Get a single account
@@ -117,6 +117,48 @@ async def create_account(
     await db.commit()
     await db.refresh(new_account)
     return new_account
+
+
+@router.put("/update/{account_id}", response_model=AccountResponse)
+async def update_account(
+    account_id: int,
+    update_data: AccountPut,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
+    require_admin(principal)
+
+    result = await db.execute(
+        select(models.Account).where(models.Account.id == account_id)
+    )
+    account = result.scalars().first()
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
+        )
+
+    if update_data.username is not None:
+        result = await db.execute(
+            select(models.Account).where(
+                func.lower(models.Account.username) == update_data.username.lower(),
+                models.Account.id != account_id,
+            )
+        )
+        if result.scalars().first():
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Account with this username already exists",
+            )
+        account.username = update_data.username
+
+    if update_data.password is not None:
+        account.password_hash = await run_in_threadpool(
+            hash_password, update_data.password
+        )
+
+    await db.commit()
+    await db.refresh(account)
+    return account
 
 
 @router.post("/token", response_model=Token)

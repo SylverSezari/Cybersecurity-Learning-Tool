@@ -122,7 +122,8 @@ async def update_chapter(
     # check if chapter with this title exists
     result = await db.execute(
         select(models.Chapter).where(
-            func.lower(models.Chapter.title) == update_data.title.lower()
+            func.lower(models.Chapter.title) == update_data.title.lower(),
+            models.Chapter.id != chapter_id,
         )
     )
 

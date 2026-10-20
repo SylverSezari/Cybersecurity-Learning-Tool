@@ -68,7 +68,7 @@ async def test_validate_session_accepts_admin_token(
 	response = await client.get("/api/accounts/session", headers=admin_auth_headers)
 
 	assert response.status_code == 200
-	assert response.json() == {"valid": True}
+	assert response.json() == {"valid": True, "role": "admin"}
 
 
 @pytest.mark.anyio
@@ -80,7 +80,7 @@ async def test_validate_session_accepts_existing_user_token(
 	response = await client.get("/api/accounts/session", headers=user_auth_headers)
 
 	assert response.status_code == 200
-	assert response.json() == {"valid": True}
+	assert response.json() == {"valid": True, "role": "user"}
 
 
 @pytest.mark.anyio
@@ -271,6 +271,91 @@ async def test_create_account_rejects_regular_user(
 	assert response.json()["detail"] == "Admin privileges required"
 
 
+## Test update_account
+# Verify username/password changes, duplicate usernames, and admin-only access.
+
+
+@pytest.mark.anyio
+async def test_update_account_changes_username_and_password(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+	test_account_factory: Callable[[str], Awaitable[dict]],
+):
+	account = await test_account_factory("before_update")
+	response = await client.put(
+		f"/api/accounts/update/{account['id']}",
+		json={"username": "after_update", "password": "newpassword123"},
+		headers=admin_auth_headers,
+	)
+
+	assert response.status_code == 200
+	assert response.json() == {"id": account["id"], "username": "after_update"}
+	login_response = await client.post(
+		"/api/accounts/token",
+		json={"username": "after_update", "password": "newpassword123"},
+	)
+	assert login_response.status_code == 200
+
+
+@pytest.mark.anyio
+async def test_update_account_rejects_duplicate_username(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+	test_account_factory: Callable[[str], Awaitable[dict]],
+):
+	account = await test_account_factory("account_to_rename")
+	await test_account_factory("used_username")
+
+	response = await client.put(
+		f"/api/accounts/update/{account['id']}",
+		json={"username": "USED_USERNAME"},
+		headers=admin_auth_headers,
+	)
+
+	assert response.status_code == 409
+	assert response.json()["detail"] == "Account with this username already exists"
+
+
+@pytest.mark.anyio
+async def test_update_account_returns_not_found_for_unknown_id(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+):
+	response = await client.put(
+		"/api/accounts/update/99999",
+		json={"username": "missing_account"},
+		headers=admin_auth_headers,
+	)
+
+	assert response.status_code == 404
+	assert response.json()["detail"] == "Account not found"
+
+
+@pytest.mark.anyio
+async def test_update_account_rejects_regular_user(
+	client: AsyncClient,
+	user_auth_headers: dict[str, str],
+):
+	response = await client.put(
+		"/api/accounts/update/1",
+		json={"username": "unauthorized_update"},
+		headers=user_auth_headers,
+	)
+
+	assert response.status_code == 403
+	assert response.json()["detail"] == "Admin privileges required"
+
+
+@pytest.mark.anyio
+async def test_update_account_rejects_missing_token(client: AsyncClient):
+	response = await client.put(
+		"/api/accounts/update/1", json={"username": "unauthorized_update"}
+	)
+
+	assert response.status_code == 401
+	assert response.json()["detail"] == "Invalid or expired authentication token"
+
+
 ## Test login
 # Exercise admin and user login, case-insensitive usernames, and generic credential failures.
 
@@ -308,7 +393,7 @@ async def test_login_returns_token_for_existing_user(
 		headers={"Authorization": f"Bearer {response.json()['access_token']}"},
 	)
 	assert session_response.status_code == 200
-	assert session_response.json() == {"valid": True}
+	assert session_response.json() == {"valid": True, "role": "user"}
 
 
 @pytest.mark.anyio

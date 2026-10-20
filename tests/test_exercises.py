@@ -310,6 +310,37 @@ async def test_assign_exercise_can_unassign_from_chapter(
 
 
 @pytest.mark.anyio
+async def test_assign_exercise_can_unassign_multiple_exercises(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	admin_auth_headers: dict[str, str],
+):
+	# Multiple exercises can be left unassigned at the same time.
+	chapter = models.Chapter(title="Multiple unassignment chapter", position=0, active=True)
+	db_session.add(chapter)
+	await db_session.commit()
+	first = await add_exercise(
+		db_session, "First unassigned", "first-unassigned.html", chapter_id=chapter.id, position=0
+	)
+	second = await add_exercise(
+		db_session, "Second unassigned", "second-unassigned.html", chapter_id=chapter.id, position=1
+	)
+
+	positions = []
+	for exercise in (first, second):
+		response = await client.put(
+			f"/api/exercises/assignment?exercise_id={exercise.id}",
+			json={"chapter_id": -1, "position": -1},
+			headers=admin_auth_headers,
+		)
+		assert response.status_code == 200, response.text
+		assert response.json()["chapter_id"] == -1
+		positions.append(response.json()["position"])
+
+	assert positions == [-1, -2]
+
+
+@pytest.mark.anyio
 async def test_assign_exercise_returns_not_found_for_unknown_exercise(
 	client: AsyncClient,
 	admin_auth_headers: dict[str, str],

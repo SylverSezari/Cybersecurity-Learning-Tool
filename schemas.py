@@ -82,6 +82,11 @@ class AccountCreate(BaseModel):
     password: str = Field(min_length=4)
 
 
+class AccountPut(BaseModel):
+    username: str | None = Field(default=None, min_length=1, max_length=20)
+    password: str | None = Field(default=None, min_length=4)
+
+
 class AccountLogin(BaseModel):
     username: str
     password: str

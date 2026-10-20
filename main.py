@@ -48,12 +48,26 @@ async def login_page(request: Request):
     )
 
 
+## account management
+@app.get("/account", include_in_schema=False, name="account_page")
+async def account_page(request: Request):
+    return templates.TemplateResponse(
+        request, "account.html", {"title": "Account Management"}
+    )
+
+
 ## chapter select
 @app.get("/chapters", include_in_schema=False, name="chapters")
 async def chapter_select(
     request: Request, db: Annotated[AsyncSession, Depends(get_db)]
 ):
-    result = await db.execute(select(models.Chapter))
+    result = await db.execute(
+        select(models.Chapter).order_by(
+            models.Chapter.active.desc(),
+            models.Chapter.position,
+            models.Chapter.id,
+        )
+    )
 
     chapters = result.scalars().all()
 

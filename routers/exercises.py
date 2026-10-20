@@ -132,6 +132,21 @@ async def assign_exercise(
             status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
         )
 
+    position = assignment.position
+
+    # Keep unassigned exercises at unique negative positions for the database constraint.
+    if assignment.chapter_id == -1:
+        result = await db.execute(
+            select(models.Exercise.position).where(
+                models.Exercise.chapter_id == -1,
+                models.Exercise.id != exercise_id,
+            )
+        )
+        unassigned_positions = set(result.scalars().all())
+        position = -1
+        while position in unassigned_positions:
+            position -= 1
+
     # check if chapter exists if you are not unassigning exercise
     if assignment.chapter_id != -1:
         result = await db.execute(
@@ -160,7 +175,7 @@ async def assign_exercise(
 
     # assign the new values
     exercise.chapter_id = assignment.chapter_id
-    exercise.position = assignment.position
+    exercise.position = position
 
     await db.commit()
     await db.refresh(exercise, attribute_names=["chapter"])

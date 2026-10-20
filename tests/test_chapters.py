@@ -51,6 +51,24 @@ async def test_get_all_chapters_rejects_missing_token(client: AsyncClient):
 	assert response.json()["detail"] == "Invalid or expired authentication token"
 
 
+@pytest.mark.anyio
+async def test_chapter_select_page_orders_active_chapters_before_inactive(
+	client: AsyncClient,
+	db_session: AsyncSession,
+):
+	# Learners see active chapters in saved position order, followed by inactive ones.
+	await add_chapter(db_session, "Later active", position=2, active=True)
+	await add_chapter(db_session, "Inactive chapter")
+	await add_chapter(db_session, "Earlier active", position=0, active=True)
+
+	response = await client.get("/chapters")
+	content = response.text
+
+	assert response.status_code == 200
+	assert content.index("Earlier active") < content.index("Later active")
+	assert content.index("Later active") < content.index("Inactive chapter")
+
+
 ## Test get_single_chapter
 # Check authenticated retrieval, unknown IDs, and rejection of requests without a token.
 
@@ -183,6 +201,25 @@ async def test_update_chapter_changes_title_for_admin(
 
 	assert response.status_code == 200
 	assert response.json()["title"] == "New title"
+
+
+@pytest.mark.anyio
+async def test_update_chapter_accepts_its_existing_title(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	admin_auth_headers: dict[str, str],
+):
+	# A chapter's existing title is not a duplicate of another chapter.
+	chapter = await add_chapter(db_session, "Current title")
+
+	response = await client.put(
+		f"/api/chapters/update/{chapter.id}",
+		json={"title": "Current title"},
+		headers=admin_auth_headers,
+	)
+
+	assert response.status_code == 200
+	assert response.json()["title"] == "Current title"
 
 
 @pytest.mark.anyio

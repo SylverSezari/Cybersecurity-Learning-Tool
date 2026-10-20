@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import func, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 
@@ -194,3 +194,34 @@ async def change_chapters_active(
 
     await db.commit()
     return chapters
+
+
+## delete chapter
+@router.delete("/delete/{chapter_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_chapter(
+    chapter_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
+    
+    require_admin(principal)
+    
+    # Check if chapter exists
+    result = await db.execute(
+        select(models.Chapter).where(models.Chapter.id == chapter_id)
+    )
+
+    chapter = result.scalars().first()
+    if not chapter:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter not found"
+        )
+
+    await db.execute(
+        update(models.Exercise)
+        .where(models.Exercise.chapter_id == chapter_id)
+        .values(chapter_id=None, position=-1)
+    )
+    await db.delete(chapter)
+    await db.commit()
+    

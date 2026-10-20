@@ -473,3 +473,57 @@ async def test_update_exercise_rejects_regular_user(
 	assert response.status_code == 403
 	assert response.json()["detail"] == "Admin privileges required"
 
+
+## Test delete_exercise
+# Check removal, missing-exercise errors, and admin-only access.
+
+
+@pytest.mark.anyio
+async def test_delete_exercise_removes_exercise_for_admin(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	admin_auth_headers: dict[str, str],
+):
+	exercise = await add_exercise(db_session, "Exercise to delete", "delete.html")
+
+	response = await client.delete(
+		f"/api/exercises/delete/{exercise.id}", headers=admin_auth_headers
+	)
+
+	assert response.status_code == 204
+	assert await db_session.get(models.Exercise, exercise.id) is None
+
+
+@pytest.mark.anyio
+async def test_delete_exercise_returns_not_found_for_unknown_id(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+):
+	response = await client.delete(
+		"/api/exercises/delete/99999", headers=admin_auth_headers
+	)
+
+	assert response.status_code == 404
+	assert response.json()["detail"] == "Exercise not found"
+
+
+@pytest.mark.anyio
+async def test_delete_exercise_rejects_missing_token(client: AsyncClient):
+	response = await client.delete("/api/exercises/delete/1")
+
+	assert response.status_code == 401
+	assert response.json()["detail"] == "Invalid or expired authentication token"
+
+
+@pytest.mark.anyio
+async def test_delete_exercise_rejects_regular_user(
+	client: AsyncClient,
+	user_auth_headers: dict[str, str],
+):
+	response = await client.delete(
+		"/api/exercises/delete/1", headers=user_auth_headers
+	)
+
+	assert response.status_code == 403
+	assert response.json()["detail"] == "Admin privileges required"
+

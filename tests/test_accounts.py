@@ -367,3 +367,61 @@ async def test_login_rejects_incorrect_admin_password(client: AsyncClient):
 
 	assert response.status_code == 401
 	assert response.json()["detail"] == "Invalid username or password"
+
+
+## Test delete_account
+# Check removal, missing-account errors, and admin-only access.
+
+
+@pytest.mark.anyio
+async def test_delete_account_removes_account_for_admin(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+	test_account_factory: Callable[[str], Awaitable[dict]],
+):
+	account = await test_account_factory("account_to_delete")
+
+	response = await client.delete(
+		f"/api/accounts/delete/{account['id']}", headers=admin_auth_headers
+	)
+
+	assert response.status_code == 204
+	lookup_response = await client.get(
+		f"/api/accounts/{account['id']}", headers=admin_auth_headers
+	)
+	assert lookup_response.status_code == 404
+	assert lookup_response.json()["detail"] == "Account not found"
+
+
+@pytest.mark.anyio
+async def test_delete_account_returns_not_found_for_unknown_id(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+):
+	response = await client.delete(
+		"/api/accounts/delete/99999", headers=admin_auth_headers
+	)
+
+	assert response.status_code == 404
+	assert response.json()["detail"] == "Account not found"
+
+
+@pytest.mark.anyio
+async def test_delete_account_rejects_missing_token(client: AsyncClient):
+	response = await client.delete("/api/accounts/delete/1")
+
+	assert response.status_code == 401
+	assert response.json()["detail"] == "Invalid or expired authentication token"
+
+
+@pytest.mark.anyio
+async def test_delete_account_rejects_regular_user(
+	client: AsyncClient,
+	user_auth_headers: dict[str, str],
+):
+	response = await client.delete(
+		"/api/accounts/delete/1", headers=user_auth_headers
+	)
+
+	assert response.status_code == 403
+	assert response.json()["detail"] == "Admin privileges required"

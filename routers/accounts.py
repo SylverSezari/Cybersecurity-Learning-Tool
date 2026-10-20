@@ -155,3 +155,29 @@ async def login(
         role="user",
     )
     return Token(access_token=access_token, token_type="bearer")
+
+
+## delete account
+@router.delete("/delete/{account_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_account(
+    account_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
+    
+    require_admin(principal)
+    
+    # Check if account exists
+    result = await db.execute(
+        select(models.Account).where(models.Account.id == account_id)
+    )
+
+    account = result.scalars().first()
+    if not account:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
+        )
+        
+    # delete account
+    await db.delete(account)
+    await db.commit()

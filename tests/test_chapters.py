@@ -383,3 +383,72 @@ async def test_change_chapters_active_rejects_regular_user(
 
 	assert response.status_code == 403
 	assert response.json()["detail"] == "Admin privileges required"
+
+
+@pytest.mark.anyio
+async def test_delete_chapter_unassigns_exercises_and_resets_position(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	admin_auth_headers: dict[str, str],
+):
+	chapter = await add_chapter(db_session, "Chapter to delete")
+	exercises = [
+		models.Exercise(
+			title=f"Exercise {position}",
+			html_filename=f"exercise-{position}.html",
+			task=True,
+			chapter_id=chapter.id,
+			position=position,
+		)
+		for position in (1, 2)
+	]
+	db_session.add_all(exercises)
+	await db_session.commit()
+
+	response = await client.delete(
+		f"/api/chapters/delete/{chapter.id}", headers=admin_auth_headers
+	)
+
+	assert response.status_code == 204
+	lookup_response = await client.get(
+		f"/api/chapters/{chapter.id}", headers=admin_auth_headers
+	)
+	assert lookup_response.status_code == 404
+	for exercise in exercises:
+		await db_session.refresh(exercise)
+		assert exercise.chapter_id is None
+		assert exercise.position == -1
+
+
+@pytest.mark.anyio
+async def test_delete_chapter_returns_not_found_for_unknown_id(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+):
+	response = await client.delete(
+		"/api/chapters/delete/99999", headers=admin_auth_headers
+	)
+
+	assert response.status_code == 404
+	assert response.json()["detail"] == "Chapter not found"
+
+
+@pytest.mark.anyio
+async def test_delete_chapter_rejects_missing_token(client: AsyncClient):
+	response = await client.delete("/api/chapters/delete/1")
+
+	assert response.status_code == 401
+	assert response.json()["detail"] == "Invalid or expired authentication token"
+
+
+@pytest.mark.anyio
+async def test_delete_chapter_rejects_regular_user(
+	client: AsyncClient,
+	user_auth_headers: dict[str, str],
+):
+	response = await client.delete(
+		"/api/chapters/delete/1", headers=user_auth_headers
+	)
+
+	assert response.status_code == 403
+	assert response.json()["detail"] == "Admin privileges required"

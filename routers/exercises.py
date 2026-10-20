@@ -196,3 +196,29 @@ async def update_exercise(
     await db.commit()
     await db.refresh(exercise)
     return exercise
+
+
+## delete exercise
+@router.delete("/delete/{exercise_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_exercise(
+    exercise_id: int,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
+    
+    require_admin(principal)
+    
+    # Check if exercise exists
+    result = await db.execute(
+        select(models.Exercise).where(models.Exercise.id == exercise_id)
+    )
+
+    exercise = result.scalars().first()
+    if not exercise:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
+        )
+        
+    # delete exercise
+    await db.delete(exercise)
+    await db.commit()

@@ -31,9 +31,7 @@ def verify_password(password: str, password_hash: str) -> bool:
 
 
 # Create a signed JWT containing the subject, role, and a two-hour expiration time.
-def create_access_token(
-    *, subject: str, role: Literal["admin", "user"]
-) -> str:
+def create_access_token(*, subject: str, role: Literal["admin", "user"]) -> str:
     expires_at = datetime.now(UTC) + timedelta(minutes=120)
     return jwt.encode(
         {"sub": subject, "role": role, "exp": expires_at},
@@ -113,6 +111,7 @@ async def get_page_principal(
         else request.cookies.get("access_token")
     )
     return _principal_from_token(token)
+
 
 def require_admin(principal: Principal) -> None:
     # Raise a forbidden response when a route is called by a learner account.

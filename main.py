@@ -71,7 +71,8 @@ async def _ensure_existing_user_account(
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Account no longer exists",
-    )
+        )
+
 
 app.include_router(chapters.router, prefix="/api/chapters", tags=["chapters"])
 app.include_router(exercises.router, prefix="/api/exercises", tags=["exercises"])
@@ -93,9 +94,7 @@ async def home(request: Request):
 @app.get("/login", include_in_schema=False, name="login_page")
 async def login_page(request: Request):
     # Render the sign-in form.
-    return templates.TemplateResponse(
-        request, "login.html", {"title": "Anmelden"}
-    )
+    return templates.TemplateResponse(request, "login.html", {"title": "Anmelden"})
 
 
 @app.get("/logout", include_in_schema=False, name="logout")
@@ -139,7 +138,9 @@ async def chapter_select(
     chapters = result.scalars().all()
 
     return templates.TemplateResponse(
-        request, "chapter_select.html", {"chapters": chapters, "title": "Kapitel auswählen"}
+        request,
+        "chapter_select.html",
+        {"chapters": chapters, "title": "Kapitel auswählen"},
     )
 
 
@@ -160,7 +161,9 @@ async def chapter_task(
     )
     chapter = result.scalars().first()
     if chapter is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chapter not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter not found"
+        )
 
     if not chapter.exercises:
         return templates.TemplateResponse(
@@ -206,19 +209,21 @@ async def task_exercise(
     )
     chapter = result.scalars().first()
     if chapter is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Chapter not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter not found"
+        )
 
     exercise = next(
         (item for item in chapter.exercises if item.id == exercise_id),
         None,
     )
     if exercise is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
+        )
 
     account_id = principal["account_id"] if principal["role"] == "user" else None
-    completed_ids, locked_by = await get_exercise_progress(
-        db, chapter.id, account_id
-    )
+    completed_ids, locked_by = await get_exercise_progress(db, chapter.id, account_id)
     locked_by_id = locked_by.get(exercise.id)
     required_exercise = next(
         (item for item in chapter.exercises if item.id == locked_by_id),
@@ -228,7 +233,9 @@ async def task_exercise(
     exercise_path = _resolve_exercise_file(exercise.html_filename)
     error_message = None
     if exercise_path is None or exercise_path.suffix.casefold() != ".html":
-        error_message = f"Die Übungsdatei „{exercise.html_filename}“ wurde nicht gefunden."
+        error_message = (
+            f"Die Übungsdatei „{exercise.html_filename}“ wurde nicht gefunden."
+        )
 
     return templates.TemplateResponse(
         request,
@@ -283,21 +290,29 @@ async def exercise_content(
     )
     exercise = result.scalars().first()
     if exercise is None:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
+        )
     if principal["role"] == "user":
         if principal["account_id"] is None:
-            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid account")
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid account"
+            )
         _, locked_by = await get_exercise_progress(
             db, exercise.chapter_id, principal["account_id"]
         )
         if exercise_id in locked_by:
-            raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Exercise is locked")
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN, detail="Exercise is locked"
+            )
 
     requested_file = _resolve_exercise_file(relative_path)
     exercise_file = _resolve_exercise_file(exercise.html_filename)
     if requested_file is None or (
         requested_file.suffix.casefold() == ".html" and requested_file != exercise_file
     ):
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Exercise file not found")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Exercise file not found"
+        )
 
     return FileResponse(requested_file)

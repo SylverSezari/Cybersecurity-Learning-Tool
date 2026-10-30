@@ -1,6 +1,7 @@
 const exerciseFrame = document.getElementById("exerciseFrame");
 const exerciseLoadError = document.getElementById("exerciseLoadError");
 const accessToken = sessionStorage.getItem("access_token");
+let completionPending = false;
 
 if (exerciseFrame && accessToken) {
 	loadExercise();
@@ -41,31 +42,53 @@ async function loadExercise() {
 }
 
 const completeButton = document.getElementById("completeExercise");
-if (completeButton) {
-	completeButton.addEventListener("click", async () => {
-		// Completion is persisted by the API, which independently rechecks prerequisite locks.
-		completeButton.disabled = true;
-		const status = document.getElementById("progressStatus");
-		try {
-			const response = await fetch(
-				`/api/progress/exercises/${completeButton.dataset.exerciseId}/complete`,
-				{
-					method: "POST",
-					headers: { Authorization: `Bearer ${accessToken}` },
-				},
-			);
-			if (!response.ok) {
-				const result = await response.json();
-				throw new Error(result.detail === "Exercise not found"
-					? "Übung nicht gefunden."
-					: result.detail === "Exercise is locked"
-						? "Diese Übung ist noch gesperrt."
-						: "Der Lernfortschritt konnte nicht gespeichert werden.");
-			}
-			window.location.reload();
-		} catch (error) {
-			status.textContent = error.message;
-			completeButton.disabled = false;
+
+async function submitExerciseCompletion(answers) {
+	// The API checks both completion answers and prerequisite locks before persisting progress.
+	if (completionPending) return;
+	completionPending = true;
+	if (completeButton) completeButton.disabled = true;
+	const status = document.getElementById("progressStatus");
+	const headers = { Authorization: `Bearer ${accessToken}` };
+	const request = { method: "POST", headers };
+	if (answers !== undefined) {
+		headers["Content-Type"] = "application/json";
+		request.body = JSON.stringify({ answers });
+	}
+
+	try {
+		const response = await fetch(
+			`/api/progress/exercises/${exerciseFrame?.dataset.exerciseId || completeButton?.dataset.exerciseId}/complete`,
+			request,
+		);
+		if (!response.ok) {
+			const result = await response.json();
+			const messages = {
+				"Exercise not found": "Übung nicht gefunden.",
+				"Exercise is locked": "Diese Übung ist noch gesperrt.",
+				"Task answers are required": "Diese Übung enthält noch offene Aufgaben.",
+				"Task answers are incorrect": "Nicht alle Aufgaben wurden richtig beantwortet.",
+			};
+			throw new Error(messages[result.detail] || "Der Lernfortschritt konnte nicht gespeichert werden.");
 		}
-	});
+		window.location.reload();
+	} catch (error) {
+		status.textContent = error.message;
+		completionPending = false;
+		if (completeButton) completeButton.disabled = false;
+	}
 }
+
+completeButton?.addEventListener("click", () => submitExerciseCompletion());
+
+window.addEventListener("message", (event) => {
+	if (
+		!exerciseFrame
+		|| event.source !== exerciseFrame.contentWindow
+		|| event.data?.type !== "exercise-tasks-complete"
+		|| !Array.isArray(event.data.answers)
+	) {
+		return;
+	}
+	submitExerciseCompletion(event.data.answers);
+});

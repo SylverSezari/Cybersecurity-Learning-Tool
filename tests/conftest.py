@@ -114,6 +114,7 @@ async def client(
 
 ## Auth Helpers
 
+
 ### log in the admin
 # Log in with the configured test admin and return a ready-to-use bearer header.
 async def login_test_admin(client: AsyncClient) -> dict[str, str]:

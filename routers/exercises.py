@@ -35,7 +35,7 @@ async def get_single_exercise(
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     # Return one exercise by ID, or report that it does not exist.
-    #check if exercise exists
+    # check if exercise exists
     result = await db.execute(
         select(models.Exercise).where(models.Exercise.id == exercise_id)
     )
@@ -75,7 +75,7 @@ async def create_exercise(
     # Create an unassigned exercise with its answer key and prerequisite rule.
     require_admin(principal)
 
-    #Check if exercise with title exists already
+    # Check if exercise with title exists already
     result = await db.execute(
         select(models.Exercise).where(
             func.lower(models.Exercise.title) == exercise.title.lower()
@@ -88,7 +88,7 @@ async def create_exercise(
             detail="Exercise with this title already created",
         )
 
-    #Check if filename is already taken
+    # Check if filename is already taken
     result = await db.execute(
         select(models.Exercise).where(
             func.lower(models.Exercise.html_filename) == exercise.html_filename.lower()
@@ -101,7 +101,7 @@ async def create_exercise(
             detail="Exercise with this filename already created",
         )
 
-    #create new exercise
+    # create new exercise
     new_exercise = models.Exercise(
         title=exercise.title,
         html_filename=exercise.html_filename,
@@ -210,7 +210,7 @@ async def update_exercise(
             status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
         )
 
-    #Update exercise with relevant data
+    # Update exercise with relevant data
     exercise_data = update_data.model_dump(exclude_unset=True)
     if "title" in exercise_data:
         result = await db.execute(
@@ -241,9 +241,9 @@ async def delete_exercise(
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     # Delete an exercise and its recorded completion rows.
-    
+
     require_admin(principal)
-    
+
     # Check if exercise exists
     result = await db.execute(
         select(models.Exercise).where(models.Exercise.id == exercise_id)
@@ -254,7 +254,7 @@ async def delete_exercise(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
         )
-        
+
     await db.execute(
         delete(models.ExerciseCompletion).where(
             models.ExerciseCompletion.exercise_id == exercise_id

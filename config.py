@@ -9,13 +9,14 @@ class Settings(BaseSettings):
         env_file=".env",
         env_file_encoding="utf-8",
     )
-    
+
     database_url: str
 
     secret_key: SecretStr
     algorithm: str = "HS256"
-    
+
     admin: str
     admin_password: SecretStr
-    
+
+
 settings = Settings()  # Loaded from .env file

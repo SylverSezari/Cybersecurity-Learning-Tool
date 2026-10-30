@@ -36,6 +36,10 @@ class ExerciseAssignment(BaseModel):
     position: int
 
 
+class ExerciseCompletionRequest(BaseModel):
+    answers: SolutionList
+
+
 ### for updating exercises
 class ExercisePut(BaseModel):
     # Partial exercise update; omitted fields stay unchanged at the route layer.

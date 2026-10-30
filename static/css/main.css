@@ -45,15 +45,12 @@ body {
 }
 
 .brand-mark {
-	display: grid;
+	display: block;
 	width: 2.25rem;
 	height: 2.25rem;
-	place-items: center;
+	object-fit: contain;
 	border: 1px solid var(--accent);
 	border-radius: 0.45rem;
-	color: var(--accent);
-	font-size: 0.78rem;
-	letter-spacing: 0.04em;
 }
 
 .nav-actions {

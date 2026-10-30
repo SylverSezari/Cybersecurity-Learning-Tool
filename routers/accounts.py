@@ -230,9 +230,9 @@ async def delete_account(
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     # Delete an account and its recorded completion rows.
-    
+
     require_admin(principal)
-    
+
     # Check if account exists
     result = await db.execute(
         select(models.Account).where(models.Account.id == account_id)
@@ -243,7 +243,7 @@ async def delete_account(
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
         )
-        
+
     await db.execute(
         delete(models.ExerciseCompletion).where(
             models.ExerciseCompletion.account_id == account_id

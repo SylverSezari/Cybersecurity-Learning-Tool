@@ -1,4 +1,5 @@
 let exerciseSolutions = null;
+let completionSent = false;
 
 // Ignore letter case and surrounding whitespace while preserving type-aware checks below.
 function normalizedAnswer(value) {
@@ -31,7 +32,23 @@ function checkTask(task) {
 
 	const tasks = [...document.querySelectorAll(".exercise-task")];
 	const completion = document.getElementById("tasksComplete");
-	if (completion) completion.hidden = !tasks.every((item) => item.dataset.solved === "true");
+	const allTasksSolved = tasks.every((item) => item.dataset.solved === "true");
+	if (completion) completion.hidden = !allTasksSolved;
+	if (allTasksSolved && !completionSent && exerciseSolutions) {
+		completionSent = true;
+		const answers = [];
+		for (const item of tasks) {
+			const index = Number(item.dataset.solutionIndex);
+			const expected = exerciseSolutions[index];
+			const value = item.querySelector(".task-answer").value;
+			answers[index] = typeof expected === "boolean"
+				? value === "true"
+				: typeof expected === "number"
+					? Number(value)
+					: value;
+		}
+		parent.postMessage({ type: "exercise-tasks-complete", answers }, "*");
+	}
 }
 
 document.querySelectorAll(".exercise-task").forEach((task) => {

@@ -59,12 +59,14 @@
 				<div class="task-completion" aria-live="polite">
 					{% if exercise.id in completed_exercise_ids %}
 						<p class="task-completed-status">Abgeschlossen</p>
+					{% elif exercise.solution %}
+						<p class="task-progress-status" id="progressStatus" role="status"></p>
 					{% else %}
 						<button class="task-complete-button" id="completeExercise" type="button" data-exercise-id="{{ exercise.id }}">
 							Als abgeschlossen markieren
 						</button>
+						<p class="task-progress-status" id="progressStatus" role="status"></p>
 					{% endif %}
-					<p class="task-progress-status" id="progressStatus" role="status"></p>
 				</div>
 			{% endif %}
 			<p class="task-progress-error" id="exerciseLoadError" role="alert" hidden></p>
@@ -73,6 +75,7 @@
 				id="exerciseFrame"
 				title="Übung: {{ exercise.title }}"
 				src="about:blank"
+				data-exercise-id="{{ exercise.id }}"
 				data-exercise-url="{{ exercise_url }}"
 				data-exercise-solutions='{{ exercise.solution | tojson }}'
 				sandbox="allow-scripts allow-forms"
@@ -83,5 +86,5 @@
 {% endblock content %}
 
 {% block scripts %}
-<script src="{{ url_for('static', path='js/exercise-player.js') }}" defer></script>
+<script src="{{ url_for('static', path='js/exercise-player.js') }}?v=2" defer></script>
 {% endblock scripts %}

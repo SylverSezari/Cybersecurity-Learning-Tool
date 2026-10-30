@@ -210,9 +210,9 @@ async def delete_chapter(
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     # Delete a chapter while leaving its former exercises unassigned.
-    
+
     require_admin(principal)
-    
+
     # Check if chapter exists
     result = await db.execute(
         select(models.Chapter).where(models.Chapter.id == chapter_id)
@@ -231,4 +231,3 @@ async def delete_chapter(
     )
     await db.delete(chapter)
     await db.commit()
-    

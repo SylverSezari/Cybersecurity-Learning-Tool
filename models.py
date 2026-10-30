@@ -2,10 +2,11 @@
 
 from __future__ import annotations
 
-from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, UniqueConstraint
+from sqlalchemy import JSON, Boolean, ForeignKey, Integer, String, UniqueConstraint
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
+
 
 class Exercise(Base):
     # A lesson file, optionally assigned a unique position within a chapter.
@@ -19,7 +20,9 @@ class Exercise(Base):
     solution: Mapped[list[str | int | float | bool]] = mapped_column(
         JSON, nullable=True, default=list
     )
-    requires_previous: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    requires_previous: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False
+    )
     position: Mapped[int] = mapped_column(Integer, nullable=True)
     chapter_id: Mapped[int] = mapped_column(
         ForeignKey("chapters.id"),
@@ -48,8 +51,8 @@ class Chapter(Base):
 class Account(Base):
     # A learner account; only a password hash is persisted.
 
-    __tablename__= "accounts"
-    
+    __tablename__ = "accounts"
+
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     username: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)

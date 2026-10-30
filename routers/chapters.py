@@ -26,6 +26,7 @@ async def get_all_chapters(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Return the chapter catalog to an authenticated caller.
     result = await db.execute(select(models.Chapter))
 
     chapters = result.scalars().all()
@@ -39,6 +40,7 @@ async def get_single_chapter(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Return one chapter with its exercises, or a not-found response.
     # get all chapters with the same id
     result = await db.execute(
         select(models.Chapter)
@@ -63,6 +65,7 @@ async def create_chapter(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Create an inactive chapter that an administrator can later publish.
     # check that user is the admin
     require_admin(principal)
 
@@ -106,6 +109,7 @@ async def update_chapter(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Rename a chapter after checking that its title remains unique.
     require_admin(principal)
 
     # check if chapter exists
@@ -149,6 +153,7 @@ async def change_chapters_active(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Validate and save the complete active/inactive chapter ordering.
     require_admin(principal)
 
     # Load every chapter and its exercises so the returned response can include them.
@@ -204,6 +209,7 @@ async def delete_chapter(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Delete a chapter while leaving its former exercises unassigned.
     
     require_admin(principal)
     

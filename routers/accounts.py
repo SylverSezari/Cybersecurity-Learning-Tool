@@ -30,6 +30,7 @@ async def get_all_accounts(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Return public account fields to administrators only.
     require_admin(principal)
     result = await db.execute(select(models.Account))
 
@@ -42,6 +43,7 @@ async def validate_session(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Confirm that the token is valid and its learner account still exists.
     if principal["role"] == "user":
         result = await db.execute(
             select(models.Account.id).where(
@@ -65,6 +67,7 @@ async def get_single_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Return one account to an administrator or to that account's owner.
     if principal["role"] != "admin" and principal["account_id"] != account_id:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
@@ -92,6 +95,7 @@ async def create_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Create a learner after checking username uniqueness and hashing its password.
     require_admin(principal)
 
     # check if account with name exists already
@@ -126,6 +130,7 @@ async def update_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Update an account's username and/or replace its password hash.
     require_admin(principal)
 
     result = await db.execute(
@@ -168,6 +173,7 @@ async def login(
     request: Request,
     response: Response,
 ):
+    # Authenticate the configured administrator or a stored learner account.
     if credentials.username == settings.admin and hmac.compare_digest(
         credentials.password.encode("utf-8"),
         settings.admin_password.get_secret_value().encode("utf-8"),
@@ -204,6 +210,7 @@ async def login(
 
 
 def _set_access_cookie(response: Response, request: Request, token: str) -> None:
+    # Set the browser-session cookie with transport and script-access protections.
     response.set_cookie(
         "access_token",
         token,
@@ -222,6 +229,7 @@ async def delete_account(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Delete an account and its recorded completion rows.
     
     require_admin(principal)
     

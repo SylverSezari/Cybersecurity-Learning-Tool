@@ -2,6 +2,7 @@
 
 {% block content %}
 <section class="task-workspace" aria-label="Kapitelübungen">
+	{# The sidebar shows sequence, completion, and prerequisite locks for this chapter. #}
 	<aside class="task-sidebar">
 			<a class="task-back-link" href="{{ url_for('chapters') }}">&larr; Alle Kapitel</a>
 		<p class="section-kicker">Kapitel</p>
@@ -42,6 +43,7 @@
 			<h1>{{ exercise.title if exercise else "Kapitelübungen" }}</h1>
 		</header>
 
+		{# Render one exclusive state: prerequisite lock, missing lesson, or playable lesson. #}
 		{% if required_exercise %}
 			<div class="task-locked" role="status">
 				<h2>Übung gesperrt</h2>

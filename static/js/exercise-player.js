@@ -7,6 +7,7 @@ if (exerciseFrame && accessToken) {
 }
 
 async function loadExercise() {
+	// Fetch with the bearer token, then run the returned lesson inside a sandboxed frame.
 	try {
 		const response = await fetch(exerciseFrame.dataset.exerciseUrl, {
 			headers: { Authorization: `Bearer ${accessToken}` },
@@ -19,10 +20,12 @@ async function loadExercise() {
 			await response.text(),
 			"text/html",
 		);
+		// Resolve lesson-relative assets from the app root after converting the response to srcdoc.
 		const base = documentContent.createElement("base");
 		base.href = `${window.location.origin}/`;
 		documentContent.head.prepend(base);
 		const solutions = JSON.parse(exerciseFrame.dataset.exerciseSolutions || "[]");
+		// Deliver the answer key only after the iframe has loaded its lesson script.
 		exerciseFrame.addEventListener("load", () => {
 			exerciseFrame.contentWindow?.postMessage(
 				{ type: "exercise-solutions", solutions },
@@ -40,6 +43,7 @@ async function loadExercise() {
 const completeButton = document.getElementById("completeExercise");
 if (completeButton) {
 	completeButton.addEventListener("click", async () => {
+		// Completion is persisted by the API, which independently rechecks prerequisite locks.
 		completeButton.disabled = true;
 		const status = document.getElementById("progressStatus");
 		try {

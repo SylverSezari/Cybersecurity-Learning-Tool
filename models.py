@@ -1,3 +1,5 @@
+# Database tables and relationships for lessons, accounts, and completion state.
+
 from __future__ import annotations
 
 from sqlalchemy import Boolean, ForeignKey, Integer, JSON, String, UniqueConstraint
@@ -5,11 +7,9 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from database import Base
 
-# define which tables exist in the database
-
-
-## the exercises are defined here
 class Exercise(Base):
+    # A lesson file, optionally assigned a unique position within a chapter.
+
     __tablename__ = "exercises"
     __table_args__ = (UniqueConstraint("chapter_id", "position"),)
 
@@ -29,8 +29,9 @@ class Exercise(Base):
     chapter: Mapped[Chapter] = relationship(back_populates="exercises")
 
 
-## the chapters are defined here
 class Chapter(Base):
+    # An ordered, optionally published collection of exercises.
+
     __tablename__ = "chapters"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -44,8 +45,9 @@ class Chapter(Base):
     )
 
 
-## the accountse are defined here
 class Account(Base):
+    # A learner account; only a password hash is persisted.
+
     __tablename__= "accounts"
     
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
@@ -54,6 +56,8 @@ class Account(Base):
 
 
 class ExerciseCompletion(Base):
+    # A composite-key record that marks one exercise complete for one account.
+
     __tablename__ = "exercise_completions"
 
     account_id: Mapped[int] = mapped_column(

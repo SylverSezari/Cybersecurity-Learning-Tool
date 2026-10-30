@@ -16,6 +16,7 @@ async def _require_user_account(
 	db: AsyncSession,
 	principal: Principal,
 ) -> int:
+	# Return a live learner account ID; reject administrators and deleted users.
 	account_id = principal["account_id"]
 	if principal["role"] != "user" or account_id is None:
 		raise HTTPException(
@@ -40,6 +41,7 @@ async def chapter_progress(
 	db: Annotated[AsyncSession, Depends(get_db)],
 	principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+	# Report a learner's completed exercises and current prerequisite locks.
 	account_id = await _require_user_account(db, principal)
 	result = await db.execute(
 		select(models.Chapter.id).where(
@@ -63,6 +65,7 @@ async def complete_exercise(
 	db: Annotated[AsyncSession, Depends(get_db)],
 	principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+	# Record completion only for an available exercise that is not locked.
 	account_id = await _require_user_account(db, principal)
 	result = await db.execute(
 		select(models.Exercise)

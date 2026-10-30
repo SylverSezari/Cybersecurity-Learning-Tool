@@ -1,10 +1,16 @@
 let exerciseSolutions = null;
 
+// Ignore letter case and surrounding whitespace while preserving type-aware checks below.
 function normalizedAnswer(value) {
-	return String(value).trim().toLocaleUpperCase("de-CH");
+	return String(value)
+		.normalize("NFC")
+		.trim()
+		.toLocaleUpperCase("de-CH")
+		.normalize("NFC");
 }
 
 function checkTask(task) {
+	// Each task points to its expected value by index in the answer key sent by the parent.
 	const solutionIndex = Number(task.dataset.solutionIndex);
 	const expected = exerciseSolutions?.[solutionIndex];
 	const answer = task.querySelector(".task-answer");
@@ -33,6 +39,7 @@ document.querySelectorAll(".exercise-task").forEach((task) => {
 });
 
 window.addEventListener("message", (event) => {
+	// Accept answer keys only from the embedding page, never from another window.
 	if (event.source !== parent || event.data?.type !== "exercise-solutions") return;
 	exerciseSolutions = Array.isArray(event.data.solutions) ? event.data.solutions : [];
 	document.querySelectorAll(".exercise-task").forEach((task) => {
@@ -43,6 +50,7 @@ window.addEventListener("message", (event) => {
 
 const shiftControl = document.getElementById("caesarShift");
 if (shiftControl) {
+	// This interactive example keeps the plaintext alphabet fixed and shifts the cipher row.
 	const alphabet = Array.from({ length: 26 }, (_, index) => String.fromCharCode(65 + index));
 	const plainOutput = document.getElementById("plainAlphabet");
 	const cipherOutput = document.getElementById("cipherAlphabet");

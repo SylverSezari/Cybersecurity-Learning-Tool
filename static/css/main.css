@@ -2,6 +2,7 @@
 	box-sizing: border-box;
 }
 
+/* Shared application shell and navigation. */
 html[data-auth-pending="true"] body {
 	visibility: hidden;
 }
@@ -138,6 +139,7 @@ body {
 	padding: 2rem clamp(1rem, 2.5vw, 3rem) 3rem;
 }
 
+/* Landing page and chapter selection. */
 .home-options {
 	display: grid;
 	gap: clamp(2.5rem, 7vw, 5.5rem);
@@ -286,6 +288,7 @@ body {
 	font-size: 1.25rem;
 }
 
+/* Chapter exercise navigation, embedded lesson, and progress states. */
 .task-workspace {
 	display: grid;
 	grid-template-columns: minmax(13rem, 17rem) minmax(0, 1fr);
@@ -502,6 +505,7 @@ body {
 	color: var(--muted-text);
 }
 
+/* Sign-in page. */
 .login-page {
 	display: grid;
 	grid-template-columns: minmax(0, 1.1fr) minmax(18rem, 0.9fr);
@@ -607,6 +611,7 @@ body {
 	cursor: wait;
 }
 
+/* Administrator workspace: navigation, chapter ordering, exercise tools, and accounts. */
 .account-workspace {
 	width: 100%;
 	margin: 0;
@@ -1436,6 +1441,7 @@ a {
 
 }
 
+/* Collapse the two-column workspaces when there is not enough room side by side. */
 @media (max-width: 44rem) {
 	.task-workspace {
 		grid-template-columns: minmax(0, 1fr);
@@ -1593,6 +1599,7 @@ a {
 	}
 }
 
+/* Honor the operating-system preference to reduce nonessential entrance motion. */
 @media (prefers-reduced-motion: reduce) {
 	.login-page {
 		animation: none;

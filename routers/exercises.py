@@ -20,6 +20,7 @@ async def get_all_exercises(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Return the exercise catalog to an authenticated caller.
     result = await db.execute(select(models.Exercise))
 
     exercises = result.scalars().all()
@@ -33,6 +34,7 @@ async def get_single_exercise(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Return one exercise by ID, or report that it does not exist.
     #check if exercise exists
     result = await db.execute(
         select(models.Exercise).where(models.Exercise.id == exercise_id)
@@ -53,6 +55,7 @@ async def get_exercises_belonging_to_chapter(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Return exercises assigned to a chapter in display order.
     result = await db.execute(
         select(models.Exercise)
         .where(models.Exercise.chapter_id == chapter_id)
@@ -69,6 +72,7 @@ async def create_exercise(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Create an unassigned exercise with its answer key and prerequisite rule.
     require_admin(principal)
 
     #Check if exercise with title exists already
@@ -120,6 +124,7 @@ async def assign_exercise(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Assign an exercise to a chapter position or move it to the unassigned pool.
     require_admin(principal)
 
     # Check if exercise exists
@@ -191,6 +196,7 @@ async def update_exercise(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Apply only submitted exercise fields after enforcing title uniqueness.
     require_admin(principal)
 
     # Check if exercise exists
@@ -234,6 +240,7 @@ async def delete_exercise(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Delete an exercise and its recorded completion rows.
     
     require_admin(principal)
     

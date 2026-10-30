@@ -1,5 +1,8 @@
+# Validated request and response shapes for the HTTP API.
+
 from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 
+# Strict scalar members prevent JSON booleans and numbers from being coerced silently.
 SolutionValue = StrictStr | StrictInt | StrictFloat | StrictBool
 SolutionList = list[SolutionValue]
 
@@ -35,6 +38,7 @@ class ExerciseAssignment(BaseModel):
 
 ### for updating exercises
 class ExercisePut(BaseModel):
+    # Partial exercise update; omitted fields stay unchanged at the route layer.
     title: str | None = Field(default=None, min_length=1, max_length=100)
     html_filename: str | None = Field(default=None, min_length=1, max_length=100)
     solution: SolutionList = Field(default_factory=list)

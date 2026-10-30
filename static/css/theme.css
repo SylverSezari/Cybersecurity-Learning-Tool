@@ -1,4 +1,5 @@
 :root {
+	/* Shared semantic colors keep page components consistent across themes. */
 	color-scheme: light;
 	--page-background: #f5f7fa;
 	--surface: #ffffff;
@@ -12,6 +13,7 @@
 }
 
 [data-theme="dark"] {
+	/* Override the same tokens rather than duplicating component-specific rules. */
 	color-scheme: dark;
 	--page-background: #151a20;
 	--surface: #202831;

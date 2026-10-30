@@ -1,3 +1,5 @@
+# Async SQLAlchemy setup and compatibility upgrades for the SQLite database.
+
 import json
 
 from sqlalchemy import inspect, text
@@ -14,10 +16,13 @@ AsyncSessionLocal = async_sessionmaker(
 
 
 class Base(DeclarativeBase):
+    # Declarative base shared by all ORM models.
+
     pass
 
 
 async def init_db():
+    # Create missing tables and upgrade older local databases in place.
     import models
 
     required_tables = {
@@ -32,6 +37,7 @@ async def init_db():
             lambda sync_connection: set(inspect(sync_connection).get_table_names())
         )
 
+        # Create the current schema when opening a fresh or incomplete database.
         if not required_tables.issubset(existing_tables):
             await connection.run_sync(Base.metadata.create_all)
 
@@ -46,6 +52,7 @@ async def init_db():
             }
         )
 
+        # Add columns introduced after the first version without replacing user data.
         if "html_filename" not in exercise_columns:
             await connection.execute(
                 text(
@@ -68,6 +75,7 @@ async def init_db():
             )
 
         def normalize_solutions(sync_connection):
+            # Convert legacy scalar solutions to the current list representation.
             rows = sync_connection.execute(
                 text("SELECT id, solution FROM exercises")
             ).all()
@@ -90,10 +98,12 @@ async def init_db():
 
         await connection.run_sync(normalize_solutions)
 
+        # The old task column was replaced by the separately stored HTML lesson.
         if "task" in exercise_columns:
             await connection.execute(text("ALTER TABLE exercises DROP COLUMN task"))
 
 
 async def get_db():
+    # Yield one request-scoped async session and close it when the request ends.
     async with AsyncSessionLocal() as session:
         yield session

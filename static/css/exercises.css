@@ -1,4 +1,5 @@
 :root {
+  /* Map lesson-specific names onto the shared application theme tokens. */
 	--lesson-ink: var(--text);
 	--lesson-muted: var(--muted-text);
 	--lesson-line: var(--border);
@@ -18,6 +19,7 @@ body {
 	font: 1rem/1.65 "Trebuchet MS", "Segoe UI", sans-serif;
 }
 .lesson { width: min(100%, 54rem); margin: 0 auto; }
+/* Lesson headings and explanatory content. */
 .lesson-header { padding: .5rem 0 1.5rem; border-bottom: 1px solid var(--lesson-line); }
 .eyebrow, .section-label {
 	margin: 0;
@@ -45,6 +47,7 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 .note p, .worked-example p { margin: .2rem 0; }
 .equation { font-family: "Courier New", monospace; font-weight: 700; }
 .alphabet-tool { margin-top: 1rem; }
+/* Interactive alphabet mapping used by the cipher lessons. */
 .alphabet-control { display: grid; grid-template-columns: auto minmax(8rem, 1fr) 3rem; gap: .75rem; align-items: center; }
 .alphabet-control label { font-weight: 700; }
 .alphabet-control output { color: var(--lesson-accent); font-weight: 800; text-align: center; }
@@ -54,6 +57,7 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 .alphabet-row strong { color: var(--lesson-muted); font-size: .8rem; }
 .alphabet-row output { overflow-wrap: anywhere; font-family: "Courier New", monospace; font-weight: 700; letter-spacing: .12em; }
 .task-list { display: grid; gap: 1rem; margin-top: 1rem; }
+/* Answer inputs, validation feedback, and the all-tasks-complete state. */
 .exercise-task { padding: 1rem; border: 1px solid var(--lesson-line); background: var(--surface); }
 .task-story { margin: 0 0 .55rem; color: var(--lesson-muted); font-size: .92rem; }
 .task-prompt { margin: 0 0 .65rem; font-weight: 700; }

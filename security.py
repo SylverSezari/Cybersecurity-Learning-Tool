@@ -115,6 +115,7 @@ async def get_page_principal(
     return _principal_from_token(token)
 
 def require_admin(principal: Principal) -> None:
+    # Raise a forbidden response when a route is called by a learner account.
     if principal["role"] != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,

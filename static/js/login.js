@@ -2,6 +2,8 @@ const loginForm = document.getElementById("loginForm");
 const loginError = document.getElementById("loginError");
 const loginSubmit = document.getElementById("loginSubmit");
 
+// Submit credentials as JSON, store the returned bearer token for this browser session,
+// and restore the form controls on both success and failure.
 loginForm.addEventListener("submit", async (event) => {
 	event.preventDefault();
 	loginError.hidden = true;

@@ -1,3 +1,4 @@
+// Admin page state mirrors the loaded catalog until changes are explicitly saved.
 const accessToken = sessionStorage.getItem("access_token");
 const activeList = document.getElementById("activeChapters");
 const inactiveList = document.getElementById("inactiveChapters");
@@ -40,6 +41,7 @@ const apiErrorMessages = new Map([
 	["Admin privileges required", "Administratorrechte erforderlich."],
 ]);
 
+// Keep solution values typed so the API receives booleans and numbers as JSON scalars.
 function createSolutionRow(value = "") {
 	const row = document.createElement("div");
 	row.className = "solution-row";
@@ -67,6 +69,7 @@ function createSolutionRow(value = "") {
 	return row;
 }
 
+// Render each solution with an input that preserves the value's intended JSON type.
 function createSolutionValueControl(type, value = "") {
 	if (type === "boolean") {
 		const select = document.createElement("select");
@@ -93,6 +96,7 @@ function setSolutionRows(containerId, solutions = []) {
 }
 
 function readSolutions(containerId) {
+	// An undefined result signals invalid input; an empty array means no tasks.
 	const solutions = [];
 	for (const row of document.getElementById(containerId).querySelectorAll(".solution-row")) {
 		const type = row.querySelector(".solution-type").value;
@@ -124,7 +128,9 @@ function setStatus(message) {
 	if (accountStatus) accountStatus.textContent = message;
 }
 
+// Chapter activation and ordering are edited locally, then saved as one validated snapshot.
 function chapterOrder() {
+	// Serialize only persisted ordering fields to detect unsaved edits reliably.
 	return JSON.stringify(chapters.map(({ id, active, position }) => ({ id, active, position })));
 }
 
@@ -137,6 +143,7 @@ function updateDirtyState() {
 }
 
 function sortedChapters() {
+	// Active chapters use their saved position; inactive chapters stay in stable ID order.
 	return [...chapters].sort((first, second) => {
 		if (first.active !== second.active) return first.active ? -1 : 1;
 		if (first.active) return first.position - second.position || first.id - second.id;
@@ -145,6 +152,7 @@ function sortedChapters() {
 }
 
 function reorderDraft() {
+	// Rebuild the draft positions from the rendered lists after a drag or button move.
 	const activeIds = [...activeList.children].map((row) => Number(row.dataset.chapterId));
 	const inactiveIds = [...inactiveList.children].map((row) => Number(row.dataset.chapterId));
 	const byId = new Map(chapters.map((chapter) => [chapter.id, chapter]));
@@ -156,6 +164,7 @@ function reorderDraft() {
 }
 
 function moveChapter(row, offset) {
+	// Move by one position within the current active or inactive list only.
 	const list = row.parentElement;
 	const target = list.children[[...list.children].indexOf(row) + offset];
 	if (!target) return;
@@ -166,6 +175,7 @@ function moveChapter(row, offset) {
 }
 
 function makeChapterRow(chapter, list) {
+	// Bind keyboard controls, drag-and-drop, and activation to a single list item.
 	const row = document.createElement("li");
 	row.className = "chapter-row";
 	row.draggable = chapter.active;
@@ -234,6 +244,7 @@ function updateChapterOptions() {
 }
 
 function renderChapters() {
+	// Recreate both lists from the current draft and refresh dependent selectors.
 	activeList.replaceChildren();
 	inactiveList.replaceChildren();
 	const ordered = sortedChapters();
@@ -249,6 +260,7 @@ function renderChapters() {
 }
 
 async function apiRequest(path, options = {}) {
+	// Centralize bearer authentication, JSON headers, and user-facing API errors.
 	const response = await fetch(path, {
 		...options,
 		headers: {
@@ -280,6 +292,7 @@ function showError(error) {
 	setStatus(error.message);
 }
 
+// Exercise assignment and editing use the currently selected chapter as their context.
 function updateExerciseChapterOptions() {
 	const selectedId = exerciseChapterSelect.value;
 	exerciseChapterSelect.replaceChildren(new Option("Kapitel auswählen", ""));
@@ -319,6 +332,7 @@ function makeExerciseRow(exercise, actionLabel, action) {
 }
 
 function renderExerciseLists() {
+	// Show selected-chapter assignments alongside the complete exercise catalog.
 	if (!exerciseChapterSelect) return;
 	const chapterId = Number(exerciseChapterSelect.value);
 	const assigned = exercises
@@ -378,6 +392,7 @@ function updateExerciseOptions() {
 }
 
 function fillExerciseUpdateForm() {
+	// Keep the editor synchronized with the selected catalog entry.
 	const exercise = exercises.find((item) => String(item.id) === updateExerciseSelect.value);
 	if (!exercise) return;
 	document.getElementById("updateExerciseTitle").value = exercise.title;
@@ -392,6 +407,7 @@ async function loadExercises() {
 }
 
 async function assignExercise(exerciseId, chapterId) {
+	// Choose the first free nonnegative position before asking the API to assign it.
 	let position = -1;
 	if (chapterId !== -1) {
 		const occupied = new Set(
@@ -414,6 +430,7 @@ async function assignExercise(exerciseId, chapterId) {
 	}
 }
 
+// Account catalog and its create, update, and delete selectors.
 function updateAccountOptions() {
 	for (const select of [updateAccountSelect, deleteAccountSelect]) {
 		const selectedId = select.value;
@@ -475,6 +492,7 @@ document.querySelectorAll(".admin-nav-button").forEach((button) => {
 	});
 });
 
+// Chapter forms create, rename, and delete records; ordering changes are saved separately.
 document.getElementById("addChapterForm").addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const title = document.getElementById("newChapterTitle").value.trim();
@@ -525,6 +543,7 @@ exerciseChapterSelect.addEventListener("change", renderExerciseLists);
 updateExerciseSelect.addEventListener("change", fillExerciseUpdateForm);
 updateAccountSelect.addEventListener("change", fillAccountUpdateForm);
 
+// Account forms send only the fields the administrator intends to change.
 document.getElementById("addAccountForm").addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const username = document.getElementById("newAccountUsername").value.trim();
@@ -577,6 +596,7 @@ document.getElementById("deleteAccountForm").addEventListener("submit", async (e
 	}
 });
 
+// Exercise forms keep the ordered answer key aligned with tasks in each lesson file.
 document.getElementById("addExerciseForm").addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const title = document.getElementById("newExerciseTitle").value.trim();
@@ -641,6 +661,7 @@ document.getElementById("deleteExerciseForm").addEventListener("submit", async (
 	}
 });
 
+// Submit the full chapter order because the API validates a complete snapshot.
 saveButton.addEventListener("click", async () => {
 	const active = [...activeList.children].map((row) => Number(row.dataset.chapterId));
 	const inactive = [...inactiveList.children].map((row) => Number(row.dataset.chapterId));

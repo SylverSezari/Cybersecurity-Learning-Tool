@@ -1,3 +1,5 @@
+# FastAPI application, API router registration, and learning-page handlers.
+
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
@@ -20,6 +22,7 @@ from security import Principal, get_current_principal, get_page_principal
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
+    # Initialize shared database resources and dispose of them on shutdown.
     await init_db()
     yield
     # Shutdown
@@ -35,6 +38,7 @@ EXERCISES_DIRECTORY = Path(__file__).resolve().parent / "templates" / "exercises
 
 
 def _resolve_exercise_file(relative_path: str) -> Path | None:
+    # Resolve an exercise asset only when it remains inside the lesson directory.
     exercise_root = EXERCISES_DIRECTORY.resolve()
     try:
         file_path = (exercise_root / relative_path).resolve()
@@ -49,6 +53,7 @@ async def _ensure_existing_user_account(
     db: AsyncSession,
     principal: Principal,
 ) -> None:
+    # Reject user tokens whose account was deleted after the token was issued.
     if principal["role"] != "user":
         return
 
@@ -80,12 +85,14 @@ app.include_router(progress_router.router, prefix="/api/progress", tags=["progre
 ## home
 @app.get("/", include_in_schema=False, name="home")
 async def home(request: Request):
+    # Render the learner landing page.
     return templates.TemplateResponse(request, "home.html")
 
 
 ## login
 @app.get("/login", include_in_schema=False, name="login_page")
 async def login_page(request: Request):
+    # Render the sign-in form.
     return templates.TemplateResponse(
         request, "login.html", {"title": "Anmelden"}
     )
@@ -93,6 +100,7 @@ async def login_page(request: Request):
 
 @app.get("/logout", include_in_schema=False, name="logout")
 async def logout(request: Request):
+    # Clear the browser's HTTP-only access cookie and return to sign-in.
     response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie(
         "access_token",
@@ -107,6 +115,7 @@ async def logout(request: Request):
 ## account management
 @app.get("/account", include_in_schema=False, name="account_page")
 async def account_page(request: Request):
+    # Render the administration interface; the client guard checks the role.
     return templates.TemplateResponse(
         request, "account.html", {"title": "Kontoverwaltung"}
     )
@@ -117,6 +126,7 @@ async def account_page(request: Request):
 async def chapter_select(
     request: Request, db: Annotated[AsyncSession, Depends(get_db)]
 ):
+    # List active chapters in their configured learning order.
     result = await db.execute(
         select(models.Chapter)
         .where(models.Chapter.active.is_(True))
@@ -139,6 +149,7 @@ async def chapter_task(
     request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
 ):
+    # Open a chapter at its first exercise, or show its empty-state message.
     result = await db.execute(
         select(models.Chapter)
         .options(selectinload(models.Chapter.exercises))
@@ -183,6 +194,7 @@ async def task_exercise(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
+    # Render one active exercise together with the learner's lock state.
     await _ensure_existing_user_account(db, principal)
     result = await db.execute(
         select(models.Chapter)
@@ -259,6 +271,7 @@ async def exercise_content(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
+    # Authorize and serve the selected lesson asset, enforcing progress locks.
     await _ensure_existing_user_account(db, principal)
     result = await db.execute(
         select(models.Exercise)

@@ -1,3 +1,5 @@
+# Calculate which exercises are completed or blocked for a learner.
+
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -9,6 +11,7 @@ async def get_exercise_progress(
 	chapter_id: int,
 	account_id: int | None,
 ) -> tuple[set[int], dict[int, int]]:
+	# Return completion IDs and each locked exercise's first unmet prerequisite.
 	if account_id is None:
 		return set(), {}
 
@@ -33,6 +36,7 @@ async def get_exercise_progress(
 			continue
 
 		if previous_blocker is not None:
+			# A blocked prerequisite also blocks later exercises in the sequence.
 			locked_by[exercise.id] = previous_blocker
 		elif exercise.requires_previous:
 			previous = exercises[index - 1]

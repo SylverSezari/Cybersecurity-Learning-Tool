@@ -17,6 +17,7 @@
 			href="{{ url_for('static', path='css/main.css') }}?v=3"
 		/>
 		<script>
+			// Avoid flashing protected content while the async session check is pending.
 			if (window.location.pathname !== "/login") {
 				document.documentElement.dataset.authPending = "true";
 			}
@@ -83,6 +84,7 @@
 			const initialTheme = storedTheme || (prefersDark ? "dark" : "light");
 			const exerciseFrames = document.querySelectorAll(".exercise-frame");
 
+			// Exercise documents are isolated, so theme changes cross the frame boundary by message.
 			function syncExerciseTheme(theme) {
 				exerciseFrames.forEach((frame) => {
 					frame.contentWindow?.postMessage({ type: "theme-change", theme }, "*");

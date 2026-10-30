@@ -1,3 +1,5 @@
+# Legacy sample-data loader retained for local development and migration testing.
+
 import asyncio
 
 from sqlalchemy import select
@@ -44,6 +46,7 @@ CRYPTOGRAPHY_LESSONS = [
 
 
 async def populate_cryptography_lessons():
+    # Create or refresh the cryptography chapter and its lesson records.
     await init_db()
 
     async with AsyncSessionLocal() as session:
@@ -81,6 +84,7 @@ async def populate_cryptography_lessons():
 
 
 async def populate_db():
+    # Populate the database with sample chapters and cryptography exercises.
     await init_db()
 
     async with AsyncSessionLocal() as session:

@@ -16,6 +16,7 @@
 	</header>
 
 	<div class="admin-layout">
+		{# The navigation switches among the three administration workflows below. #}
 		<nav class="admin-sidebar" aria-label="Verwaltungsbereiche">
 			<button class="admin-nav-button is-selected" type="button" data-section="chapters" aria-current="page">
 				<span class="admin-nav-index"></span>Kapitel
@@ -29,6 +30,7 @@
 		</nav>
 
 		<div class="admin-main">
+			{# Chapter order and visibility are saved together; CRUD actions use separate forms. #}
 			<section class="admin-section" id="chaptersSection" aria-labelledby="chapter-heading">
 				<div class="chapter-manager">
 					<div class="chapter-lists">
@@ -91,6 +93,7 @@
 				</div>
 			</section>
 
+			{# Exercises are authored here, then assigned to a chapter and display position. #}
 			<section class="admin-section exercise-manager" id="exercisesSection" hidden aria-labelledby="exercises-heading">
 				<div class="exercise-main-column">
 					<header class="exercise-section-heading">
@@ -178,6 +181,7 @@
 					</form>
 				</aside>
 			</section>
+			{# Learner accounts can be created, updated, deleted, and reviewed in this section. #}
 			<section class="accounts-manager" id="accountsSection" hidden aria-labelledby="accounts-heading">
 				<header class="accounts-section-heading">
 					<div>

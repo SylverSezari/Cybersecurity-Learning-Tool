@@ -1,0 +1,85 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="task-workspace" aria-label="Kapitelübungen">
+	<aside class="task-sidebar">
+			<a class="task-back-link" href="{{ url_for('chapters') }}">&larr; Alle Kapitel</a>
+		<p class="section-kicker">Kapitel</p>
+		<h2 class="task-chapter-title">{{ chapter.title }}</h2>
+		<nav aria-label="Übungen in {{ chapter.title }}">
+			<ol class="task-exercise-list">
+				{% for item in exercises %}
+				<li>
+					{% if item.id in locked_by %}
+					<span class="task-exercise-link is-locked" aria-disabled="true">
+						<span class="task-exercise-number">{{ "%02d"|format(loop.index) }}</span>
+						<span class="task-exercise-name">{{ item.title }}<small>Gesperrt</small></span>
+					</span>
+					{% else %}
+					<a
+						class="task-exercise-link{% if exercise and item.id == exercise.id %} is-current{% endif %}"
+						href="{{ url_for('task_exercise', chapter_id=chapter.id, exercise_id=item.id) }}"
+						{% if exercise and item.id == exercise.id %}aria-current="page"{% endif %}
+					>
+						<span class="task-exercise-number">{{ "%02d"|format(loop.index) }}</span>
+						<span class="task-exercise-name">
+							{{ item.title }}
+							{% if item.id in completed_exercise_ids %}<small>Abgeschlossen</small>{% endif %}
+						</span>
+					</a>
+					{% endif %}
+				</li>
+				{% else %}
+				<li class="task-empty-nav">Keine Übungen zugewiesen.</li>
+				{% endfor %}
+			</ol>
+		</nav>
+	</aside>
+
+	<main class="task-main">
+		<header class="task-heading">
+			<p class="section-kicker">{{ chapter.title }}</p>
+			<h1>{{ exercise.title if exercise else "Kapitelübungen" }}</h1>
+		</header>
+
+		{% if required_exercise %}
+			<div class="task-locked" role="status">
+				<h2>Übung gesperrt</h2>
+				<p>Schliesse zuerst <strong>{{ required_exercise.title }}</strong> ab, um fortzufahren.</p>
+			</div>
+		{% elif error_message %}
+			<div class="task-error" role="alert">
+				<h2>Übung nicht verfügbar</h2>
+				<p>{{ error_message }}</p>
+			</div>
+		{% elif exercise %}
+			{% if can_complete %}
+				<div class="task-completion" aria-live="polite">
+					{% if exercise.id in completed_exercise_ids %}
+						<p class="task-completed-status">Abgeschlossen</p>
+					{% else %}
+						<button class="task-complete-button" id="completeExercise" type="button" data-exercise-id="{{ exercise.id }}">
+							Als abgeschlossen markieren
+						</button>
+					{% endif %}
+					<p class="task-progress-status" id="progressStatus" role="status"></p>
+				</div>
+			{% endif %}
+			<p class="task-progress-error" id="exerciseLoadError" role="alert" hidden></p>
+			<iframe
+				class="exercise-frame"
+				id="exerciseFrame"
+				title="Übung: {{ exercise.title }}"
+				src="about:blank"
+				data-exercise-url="{{ exercise_url }}"
+				data-exercise-solutions='{{ exercise.solution | tojson }}'
+				sandbox="allow-scripts allow-forms"
+			></iframe>
+		{% endif %}
+	</main>
+</section>
+{% endblock content %}
+
+{% block scripts %}
+<script src="{{ url_for('static', path='js/exercise-player.js') }}" defer></script>
+{% endblock scripts %}

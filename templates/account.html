@@ -4,21 +4,27 @@
 <section class="account-workspace" aria-labelledby="account-title">
 	<header class="account-heading">
 		<div>
-			<p class="section-kicker">Administration</p>
-			<h1 id="account-title">Account management</h1>
+			<p class="section-kicker">Verwaltung</p>
+			<h1 id="account-title">Kontoverwaltung</h1>
 		</div>
+		<button class="logout-button" id="adminLogoutButton" type="button">
+			<svg viewBox="0 0 24 24" aria-hidden="true">
+				<path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+			</svg>
+			Abmelden
+		</button>
 	</header>
 
 	<div class="admin-layout">
-		<nav class="admin-sidebar" aria-label="Management sections">
+		<nav class="admin-sidebar" aria-label="Verwaltungsbereiche">
 			<button class="admin-nav-button is-selected" type="button" data-section="chapters" aria-current="page">
-				<span class="admin-nav-index"></span>Chapters
+				<span class="admin-nav-index"></span>Kapitel
 			</button>
 			<button class="admin-nav-button" type="button" data-section="exercises">
-				<span class="admin-nav-index"></span>Exercises
+				<span class="admin-nav-index"></span>Übungen
 			</button>
 			<button class="admin-nav-button" type="button" data-section="accounts">
-				<span class="admin-nav-index"></span>Accounts
+				<span class="admin-nav-index"></span>Benutzerkonten
 			</button>
 		</nav>
 
@@ -30,55 +36,56 @@
 							<div class="list-heading">
 								<div>
 									<p class="section-kicker"></p>
-									<h2 id="chapter-heading">Chapters</h2>
+									<h2 id="chapter-heading">Kapitel</h2>
 								</div>
-								<span class="item-count" id="activeCount">0 active</span>
+								<span class="item-count" id="activeCount">0 aktiv</span>
 							</div>
-							<ol class="chapter-list" id="activeChapters" aria-label="Active chapters"></ol>
-							<p class="list-empty" id="activeEmpty" hidden>No active chapters. Activate one below.</p>
+							<p class="account-status" id="chapterStatus" role="status" aria-live="polite"></p>
+							<ol class="chapter-list" id="activeChapters" aria-label="Aktive Kapitel"></ol>
+							<p class="list-empty" id="activeEmpty" hidden>Keine aktiven Kapitel. Aktiviere unten ein Kapitel.</p>
 						</section>
 
 						<section class="chapter-list-section inactive-section" aria-labelledby="inactive-heading">
 							<div class="list-heading">
 								<div>
-									<h2 id="inactive-heading">Inactive chapters</h2>
+									<h2 id="inactive-heading">Inaktive Kapitel</h2>
 								</div>
-								<span class="item-count" id="inactiveCount">0 inactive</span>
+								<span class="item-count" id="inactiveCount">0 inaktiv</span>
 							</div>
-							<ol class="chapter-list" id="inactiveChapters" aria-label="Inactive chapters"></ol>
-							<p class="list-empty" id="inactiveEmpty" hidden>No inactive chapters.</p>
+							<ol class="chapter-list" id="inactiveChapters" aria-label="Inaktive Kapitel"></ol>
+							<p class="list-empty" id="inactiveEmpty" hidden>Keine inaktiven Kapitel.</p>
 						</section>
 					</div>
 
                     <footer class="save-bar">
-					<p id="saveHint">Changes to chapter order and visibility are not saved yet.</p>
+					<p id="saveHint">Änderungen an Reihenfolge und Sichtbarkeit sind noch nicht gespeichert.</p>
 					<button class="action-button save-button" id="saveChanges" type="button" disabled>
-						Save changes
+						Änderungen speichern
 					</button>
 				    </footer>
 
-					<aside class="chapter-tools" aria-label="Chapter actions">
+					<aside class="chapter-tools" aria-label="Kapitelaktionen">
 						<form class="chapter-tool-form" id="addChapterForm">
-							<h2>Add chapter</h2>
-							<label for="newChapterTitle">Chapter title</label>
+							<h2>Kapitel hinzufügen</h2>
+							<label for="newChapterTitle">Kapiteltitel</label>
 							<input id="newChapterTitle" name="title" type="text" maxlength="100" required />
-							<button class="action-button" type="submit">Add chapter</button>
+							<button class="action-button" type="submit">Kapitel hinzufügen</button>
 						</form>
 
 						<form class="chapter-tool-form" id="updateChapterForm">
-							<h2>Update chapter</h2>
-							<label for="updateChapterSelect">Chapter</label>
+							<h2>Kapitel bearbeiten</h2>
+							<label for="updateChapterSelect">Kapitel</label>
 							<select id="updateChapterSelect" required></select>
-							<label for="updateChapterTitle">New title</label>
+							<label for="updateChapterTitle">Neuer Titel</label>
 							<input id="updateChapterTitle" name="title" type="text" maxlength="100" required />
-							<button class="action-button secondary-action" type="submit">Save title</button>
+							<button class="action-button secondary-action" type="submit">Titel speichern</button>
 						</form>
 
 						<form class="chapter-tool-form delete-tool" id="deleteChapterForm">
-							<h2>Remove chapter</h2>
-							<label for="deleteChapterSelect">Chapter</label>
+							<h2>Kapitel löschen</h2>
+							<label for="deleteChapterSelect">Kapitel</label>
 							<select id="deleteChapterSelect" required></select>
-							<button class="action-button danger-action" type="submit">Delete chapter</button>
+							<button class="action-button danger-action" type="submit">Kapitel löschen</button>
 						</form>
 					</aside>
 				</div>
@@ -88,132 +95,142 @@
 				<div class="exercise-main-column">
 					<header class="exercise-section-heading">
 						<div>
-							<p class="section-kicker">Exercise library</p>
-							<h2 id="exercises-heading">Exercises</h2>
+							<p class="section-kicker">Übungsbibliothek</p>
+							<h2 id="exercises-heading">Übungen</h2>
 						</div>
 						<p class="account-status" id="exerciseStatus" role="status" aria-live="polite"></p>
 					</header>
 
 					<section class="chapter-assignment" aria-labelledby="assignment-heading">
-						<label for="exerciseChapterSelect">Chapter</label>
+						<label for="exerciseChapterSelect">Kapitel</label>
 						<select id="exerciseChapterSelect" required></select>
 						<div class="exercise-assignment-lists">
 							<section class="exercise-list-section" aria-labelledby="assigned-heading">
 								<div class="list-heading">
-									<h3 id="assigned-heading">Assigned to chapter</h3>
+									<h3 id="assigned-heading">Zugewiesen</h3>
 									<span class="item-count" id="assignedCount">0</span>
 								</div>
 								<ul class="exercise-list" id="assignedExercises"></ul>
-								<p class="list-empty" id="assignedEmpty" hidden>Select a chapter to manage its exercises.</p>
+								<p class="list-empty" id="assignedEmpty" hidden>Wähle ein Kapitel, um seine Übungen zu verwalten.</p>
 							</section>
 
 							<section class="exercise-list-section unassigned-exercise-section" aria-labelledby="unassigned-heading">
 								<div class="list-heading">
-									<h3 id="unassigned-heading">Unassigned exercises</h3>
+									<h3 id="unassigned-heading">Nicht zugewiesen</h3>
 									<span class="item-count" id="unassignedCount">0</span>
 								</div>
 								<ul class="exercise-list" id="unassignedExercises"></ul>
-								<p class="list-empty" id="unassignedEmpty" hidden>No unassigned exercises.</p>
+								<p class="list-empty" id="unassignedEmpty" hidden>Keine nicht zugewiesenen Übungen.</p>
 							</section>
 						</div>
 					</section>
 
-					<aside class="exercise-tools" aria-label="Exercise actions">
-						<form class="chapter-tool-form" id="addExerciseForm">
-							<h3>Add exercise</h3>
-							<label for="newExerciseTitle">Title</label>
-							<input id="newExerciseTitle" type="text" maxlength="100" required />
-							<label for="newExerciseFilename">HTML filename</label>
-							<input id="newExerciseFilename" type="text" maxlength="100" required />
-							<label class="exercise-task-field" for="newExerciseTask">
-								<input id="newExerciseTask" type="checkbox" />
-								Task
-							</label>
-							<button class="action-button" type="submit">Add exercise</button>
-						</form>
-
-						<form class="chapter-tool-form" id="updateExerciseForm">
-							<h3>Update exercise</h3>
-							<label for="updateExerciseSelect">Exercise</label>
-							<select id="updateExerciseSelect" required></select>
-							<label for="updateExerciseTitle">Title</label>
-							<input id="updateExerciseTitle" type="text" maxlength="100" required />
-							<label for="updateExerciseFilename">HTML filename</label>
-							<input id="updateExerciseFilename" type="text" maxlength="100" required />
-							<label class="exercise-task-field" for="updateExerciseTask">
-								<input id="updateExerciseTask" type="checkbox" />
-								Task
-							</label>
-							<button class="action-button secondary-action" type="submit">Save exercise</button>
-						</form>
-
-						<form class="chapter-tool-form delete-tool" id="deleteExerciseForm">
-							<h3>Delete exercise</h3>
-							<label for="deleteExerciseSelect">Exercise</label>
-							<select id="deleteExerciseSelect" required></select>
-							<button class="action-button danger-action" type="submit">Delete exercise</button>
-						</form>
+					<aside class="exercise-catalog" aria-labelledby="exercise-catalog-heading">
+					<p class="section-kicker">Übersicht</p>
+					<h3 id="exercise-catalog-heading">Alle Übungen</h3>
+					<ul class="exercise-catalog-list" id="allExercises"></ul>
+					<p class="list-empty" id="allExercisesEmpty" hidden>Es wurden noch keine Übungen erstellt.</p>
 					</aside>
 				</div>
 
-				<aside class="exercise-catalog" aria-labelledby="exercise-catalog-heading">
-					<p class="section-kicker">Library overview</p>
-					<h3 id="exercise-catalog-heading">All exercises</h3>
-					<ul class="exercise-catalog-list" id="allExercises"></ul>
-					<p class="list-empty" id="allExercisesEmpty" hidden>No exercises have been created.</p>
+				<aside class="exercise-tools" aria-label="Übungsaktionen">
+					<form class="chapter-tool-form" id="addExerciseForm">
+						<h3>Übung hinzufügen</h3>
+						<label for="newExerciseTitle">Titel</label>
+						<input id="newExerciseTitle" type="text" maxlength="100" required />
+						<label for="newExerciseFilename">HTML-Dateiname</label>
+						<input id="newExerciseFilename" type="text" maxlength="100" required />
+						<span class="solution-editor-label">Lösungen in Aufgabenreihenfolge</span>
+						<div class="solution-rows" id="newExerciseSolutions" aria-label="Lösungen für die neue Übung"></div>
+						<button class="action-button secondary-action solution-add-button" type="button" data-add-solution="new">Lösung hinzufügen</button>
+						<p class="form-hint">Keine Lösungen bedeutet: Diese Übung hat keine Aufgaben.</p>
+						<label class="exercise-setting-field" for="newExerciseRequiresPrevious">
+							<input id="newExerciseRequiresPrevious" type="checkbox" />
+							Vorherige Übung voraussetzen
+						</label>
+						<button class="action-button" type="submit">Übung hinzufügen</button>
+					</form>
+
+					<form class="chapter-tool-form" id="updateExerciseForm">
+						<h3>Übung bearbeiten</h3>
+						<label for="updateExerciseSelect">Übung</label>
+						<select id="updateExerciseSelect" required></select>
+						<label for="updateExerciseTitle">Titel</label>
+						<input id="updateExerciseTitle" type="text" maxlength="100" required />
+						<label for="updateExerciseFilename">HTML-Dateiname</label>
+						<input id="updateExerciseFilename" type="text" maxlength="100" required />
+						<span class="solution-editor-label">Lösungen in Aufgabenreihenfolge</span>
+						<div class="solution-rows" id="updateExerciseSolutions" aria-label="Lösungen für die ausgewählte Übung"></div>
+						<button class="action-button secondary-action solution-add-button" type="button" data-add-solution="update">Lösung hinzufügen</button>
+						<p class="form-hint">Keine Lösungen bedeutet: Diese Übung hat keine Aufgaben.</p>
+						<label class="exercise-setting-field" for="updateExerciseRequiresPrevious">
+							<input id="updateExerciseRequiresPrevious" type="checkbox" />
+							Vorherige Übung voraussetzen
+						</label>
+						<button class="action-button secondary-action" type="submit">Übung speichern</button>
+					</form>
+
+					<form class="chapter-tool-form delete-tool" id="deleteExerciseForm">
+						<h3>Übung löschen</h3>
+						<label for="deleteExerciseSelect">Übung</label>
+						<select id="deleteExerciseSelect" required></select>
+						<button class="action-button danger-action" type="submit">Übung löschen</button>
+					</form>
 				</aside>
 			</section>
 			<section class="accounts-manager" id="accountsSection" hidden aria-labelledby="accounts-heading">
 				<header class="accounts-section-heading">
 					<div>
-						<p class="section-kicker">User access</p>
-						<h2 id="accounts-heading">Accounts</h2>
+						<p class="section-kicker">Benutzerverwaltung</p>
+						<h2 id="accounts-heading">Benutzerkonten</h2>
 					</div>
 					<p class="account-status" id="accountsStatus" role="status" aria-live="polite"></p>
 				</header>
 
 				<div class="account-actions">
 					<form class="account-action-form" id="addAccountForm">
-						<h3>Create account</h3>
-						<label for="newAccountUsername">Username</label>
+						<h3>Benutzerkonto erstellen</h3>
+						<label for="newAccountUsername">Benutzername</label>
 						<input id="newAccountUsername" type="text" maxlength="20" required />
-						<label for="newAccountPassword">Password</label>
+						<label for="newAccountPassword">Passwort</label>
 						<input id="newAccountPassword" type="password" minlength="4" required />
-						<button class="action-button" type="submit">Create account</button>
+						<button class="action-button" type="submit">Konto erstellen</button>
 					</form>
 
 					<form class="account-action-form" id="updateAccountForm">
-						<h3>Edit account</h3>
-						<label for="updateAccountSelect">Account</label>
+						<h3>Benutzerkonto bearbeiten</h3>
+						<label for="updateAccountSelect">Benutzerkonto</label>
 						<select id="updateAccountSelect" required></select>
-						<label for="updateAccountUsername">Username</label>
+						<label for="updateAccountUsername">Benutzername</label>
 						<input id="updateAccountUsername" type="text" maxlength="20" required />
-						<label for="updateAccountPassword">New password</label>
+						<label for="updateAccountPassword">Neues Passwort</label>
 						<input id="updateAccountPassword" type="password" minlength="4" autocomplete="new-password" />
-						<button class="action-button secondary-action" type="submit">Save account</button>
+						<button class="action-button secondary-action" type="submit">Konto speichern</button>
 					</form>
 
 					<form class="account-action-form" id="deleteAccountForm">
-						<h3>Delete account</h3>
-						<label for="deleteAccountSelect">Account</label>
+						<h3>Benutzerkonto löschen</h3>
+						<label for="deleteAccountSelect">Benutzerkonto</label>
 						<select id="deleteAccountSelect" required></select>
-						<button class="action-button danger-action" type="submit">Delete account</button>
+						<button class="action-button danger-action" type="submit">Konto löschen</button>
 					</form>
 				</div>
 
 				<section class="account-directory" aria-labelledby="account-directory-heading">
 					<div class="list-heading">
-						<h3 id="account-directory-heading">All accounts</h3>
-						<span class="item-count" id="accountCount">0 accounts</span>
+						<h3 id="account-directory-heading">Alle Benutzerkonten</h3>
+						<span class="item-count" id="accountCount">0 Benutzerkonten</span>
 					</div>
 					<ul class="account-list" id="accountList"></ul>
-					<p class="list-empty" id="accountsEmpty" hidden>No accounts have been created.</p>
+					<p class="list-empty" id="accountsEmpty" hidden>Es wurden noch keine Benutzerkonten erstellt.</p>
 				</section>
 			</section>
 		</div>
 	</div>
 </section>
 {% endblock content %}
+
+{% block page_class %} account-page-content{% endblock page_class %}
 
 {% block scripts %}
 <script src="{{ url_for('static', path='js/account.js') }}"></script>

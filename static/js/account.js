@@ -1,7 +1,7 @@
 const accessToken = sessionStorage.getItem("access_token");
 const activeList = document.getElementById("activeChapters");
 const inactiveList = document.getElementById("inactiveChapters");
-const statusMessage = document.getElementById("accountStatus");
+const statusMessage = document.getElementById("chapterStatus");
 const saveButton = document.getElementById("saveChanges");
 const saveHint = document.getElementById("saveHint");
 const updateSelect = document.getElementById("updateChapterSelect");
@@ -17,6 +17,106 @@ let chapters = [];
 let exercises = [];
 let accounts = [];
 let savedOrder = "[]";
+const apiErrorMessages = new Map([
+	["Invalid account", "Ungültiges Benutzerkonto."],
+	["Account no longer exists", "Dieses Benutzerkonto existiert nicht mehr."],
+	["Chapter not found", "Kapitel nicht gefunden."],
+	["Exercise not found", "Übung nicht gefunden."],
+	["Exercise is locked", "Diese Übung ist noch gesperrt."],
+	["Exercise file not found", "Übungsdatei nicht gefunden."],
+	["Account not found", "Benutzerkonto nicht gefunden."],
+	["Account with this username exists already", "Ein Benutzerkonto mit diesem Benutzernamen existiert bereits."],
+	["Account with this username already exists", "Ein Benutzerkonto mit diesem Benutzernamen existiert bereits."],
+	["Invalid username or password", "Benutzername oder Passwort ist falsch."],
+	["Chapter with this title exists already", "Ein Kapitel mit diesem Titel existiert bereits."],
+	["Chapter with this title already exists", "Ein Kapitel mit diesem Titel existiert bereits."],
+	["Assigned chapter positions must be unique", "Die Reihenfolge der Kapitel darf keine doppelten Positionen enthalten."],
+	["Include each existing chapter exactly once", "Jedes vorhandene Kapitel muss genau einmal enthalten sein."],
+	["Exercise with this title already created", "Eine Übung mit diesem Titel existiert bereits."],
+	["Exercise with this filename already created", "Eine Übung mit diesem Dateinamen existiert bereits."],
+	["Position already assigned", "Diese Position ist bereits vergeben."],
+	["User account required", "Ein Benutzerkonto ist erforderlich."],
+	["Invalid or expired authentication token", "Die Sitzung ist ungültig oder abgelaufen."],
+	["Admin privileges required", "Administratorrechte erforderlich."],
+]);
+
+function createSolutionRow(value = "") {
+	const row = document.createElement("div");
+	row.className = "solution-row";
+	const typeSelect = document.createElement("select");
+	typeSelect.className = "solution-type";
+	typeSelect.setAttribute("aria-label", "Lösungstyp");
+	for (const [label, type] of [["Text", "text"], ["Zahl", "number"], ["Wahrheitswert", "boolean"]]) {
+		typeSelect.add(new Option(label, type));
+	}
+	const valueType = typeof value === "boolean" ? "boolean" : typeof value === "number" ? "number" : "text";
+	typeSelect.value = valueType;
+	let valueControl = createSolutionValueControl(valueType, value);
+	const removeButton = document.createElement("button");
+	removeButton.className = "action-button danger-action solution-remove-button";
+	removeButton.type = "button";
+	removeButton.textContent = "Entfernen";
+	removeButton.setAttribute("aria-label", "Lösung entfernen");
+	removeButton.addEventListener("click", () => row.remove());
+	typeSelect.addEventListener("change", () => {
+		const replacement = createSolutionValueControl(typeSelect.value);
+		row.replaceChild(replacement, valueControl);
+		valueControl = replacement;
+	});
+	row.append(typeSelect, valueControl, removeButton);
+	return row;
+}
+
+function createSolutionValueControl(type, value = "") {
+	if (type === "boolean") {
+		const select = document.createElement("select");
+		select.className = "solution-value";
+		select.setAttribute("aria-label", "Wahrheitswert");
+		select.add(new Option("Wahr", "true"));
+		select.add(new Option("Falsch", "false"));
+		select.value = String(value === true);
+		return select;
+	}
+	const input = document.createElement("input");
+	input.className = "solution-value";
+	input.type = type === "number" ? "number" : "text";
+	input.setAttribute("aria-label", type === "number" ? "Zahlenlösung" : "Textlösung");
+	if (type === "number") input.step = "any";
+	input.value = value === "" ? "" : String(value);
+	input.required = true;
+	return input;
+}
+
+function setSolutionRows(containerId, solutions = []) {
+	const container = document.getElementById(containerId);
+	container.replaceChildren(...solutions.map((solution) => createSolutionRow(solution)));
+}
+
+function readSolutions(containerId) {
+	const solutions = [];
+	for (const row of document.getElementById(containerId).querySelectorAll(".solution-row")) {
+		const type = row.querySelector(".solution-type").value;
+		const control = row.querySelector(".solution-value");
+		if (type === "boolean") {
+			solutions.push(control.value === "true");
+			continue;
+		}
+		if (!control.value.trim() || !control.reportValidity()) return undefined;
+		solutions.push(type === "number" ? control.valueAsNumber : control.value);
+	}
+	return solutions;
+}
+
+document.querySelectorAll("[data-add-solution]").forEach((button) => {
+	button.addEventListener("click", () => {
+		const containerId = button.dataset.addSolution === "new"
+			? "newExerciseSolutions"
+			: "updateExerciseSolutions";
+		const row = createSolutionRow();
+		document.getElementById(containerId).append(row);
+		row.querySelector(".solution-value").focus();
+	});
+});
 
 function setStatus(message) {
 	if (statusMessage) statusMessage.textContent = message;
@@ -32,8 +132,8 @@ function updateDirtyState() {
 	const dirty = chapterOrder() !== savedOrder;
 	saveButton.disabled = !dirty;
 	saveHint.textContent = dirty
-		? "Order or visibility has changed. Save to publish these changes."
-		: "Changes to chapter order and visibility are not saved yet.";
+		? "Reihenfolge oder Sichtbarkeit geändert. Speichere, um die Änderungen zu übernehmen."
+		: "Änderungen an Reihenfolge und Sichtbarkeit sind noch nicht gespeichert.";
 }
 
 function sortedChapters() {
@@ -73,12 +173,12 @@ function makeChapterRow(chapter, list) {
 	row.innerHTML = `
 		<span class="chapter-row-title"></span>
 		<label class="chapter-toggle">
-			<input type="checkbox" aria-label="Make chapter active" ${chapter.active ? "checked" : ""} />
-			<span>Active</span>
+			<input type="checkbox" aria-label="Kapitel aktivieren" ${chapter.active ? "checked" : ""} />
+			<span>Aktiv</span>
 		</label>
 		<div class="chapter-order-controls">
-			<button class="move-button" type="button" aria-label="Move chapter up" title="Move up">&#8593;</button>
-			<button class="move-button" type="button" aria-label="Move chapter down" title="Move down">&#8595;</button>
+			<button class="move-button" type="button" aria-label="Kapitel nach oben verschieben" title="Nach oben">&#8593;</button>
+			<button class="move-button" type="button" aria-label="Kapitel nach unten verschieben" title="Nach unten">&#8595;</button>
 			<span class="drag-grip" aria-hidden="true">&#8942;</span>
 		</div>`;
 	row.querySelector(".chapter-row-title").textContent = chapter.title;
@@ -118,7 +218,7 @@ function makeChapterRow(chapter, list) {
 function updateChapterOptions() {
 	for (const select of [updateSelect, deleteSelect]) {
 		const selectedId = select.value;
-		select.replaceChildren(new Option("Select a chapter", ""));
+		select.replaceChildren(new Option("Kapitel auswählen", ""));
 		for (const chapter of sortedChapters()) {
 			select.add(new Option(chapter.title, String(chapter.id)));
 		}
@@ -141,8 +241,8 @@ function renderChapters() {
 	const inactiveChapters = ordered.filter((chapter) => !chapter.active);
 	activeChapters.forEach((chapter) => activeList.append(makeChapterRow(chapter, activeList)));
 	inactiveChapters.forEach((chapter) => inactiveList.append(makeChapterRow(chapter, inactiveList)));
-	document.getElementById("activeCount").textContent = `${activeChapters.length} active`;
-	document.getElementById("inactiveCount").textContent = `${inactiveChapters.length} inactive`;
+	document.getElementById("activeCount").textContent = `Aktiv: ${activeChapters.length}`;
+	document.getElementById("inactiveCount").textContent = `Inaktiv: ${inactiveChapters.length}`;
 	document.getElementById("activeEmpty").hidden = activeChapters.length > 0;
 	document.getElementById("inactiveEmpty").hidden = inactiveChapters.length > 0;
 	updateChapterOptions();
@@ -159,7 +259,10 @@ async function apiRequest(path, options = {}) {
 	});
 	if (!response.ok) {
 		const body = await response.json().catch(() => ({}));
-		throw new Error(body.detail || "The request could not be completed.");
+		const message = typeof body.detail === "string"
+			? apiErrorMessages.get(body.detail)
+			: null;
+		throw new Error(message || "Die Anfrage konnte nicht abgeschlossen werden.");
 	}
 	return response.status === 204 ? null : response.json();
 }
@@ -170,7 +273,7 @@ async function loadChapters() {
 	savedOrder = chapterOrder();
 	renderChapters();
 	updateDirtyState();
-	setStatus(`${chapters.length} chapters loaded`);
+	setStatus(`${chapters.length} Kapitel geladen`);
 }
 
 function showError(error) {
@@ -179,7 +282,7 @@ function showError(error) {
 
 function updateExerciseChapterOptions() {
 	const selectedId = exerciseChapterSelect.value;
-	exerciseChapterSelect.replaceChildren(new Option("Select a chapter", ""));
+	exerciseChapterSelect.replaceChildren(new Option("Kapitel auswählen", ""));
 	for (const chapter of sortedChapters()) {
 		exerciseChapterSelect.add(new Option(chapter.title, String(chapter.id)));
 	}
@@ -229,10 +332,10 @@ function renderExerciseLists() {
 	assignedList.replaceChildren();
 	unassignedList.replaceChildren();
 	for (const exercise of assigned) {
-		assignedList.append(makeExerciseRow(exercise, "Unassign", () => assignExercise(exercise.id, -1)));
+		assignedList.append(makeExerciseRow(exercise, "Zuweisung aufheben", () => assignExercise(exercise.id, -1)));
 	}
 	for (const exercise of unassigned) {
-		unassignedList.append(makeExerciseRow(exercise, "Assign", () => assignExercise(exercise.id, chapterId)));
+		unassignedList.append(makeExerciseRow(exercise, "Zuweisen", () => assignExercise(exercise.id, chapterId)));
 	}
 	document.getElementById("assignedCount").textContent = String(assigned.length);
 	document.getElementById("unassignedCount").textContent = String(unassigned.length);
@@ -248,7 +351,10 @@ function renderExerciseLists() {
 		const metadata = document.createElement("span");
 		metadata.className = "catalog-metadata";
 		const chapter = chapters.find((item) => item.id === exercise.chapter_id);
-		metadata.textContent = chapter ? chapter.title : "Unassigned";
+		metadata.textContent = [
+			chapter ? chapter.title : "Nicht zugewiesen",
+			exercise.requires_previous ? "Vorherige Übung erforderlich" : "",
+		].filter(Boolean).join(" · ");
 		item.append(title, metadata);
 		allExercises.append(item);
 	}
@@ -259,7 +365,7 @@ function renderExerciseLists() {
 function updateExerciseOptions() {
 	for (const select of [updateExerciseSelect, deleteExerciseSelect]) {
 		const selectedId = select.value;
-		select.replaceChildren(new Option("Select an exercise", ""));
+		select.replaceChildren(new Option("Übung auswählen", ""));
 		for (const exercise of [...exercises].sort((first, second) => first.title.localeCompare(second.title))) {
 			select.add(new Option(exercise.title, String(exercise.id)));
 		}
@@ -276,7 +382,8 @@ function fillExerciseUpdateForm() {
 	if (!exercise) return;
 	document.getElementById("updateExerciseTitle").value = exercise.title;
 	document.getElementById("updateExerciseFilename").value = exercise.html_filename;
-	document.getElementById("updateExerciseTask").checked = exercise.task;
+	setSolutionRows("updateExerciseSolutions", exercise.solution || []);
+	document.getElementById("updateExerciseRequiresPrevious").checked = exercise.requires_previous;
 }
 
 async function loadExercises() {
@@ -301,7 +408,7 @@ async function assignExercise(exerciseId, chapterId) {
 			body: JSON.stringify({ chapter_id: chapterId, position }),
 		});
 		await loadExercises();
-		setStatus(chapterId === -1 ? "Exercise unassigned" : "Exercise assigned to chapter");
+		setStatus(chapterId === -1 ? "Übungszuweisung aufgehoben" : "Übung dem Kapitel zugewiesen");
 	} catch (error) {
 		showError(error);
 	}
@@ -310,7 +417,7 @@ async function assignExercise(exerciseId, chapterId) {
 function updateAccountOptions() {
 	for (const select of [updateAccountSelect, deleteAccountSelect]) {
 		const selectedId = select.value;
-		select.replaceChildren(new Option("Select an account", ""));
+		select.replaceChildren(new Option("Benutzerkonto auswählen", ""));
 		for (const account of accounts) {
 			select.add(new Option(account.username, String(account.id)));
 		}
@@ -343,7 +450,7 @@ function renderAccounts() {
 		item.append(id, username);
 		accountList.append(item);
 	}
-	document.getElementById("accountCount").textContent = `${accounts.length} accounts`;
+	document.getElementById("accountCount").textContent = `Benutzerkonten: ${accounts.length}`;
 	document.getElementById("accountsEmpty").hidden = accounts.length > 0;
 	updateAccountOptions();
 }
@@ -352,7 +459,7 @@ async function loadAccounts() {
 	accounts = await apiRequest("/api/accounts");
 	accounts.sort((first, second) => first.username.localeCompare(second.username));
 	renderAccounts();
-	setStatus(`${accounts.length} accounts loaded`);
+	setStatus(`${accounts.length} Benutzerkonten geladen`);
 }
 
 document.querySelectorAll(".admin-nav-button").forEach((button) => {
@@ -376,7 +483,7 @@ document.getElementById("addChapterForm").addEventListener("submit", async (even
 		await apiRequest("/api/chapters", { method: "POST", body: JSON.stringify({ title }) });
 		event.target.reset();
 		await loadChapters();
-		statusMessage.textContent = "Chapter added as inactive";
+		statusMessage.textContent = "Kapitel hinzugefügt und deaktiviert";
 	} catch (error) {
 		showError(error);
 	}
@@ -393,7 +500,7 @@ document.getElementById("updateChapterForm").addEventListener("submit", async (e
 			body: JSON.stringify({ title }),
 		});
 		await loadChapters();
-		statusMessage.textContent = "Chapter title updated";
+		statusMessage.textContent = "Kapiteltitel aktualisiert";
 	} catch (error) {
 		showError(error);
 	}
@@ -403,11 +510,11 @@ document.getElementById("deleteChapterForm").addEventListener("submit", async (e
 	event.preventDefault();
 	const chapterId = deleteSelect.value;
 	const chapter = chapters.find((item) => String(item.id) === chapterId);
-	if (!chapter || !window.confirm(`Delete “${chapter.title}”?`)) return;
+	if (!chapter || !window.confirm(`Möchtest du das Kapitel „${chapter.title}“ wirklich löschen?`)) return;
 	try {
 		await apiRequest(`/api/chapters/delete/${chapterId}`, { method: "DELETE" });
 		await loadChapters();
-		statusMessage.textContent = "Chapter deleted";
+		statusMessage.textContent = "Kapitel gelöscht";
 	} catch (error) {
 		showError(error);
 	}
@@ -430,7 +537,7 @@ document.getElementById("addAccountForm").addEventListener("submit", async (even
 		});
 		event.target.reset();
 		await loadAccounts();
-		setStatus("Account created");
+		setStatus("Benutzerkonto erstellt");
 	} catch (error) {
 		showError(error);
 	}
@@ -450,7 +557,7 @@ document.getElementById("updateAccountForm").addEventListener("submit", async (e
 			body: JSON.stringify(update),
 		});
 		await loadAccounts();
-		setStatus("Account updated");
+		setStatus("Benutzerkonto aktualisiert");
 	} catch (error) {
 		showError(error);
 	}
@@ -460,11 +567,11 @@ document.getElementById("deleteAccountForm").addEventListener("submit", async (e
 	event.preventDefault();
 	const accountId = deleteAccountSelect.value;
 	const account = accounts.find((item) => String(item.id) === accountId);
-	if (!account || !window.confirm(`Delete account “${account.username}”?`)) return;
+	if (!account || !window.confirm(`Möchtest du das Benutzerkonto „${account.username}“ wirklich löschen?`)) return;
 	try {
 		await apiRequest(`/api/accounts/delete/${accountId}`, { method: "DELETE" });
 		await loadAccounts();
-		setStatus("Account deleted");
+		setStatus("Benutzerkonto gelöscht");
 	} catch (error) {
 		showError(error);
 	}
@@ -474,16 +581,18 @@ document.getElementById("addExerciseForm").addEventListener("submit", async (eve
 	event.preventDefault();
 	const title = document.getElementById("newExerciseTitle").value.trim();
 	const html_filename = document.getElementById("newExerciseFilename").value.trim();
-	const task = document.getElementById("newExerciseTask").checked;
-	if (!title || !html_filename) return;
+	const solution = readSolutions("newExerciseSolutions");
+	const requires_previous = document.getElementById("newExerciseRequiresPrevious").checked;
+	if (!title || !html_filename || solution === undefined) return;
 	try {
 		await apiRequest("/api/exercises", {
 			method: "POST",
-			body: JSON.stringify({ title, html_filename, task }),
+			body: JSON.stringify({ title, html_filename, solution, requires_previous }),
 		});
 		event.target.reset();
+		setSolutionRows("newExerciseSolutions");
 		await loadExercises();
-		setStatus("Exercise added as unassigned");
+		setStatus("Übung hinzugefügt und keinem Kapitel zugewiesen");
 	} catch (error) {
 		showError(error);
 	}
@@ -495,17 +604,26 @@ document.getElementById("updateExerciseForm").addEventListener("submit", async (
 	if (!exerciseId) return;
 	const title = document.getElementById("updateExerciseTitle").value.trim();
 	const html_filename = document.getElementById("updateExerciseFilename").value.trim();
-	const task = document.getElementById("updateExerciseTask").checked;
-	if (!title || !html_filename) return;
+	const solution = readSolutions("updateExerciseSolutions");
+	const requires_previous = document.getElementById("updateExerciseRequiresPrevious").checked;
+	if (!title || !html_filename || solution === undefined) return;
+	const submitButton = event.currentTarget.querySelector('button[type="submit"]');
+	const originalLabel = submitButton.textContent;
+	submitButton.disabled = true;
+	submitButton.textContent = "Wird gespeichert …";
+	setStatus("Übung wird gespeichert …");
 	try {
 		await apiRequest(`/api/exercises/update/${exerciseId}`, {
 			method: "PUT",
-			body: JSON.stringify({ title, html_filename, task }),
+			body: JSON.stringify({ title, html_filename, solution, requires_previous }),
 		});
 		await loadExercises();
-		setStatus("Exercise updated");
+		setStatus("Übung aktualisiert");
 	} catch (error) {
 		showError(error);
+	} finally {
+		submitButton.disabled = false;
+		submitButton.textContent = originalLabel;
 	}
 });
 
@@ -513,11 +631,11 @@ document.getElementById("deleteExerciseForm").addEventListener("submit", async (
 	event.preventDefault();
 	const exerciseId = deleteExerciseSelect.value;
 	const exercise = exercises.find((item) => String(item.id) === exerciseId);
-	if (!exercise || !window.confirm(`Delete “${exercise.title}”?`)) return;
+	if (!exercise || !window.confirm(`Möchtest du die Übung „${exercise.title}“ wirklich löschen?`)) return;
 	try {
 		await apiRequest(`/api/exercises/delete/${exerciseId}`, { method: "DELETE" });
 		await loadExercises();
-		setStatus("Exercise deleted");
+		setStatus("Übung gelöscht");
 	} catch (error) {
 		showError(error);
 	}
@@ -545,7 +663,7 @@ saveButton.addEventListener("click", async () => {
 		savedOrder = chapterOrder();
 		renderChapters();
 		updateDirtyState();
-		statusMessage.textContent = "Chapter changes saved";
+		statusMessage.textContent = "Kapiteländerungen gespeichert";
 	} catch (error) {
 		showError(error);
 	}

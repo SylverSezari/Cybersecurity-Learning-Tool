@@ -1,0 +1,109 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Grundlagen der Kryptografie</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
+  <link rel="stylesheet" href="/static/css/exercises.css">
+  <script src="/static/js/exercise-theme.js" defer></script>
+</head>
+<body>
+  <main class="lesson">
+    <header class="hero">
+      <div>
+        <p class="eyebrow">Einführung · Kryptografie</p>
+        <h1>Geheime Nachrichten, offene Wege</h1>
+        <p class="hero-intro">
+          Wenn Nachrichten über das Internet reisen, können sie an vielen Stationen vorbeikommen.
+          Kryptografie hilft dabei, Informationen zu schützen: Sie macht Inhalte ohne den passenden
+          Schlüssel unlesbar und ermöglicht sichere Kommunikation, auch wenn der Übertragungsweg
+          nicht geheim ist.
+        </p>
+      </div>
+      <div class="message-flow" aria-label="Klartext wird mit einem Schlüssel verschlüsselt und zu Geheimtext">
+        <div><span>Nachricht</span><strong>HALLO</strong></div>
+        <span class="flow-arrow" aria-hidden="true">→</span>
+        <div><span>Geschützt</span><strong>•••••</strong></div>
+      </div>
+    </header>
+
+    <section class="lesson-section" aria-labelledby="grundbegriffe-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">Die Grundidee</p>
+          <h2 id="grundbegriffe-title">Aus lesbar wird geschützt</h2>
+        </div>
+        <p>
+          Ein Verschlüsselungsverfahren verwandelt eine lesbare Nachricht in eine Form, die für
+          Aussenstehende möglichst keinen verständlichen Inhalt preisgibt. Berechtigte können sie
+          mit dem passenden Verfahren und Schlüssel wieder zurückverwandeln.
+        </p>
+      </div>
+      <div class="concepts">
+        <article class="concept">
+          <h3>Klartext</h3>
+          <p>Die ursprüngliche Nachricht, zum Beispiel ein Text, ein Bild oder eine Datei.</p>
+        </article>
+        <article class="concept">
+          <h3>Chiffre</h3>
+          <p>Das Verfahren, das festlegt, wie aus dem Klartext ein geschützter Inhalt wird.</p>
+        </article>
+        <article class="concept">
+          <h3>Schlüssel</h3>
+          <p>Die geheime Information, die steuert, wie verschlüsselt und wieder entschlüsselt wird.</p>
+        </article>
+      </div>
+      <p class="key-note"><strong>Wichtig:</strong> Ein gutes Verfahren muss nicht geheim sein. Geschützt werden soll der Schlüssel.</p>
+    </section>
+
+    <section class="lesson-section" aria-labelledby="arten-title">
+      <div class="section-heading">
+        <div>
+          <p class="section-label">Zwei Grundformen</p>
+          <h2 id="arten-title">Wer besitzt den Schlüssel?</h2>
+        </div>
+        <p>
+          Verschlüsselung wird danach unterschieden, wie die Beteiligten ihre Schlüssel verwenden.
+          Beide Ansätze haben unterschiedliche Stärken und werden in der Praxis oft kombiniert.
+        </p>
+      </div>
+      <div class="crypto-types">
+        <article class="crypto-type">
+          <h3><span>01</span> Symmetrische Verschlüsselung</h3>
+          <p>
+            Zum Ver- und Entschlüsseln wird derselbe geheime Schlüssel verwendet. Sender und
+            Empfänger müssen ihn sicher miteinander teilen. Das Verfahren ist schnell und eignet
+            sich deshalb gut für grosse Datenmengen.
+          </p>
+          <p class="type-example"><strong>Bild:</strong> Beide besitzen eine Kopie desselben Schlüssels.</p>
+        </article>
+        <article class="crypto-type">
+          <h3><span>02</span> Asymmetrische Verschlüsselung</h3>
+          <p>
+            Hier gehören zwei Schlüssel zusammen: Ein öffentlicher Schlüssel darf geteilt werden,
+            ein privater bleibt geheim. Eine Nachricht, die mit dem öffentlichen Schlüssel geschützt
+            wurde, kann nur mit dem passenden privaten Schlüssel gelesen werden.
+          </p>
+          <p class="type-example"><strong>Bild:</strong> Ein offenes Schloss kann jede Person schliessen, aber nur du öffnest es.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="purpose" aria-labelledby="ziel-title">
+      <div>
+        <p class="section-label">Im Alltag</p>
+        <h2 id="ziel-title">Sicherheit durch Mathematik</h2>
+      </div>
+      <p>
+        Moderne Kryptografie schützt zum Beispiel Nachrichten, Online-Konten und Zahlungen. Sie
+        beruht auf mathematischen Verfahren, die leicht anzuwenden, aber ohne den Schlüssel nur
+        sehr schwer umzukehren sind. In den folgenden Abschnitten lernst du zunächst einfache
+        Chiffren kennen und entdeckst, wie sich ihre Ideen in moderner Verschlüsselung
+        weiterentwickelt haben.
+      </p>
+    </section>
+  </main>
+</body>
+</html>

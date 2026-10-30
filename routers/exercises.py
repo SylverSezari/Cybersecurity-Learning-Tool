@@ -1,7 +1,7 @@
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
@@ -101,7 +101,8 @@ async def create_exercise(
     new_exercise = models.Exercise(
         title=exercise.title,
         html_filename=exercise.html_filename,
-        task=exercise.task,
+        solution=exercise.solution,
+        requires_previous=exercise.requires_previous,
         chapter_id=-1,
     )
 
@@ -205,6 +206,19 @@ async def update_exercise(
 
     #Update exercise with relevant data
     exercise_data = update_data.model_dump(exclude_unset=True)
+    if "title" in exercise_data:
+        result = await db.execute(
+            select(models.Exercise).where(
+                func.lower(models.Exercise.title) == exercise_data["title"].lower(),
+                models.Exercise.id != exercise_id,
+            )
+        )
+        if result.scalars().first():
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Exercise with this title already created",
+            )
+
     for field, value in exercise_data.items():
         setattr(exercise, field, value)
 
@@ -234,6 +248,12 @@ async def delete_exercise(
             status_code=status.HTTP_404_NOT_FOUND, detail="Exercise not found"
         )
         
+    await db.execute(
+        delete(models.ExerciseCompletion).where(
+            models.ExerciseCompletion.exercise_id == exercise_id
+        )
+    )
+
     # delete exercise
     await db.delete(exercise)
     await db.commit()

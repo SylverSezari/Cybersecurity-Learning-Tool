@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Die Vigenère-Verschlüsselung</title>
+    <link rel="stylesheet" href="/static/css/theme.css" />
+    <link rel="stylesheet" href="/static/css/exercises.css" />
+    <script src="/static/js/exercise-theme.js" defer></script>
+    <script src="/static/js/exercise-tasks.js" defer></script>
+  </head>
+  <body>
+    <main class="lesson">
+      <header class="lesson-header">
+        <p class="eyebrow">Lektion 04 · Ein Schlüssel, viele Verschiebungen</p>
+        <h1>Die Vigenère-Verschlüsselung</h1>
+        <p class="lead">
+          Eine einzelne Caesar-Verschiebung hinterlässt deutliche Muster. In
+          einer alten Expeditionsnotiz steht deshalb ein Schlüsselwort, das die
+          Verschiebung für jeden Buchstaben neu bestimmt.
+        </p>
+      </header>
+
+      <section class="lesson-section" aria-labelledby="prinzip-title">
+        <p class="section-label">Das Prinzip</p>
+        <h2 id="prinzip-title">Das Schlüsselwort wird wiederholt</h2>
+        <p>
+          Bei Caesar gilt für jeden Buchstaben dieselbe Verschiebung. Vigenère
+          verwendet stattdessen ein <strong>Schlüsselwort</strong>: Jeder
+          Buchstabe des Schlüsselworts bestimmt eine eigene Verschiebung.
+          Schreibe das Schlüsselwort unter den Klartext und wiederhole es, bis
+          unter jedem Klartextbuchstaben genau ein Schlüsselbuchstabe steht. So
+          können gleiche Klartextbuchstaben an verschiedenen Stellen
+          unterschiedlich verschlüsselt werden.
+        </p>
+        <p>
+          Für Buchstabenwerte und die Regel
+          <span class="equation">mod 26</span> verwenden wir dasselbe Vorgehen
+          wie in der vorherigen Caesar-Lektion.
+        </p>
+        <div
+          class="worked-example"
+          aria-label="Beispiel mit Klartext HALLO und Schlüssel MOND"
+        >
+          <p>
+            <strong>Klartext:</strong> &nbsp; H &nbsp; A &nbsp; L &nbsp; L
+            &nbsp; O
+          </p>
+          <p>
+            <strong>Schlüssel:</strong> M &nbsp; O &nbsp; N &nbsp; D &nbsp; M
+          </p>
+          <p>
+            <strong>Zahlen:</strong> &nbsp; 7+12 &nbsp; 0+14 &nbsp; 11+13 &nbsp;
+            11+3 &nbsp; 14+12
+          </p>
+          <p>
+            <strong>Summen:</strong> &nbsp; 19 &nbsp; 14 &nbsp; 24 &nbsp; 14
+            &nbsp; 26
+          </p>
+          <p>
+            <strong>Nach mod 26:</strong> 19 &nbsp; 14 &nbsp; 24 &nbsp; 14
+            &nbsp; 0
+          </p>
+          <p>
+            <strong>Geheimtext:</strong> T &nbsp; O &nbsp; Y &nbsp; O &nbsp; A
+          </p>
+          <p class="equation">Cᵢ = (Pᵢ + Kᵢ) mod 26</p>
+          <p>
+            <strong>So entsteht das Ergebnis:</strong> H hat den Wert 7 und M
+            den Wert 12, also 7 + 12 = 19 = T. Beim letzten Buchstaben ergibt O
+            = 14 plus M = 12 den Wert 26. Nach mod 26 wird daraus 0, also A.
+          </p>
+        </div>
+        <p>
+          Zum Entschlüsseln ziehst du den jeweiligen Schlüsselwert ab:
+          <span class="equation">Pᵢ = (Cᵢ − Kᵢ) mod 26</span>. Zum Beispiel
+          ergibt der Geheimtextwert 19 (T) minus den Schlüsselwert 12 (M) den
+          Klartextwert 7 (H).
+        </p>
+        <p>
+          In den Formeln ist <span class="equation">i</span> die Position eines
+          Buchstabens im Text: <span class="equation">Pᵢ</span> ist der
+          Klartextwert an dieser Stelle, <span class="equation">Kᵢ</span> der
+          passende Schlüsselwert und <span class="equation">Cᵢ</span> der daraus
+          berechnete Geheimtextwert. Im Beispiel stehen unter den beiden L
+          einmal N und einmal D. Deshalb werden die L verschieden verschlüsselt:
+          L + N ergibt Y, L + D ergibt O.
+        </p>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="geschichte-title">
+        <p class="section-label">Geschichte und Sicherheit</p>
+        <h2 id="geschichte-title">Mehr Muster, aber kein modernes Geheimnis</h2>
+        <p>
+          Das wiederholte Schlüsselwort wurde 1553 von Giovan Battista Bellaso
+          beschrieben. Später wurde das Verfahren nach Blaise de Vigenère
+          benannt. Es wurde über lange Zeit für diplomatische und militärische
+          Nachrichten verwendet. Heute ist es nicht mehr sicher: Wiederholungen
+          im Schlüssel hinterlassen Muster, und bei genügend langem Geheimtext
+          kann man die Schlüssellänge und anschliessend einzelne Verschiebungen
+          untersuchen. Moderne Systeme verwenden andere Verfahren.
+        </p>
+        <aside class="note">
+          <strong>Merke:</strong> Vigenère verändert gleiche Klartextbuchstaben
+          nicht immer gleich. Der Schlüssel wiederholt sich aber, deshalb
+          verschwinden alle Muster nicht dauerhaft.
+        </aside>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="alphabet-title">
+        <p class="section-label">Zum Visualisieren</p>
+        <h2 id="alphabet-title">Sieh die Verschiebung</h2>
+        <div class="alphabet-tool">
+          <div class="alphabet-control">
+            <label for="caesarShift">Schlüssel</label>
+            <input
+              id="caesarShift"
+              type="range"
+              min="0"
+              max="25"
+              value="3"
+              aria-label="Verschiebung in Buchstaben"
+            />
+            <output id="shiftValue" for="caesarShift">3</output>
+          </div>
+          <div class="alphabet-rows" aria-live="polite">
+            <div class="alphabet-row">
+              <strong>Klartext</strong><output id="plainAlphabet"></output>
+            </div>
+            <div class="alphabet-row">
+              <strong>Geheimtext</strong><output id="cipherAlphabet"></output>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="aufgaben-title">
+        <p class="section-label">Notiz der Expedition</p>
+        <h2 id="aufgaben-title">Arbeite mit dem Schlüsselwort</h2>
+        <div class="task-list">
+          <article class="exercise-task" data-solution-index="0">
+            <p class="task-story">
+              Die Forscherin Mira hat ein neues Medikament erschaffen. Damit
+              ihre Rivalen ihr neues Rezept nicht klauen können, verschlüsselt
+              sie ihre Nachricht. Ihr Schlüsselwort lautet MOND und ihre
+              Nachricht lautet SCHOKOLADE.
+            </p>
+            <p class="task-prompt">Welcher Geheimtext entsteht?</p>
+            <div class="task-answer-row">
+              <input
+                class="task-answer"
+                type="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-label="Geheimtext eingeben"
+              />
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+
+          <article class="exercise-task" data-solution-index="1">
+            <p class="task-story">
+              Mira erhält die Antwort EICHD. Sie weiss, dass die Nachricht mit
+              dem gleichen Schlüssel wie vorher encodiert wurde.
+            </p>
+            <p class="task-prompt">Entschlüssle die Nachricht.</p>
+            <div class="task-answer-row">
+              <input
+                class="task-answer"
+                type="text"
+                autocomplete="off"
+                autocapitalize="characters"
+                spellcheck="false"
+                aria-label="Klartext eingeben"
+              />
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+
+          <article class="exercise-task" data-solution-index="2">
+            <p class="task-story">
+              Eine Nachricht ist länger als der vereinbarte Schlüssel.
+            </p>
+            <p class="task-prompt">
+              Wird der Schlüssel wiederholt, bis er gleich lang wie der Klartext
+              ist?
+            </p>
+            <div class="task-answer-row">
+              <select class="task-answer" aria-label="Aussage beurteilen">
+                <option value="">Bitte auswählen</option>
+                <option value="true">Ja</option>
+                <option value="false">Nein</option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+        </div>
+        <p class="tasks-complete" id="tasksComplete" role="status" hidden>
+          Alle Aufgaben richtig gelöst. Du kannst die Lektion jetzt als
+          abgeschlossen markieren.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

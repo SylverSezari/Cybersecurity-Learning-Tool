@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Symmetrische Verschlüsselung</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
+  <link rel="stylesheet" href="/static/css/exercises.css">
+  <script src="/static/js/exercise-theme.js" defer></script>
+  <script src="/static/js/exercise-tasks.js" defer></script>
+</head>
+<body>
+  <main class="lesson">
+    <header class="lesson-header">
+      <p class="eyebrow">Lektion 02 · Gemeinsame Geheimnisse</p>
+      <h1>Symmetrische Verschlüsselung</h1>
+      <p class="lead">
+        Zwei Personen wollen eine Nachricht geheim halten. Dafür verwenden sie denselben
+        geheimen Schlüssel: eine Person verschlüsselt damit, die andere entschlüsselt damit.
+      </p>
+    </header>
+
+    <section class="lesson-section" aria-labelledby="ablauf-title">
+      <p class="section-label">So funktioniert es</p>
+      <h2 id="ablauf-title">Ein Schlüssel für beide Richtungen</h2>
+      <p>
+        Die lesbare Nachricht heisst <strong>Klartext</strong>. Ein Verschlüsselungsverfahren
+        verändert sie mit einem Schlüssel zu <strong>Geheimtext</strong>. Wer denselben Schlüssel
+        besitzt, kann den Geheimtext wieder in den Klartext zurückverwandeln.
+      </p>
+      <div class="worked-example" aria-label="Ablauf der symmetrischen Verschlüsselung">
+        <p><strong>Klartext</strong> + geheimer Schlüssel → <strong>Geheimtext</strong></p>
+        <p><strong>Geheimtext</strong> + derselbe Schlüssel → <strong>Klartext</strong></p>
+        <p class="equation">C = Eₖ(P) &nbsp;&nbsp; und &nbsp;&nbsp; P = Dₖ(C)</p>
+      </div>
+      <ul class="concept-list">
+        <li><strong>Stärke:</strong> Symmetrische Verfahren sind schnell und eignen sich auch für grosse Dateien.</li>
+        <li><strong>Herausforderung:</strong> Beide Seiten müssen den Schlüssel vorher sicher austauschen.</li>
+        <li><strong>Wichtig:</strong> Das Verfahren darf bekannt sein. Geheim bleiben muss der Schlüssel.</li>
+      </ul>
+    </section>
+
+    <section class="lesson-section" aria-labelledby="alltag-title">
+      <p class="section-label">Früher und heute</p>
+      <h2 id="alltag-title">Von Buchstaben zu Daten</h2>
+      <p>
+        Caesar- und Vigenère-Verschlüsselung sind historische Beispiele für symmetrische
+        Verfahren: Sender und Empfänger brauchen denselben Schlüssel. Heute schützen etwa
+        AES und ChaCha20 Daten auf Geräten und bei der Übertragung im Internet. Die Grundidee
+        des gemeinsamen Schlüssels bleibt, die modernen Verfahren arbeiten aber mit Bits und
+        sind für Computer entworfen.
+      </p>
+      <aside class="note">
+        <strong>Merke:</strong> Der Schlüssel ist wie ein gemeinsam vereinbartes Geheimnis.
+        Wer ihn verliert oder weitergibt, gefährdet alle damit geschützten Nachrichten.
+      </aside>
+    </section>
+
+    <section class="lesson-section" aria-labelledby="aufgaben-title">
+      <p class="section-label">Drei kurze Situationen</p>
+      <h2 id="aufgaben-title">Kannst du den Schlüssel richtig einordnen?</h2>
+      <div class="task-list">
+        <article class="exercise-task" data-solution-index="0">
+          <p class="task-story">Mira und Noé möchten eine private Datei austauschen. Beide haben vorher dasselbe Geheimnis vereinbart.</p>
+          <p class="task-prompt">Welche Schlüssel-Regel passt zu symmetrischer Verschlüsselung?</p>
+          <div class="task-answer-row">
+            <select class="task-answer" aria-label="Schlüssel-Regel auswählen">
+              <option value="">Bitte auswählen</option>
+              <option value="same-key">Beide verwenden denselben geheimen Schlüssel</option>
+              <option value="key-pair">Eine Person nutzt einen öffentlichen, die andere einen privaten Schlüssel</option>
+            </select>
+            <button class="check-answer" type="button" disabled>Prüfen</button>
+          </div>
+          <p class="task-feedback" role="status" aria-live="polite"></p>
+        </article>
+
+        <article class="exercise-task" data-solution-index="1">
+          <p class="task-story">Ein Online-Spiel schützt heute seine Verbindung, statt Buchstaben einzeln zu verschieben.</p>
+          <p class="task-prompt">Welches davon ist ein modernes symmetrisches Verschlüsselungsverfahren?</p>
+          <div class="task-answer-row">
+            <select class="task-answer" aria-label="Verschlüsselungsverfahren auswählen">
+              <option value="">Bitte auswählen</option>
+              <option value="Caesar">Caesar</option>
+              <option value="AES">AES</option>
+              <option value="Vigenere">Vigenère</option>
+            </select>
+            <button class="check-answer" type="button" disabled>Prüfen</button>
+          </div>
+          <p class="task-feedback" role="status" aria-live="polite"></p>
+        </article>
+
+        <article class="exercise-task" data-solution-index="2">
+          <p class="task-story">Ein Team veröffentlicht die Beschreibung seines Verschlüsselungsverfahrens, hält aber seinen Schlüssel geheim.</p>
+          <p class="task-prompt">Kann ein Verfahren sicher sein, obwohl der Algorithmus bekannt ist?</p>
+          <div class="task-answer-row">
+            <select class="task-answer" aria-label="Aussage beurteilen">
+              <option value="">Bitte auswählen</option>
+              <option value="true">Ja</option>
+              <option value="false">Nein</option>
+            </select>
+            <button class="check-answer" type="button" disabled>Prüfen</button>
+          </div>
+          <p class="task-feedback" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+      <p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle Aufgaben richtig gelöst. Du kannst die Lektion jetzt als abgeschlossen markieren.</p>
+    </section>
+  </main>
+</body>
+</html>

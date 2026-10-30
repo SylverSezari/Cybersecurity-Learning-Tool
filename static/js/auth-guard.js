@@ -16,13 +16,17 @@ if (window.location.pathname !== "/login") {
 		})
 			.then(async (response) => {
 				if (!response.ok) {
-					throw new Error("Session is invalid");
+					throw new Error("Die Sitzung ist ungültig.");
 				}
 				const session = await response.json();
 				if (adminPage && session.role !== "admin") {
 					window.location.replace("/");
 					return;
 				}
+			const logoutButtonId = session.role === "admin"
+				? "adminLogoutButton"
+				: "userLogoutButton";
+			document.getElementById(logoutButtonId)?.removeAttribute("hidden");
 				document.documentElement.removeAttribute("data-auth-pending");
 			})
 			.catch(redirectToLogin);

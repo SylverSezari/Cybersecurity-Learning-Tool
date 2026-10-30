@@ -12,7 +12,7 @@ async def add_exercise(
 	db_session: AsyncSession,
 	title: str,
 	html_filename: str,
-	task: bool = True,
+	solution: list[str | int | float | bool] | None = None,
 	chapter_id: int = -1,
 	position: int | None = None,
 ) -> models.Exercise:
@@ -20,7 +20,7 @@ async def add_exercise(
 	exercise = models.Exercise(
 		title=title,
 		html_filename=html_filename,
-		task=task,
+		solution=[] if solution is None else solution,
 		chapter_id=chapter_id,
 		position=position,
 	)
@@ -171,14 +171,36 @@ async def test_create_exercise_sets_unassigned_defaults_for_admin(
 	# An admin can create an exercise, initially unassigned from any chapter.
 	response = await client.post(
 		"/api/exercises",
-		json={"title": "New exercise", "html_filename": "new.html", "task": True},
+		json={
+			"title": "New exercise",
+			"html_filename": "new.html",
+			"solution": [42],
+			"requires_previous": True,
+		},
 		headers=admin_auth_headers,
 	)
 
 	assert response.status_code == 201
 	assert response.json()["title"] == "New exercise"
 	assert response.json()["html_filename"] == "new.html"
+	assert response.json()["requires_previous"] is True
+	assert response.json()["solution"] == [42]
 	assert response.json()["chapter_id"] == -1
+
+
+@pytest.mark.anyio
+async def test_create_exercise_solution_defaults_to_empty_list(
+	client: AsyncClient,
+	admin_auth_headers: dict[str, str],
+):
+	response = await client.post(
+		"/api/exercises",
+		json={"title": "No solution", "html_filename": "no-solution.html"},
+		headers=admin_auth_headers,
+	)
+
+	assert response.status_code == 201
+	assert response.json()["solution"] == []
 
 
 @pytest.mark.anyio
@@ -189,13 +211,13 @@ async def test_create_exercise_rejects_duplicate_title(
 	# Exercise titles are unique without regard to letter case.
 	await client.post(
 		"/api/exercises",
-		json={"title": "Existing exercise", "html_filename": "existing.html", "task": True},
+		json={"title": "Existing exercise", "html_filename": "existing.html"},
 		headers=admin_auth_headers,
 	)
 
 	response = await client.post(
 		"/api/exercises",
-		json={"title": "EXISTING EXERCISE", "html_filename": "different.html", "task": True},
+		json={"title": "EXISTING EXERCISE", "html_filename": "different.html"},
 		headers=admin_auth_headers,
 	)
 
@@ -211,13 +233,13 @@ async def test_create_exercise_rejects_duplicate_filename(
 	# HTML filenames are also unique without regard to letter case.
 	await client.post(
 		"/api/exercises",
-		json={"title": "First exercise", "html_filename": "shared.html", "task": True},
+		json={"title": "First exercise", "html_filename": "shared.html"},
 		headers=admin_auth_headers,
 	)
 
 	response = await client.post(
 		"/api/exercises",
-		json={"title": "Second exercise", "html_filename": "SHARED.HTML", "task": False},
+		json={"title": "Second exercise", "html_filename": "SHARED.HTML"},
 		headers=admin_auth_headers,
 	)
 
@@ -230,7 +252,7 @@ async def test_create_exercise_rejects_missing_token(client: AsyncClient):
 	# Exercise creation requires authentication before checking admin privileges.
 	response = await client.post(
 		"/api/exercises",
-		json={"title": "No token exercise", "html_filename": "no-token.html", "task": True},
+		json={"title": "No token exercise", "html_filename": "no-token.html"},
 	)
 
 	assert response.status_code == 401
@@ -245,7 +267,7 @@ async def test_create_exercise_rejects_regular_user(
 	# A regular logged-in user cannot create exercises.
 	response = await client.post(
 		"/api/exercises",
-		json={"title": "User exercise", "html_filename": "user.html", "task": True},
+		json={"title": "User exercise", "html_filename": "user.html"},
 		headers=user_auth_headers,
 	)
 
@@ -450,7 +472,8 @@ async def test_update_exercise_changes_fields_for_admin(
 		json={
 			"title": "After update",
 			"html_filename": "after.html",
-			"task": False,
+			"solution": ["secret-answer", 12, True, False],
+			"requires_previous": True,
 		},
 		headers=admin_auth_headers,
 	)
@@ -458,7 +481,30 @@ async def test_update_exercise_changes_fields_for_admin(
 	assert response.status_code == 200
 	assert response.json()["title"] == "After update"
 	assert response.json()["html_filename"] == "after.html"
-	assert response.json()["task"] is False
+	assert response.json()["solution"] == ["secret-answer", 12, True, False]
+	assert response.json()["requires_previous"] is True
+
+
+@pytest.mark.anyio
+async def test_update_exercise_rejects_duplicate_title(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	admin_auth_headers: dict[str, str],
+):
+	# A title cannot be changed to one already assigned to another exercise.
+	exercise = await add_exercise(db_session, "Original title", "original.html")
+	await add_exercise(db_session, "Existing title", "existing.html")
+
+	response = await client.put(
+		f"/api/exercises/update/{exercise.id}",
+		json={"title": "EXISTING TITLE"},
+		headers=admin_auth_headers,
+	)
+
+	assert response.status_code == 400
+	assert response.json()["detail"] == "Exercise with this title already created"
+	await db_session.refresh(exercise)
+	assert exercise.title == "Original title"
 
 
 @pytest.mark.anyio

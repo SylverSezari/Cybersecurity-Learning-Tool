@@ -1,16 +1,20 @@
 <!doctype html>
-<html lang="en" data-theme="light">
+<html lang="de" data-theme="light">
 	<head>
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="theme-color" content="#f5f7fa" />
 		<meta
 			name="description"
-			content="Cybersecurity Learning Tool"
+			content="Lernplattform für Cybersicherheit"
 		/>
 		<link
 			rel="stylesheet"
-			href="{{ url_for('static', path='css/main.css') }}"
+			href="{{ url_for('static', path='css/theme.css') }}"
+		/>
+		<link
+			rel="stylesheet"
+			href="{{ url_for('static', path='css/main.css') }}?v=3"
 		/>
 		<script>
 			if (window.location.pathname !== "/login") {
@@ -19,28 +23,34 @@
 		</script>
 
 		{% if title %}
-		<title>{{ title }} | Cybersecurity Learning Tool</title>
+		<title>{{ title }} | Lernplattform für Cybersicherheit</title>
 		{% else %}
-		<title>Cybersecurity Learning Tool</title>
+		<title>Lernplattform für Cybersicherheit</title>
 		{% endif %}
 
 	</head>
 	<body>
 		<header class="site-header">
-			<nav class="site-nav" aria-label="Main navigation">
-				<a class="brand" href="{{ url_for('home') }}" aria-label="Home">
+			<nav class="site-nav" aria-label="Hauptnavigation">
+				<a class="brand" href="{{ url_for('home') }}" aria-label="Startseite">
 					<!-- Replace this mark with an image from static/pictures later. -->
 					<span class="brand-mark" aria-hidden="true">CLT</span>
-					<span class="brand-name">Cybersecurity Learning Tool</span>
+					<span class="brand-name">Lernplattform für Cybersicherheit</span>
 				</a>
 
 				<div class="nav-actions">
+					<button class="logout-button" id="userLogoutButton" type="button" hidden>
+						<svg viewBox="0 0 24 24" aria-hidden="true">
+							<path d="M10 17l5-5-5-5M15 12H3M12 3h6a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-6" />
+						</svg>
+						Abmelden
+					</button>
 					<button
 						class="icon-button"
 						id="themeToggle"
 						type="button"
-						aria-label="Switch to dark mode"
-						title="Switch theme"
+						aria-label="Zum dunklen Design wechseln"
+						title="Design wechseln"
 					>
 						<svg viewBox="0 0 24 24" aria-hidden="true">
 							<path d="M12 3v2M12 19v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M3 12h2M19 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
@@ -50,8 +60,8 @@
 					<a
 						class="icon-button"
 						href="{{ url_for('account_page') }}"
-						aria-label="Admin account management"
-						title="Account management"
+						aria-label="Administrationsverwaltung"
+						title="Verwaltung"
 					>
 						<svg viewBox="0 0 24 24" aria-hidden="true">
 							<circle cx="12" cy="8" r="3.5" />
@@ -62,7 +72,7 @@
 			</nav>
 		</header>
 
-		<main class="page-content">
+		<main class="page-content{% block page_class %}{% endblock page_class %}">
 			{% block content %}{% endblock content %}
 		</main>
 
@@ -71,15 +81,29 @@
 			const storedTheme = localStorage.getItem("theme");
 			const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
 			const initialTheme = storedTheme || (prefersDark ? "dark" : "light");
+			const exerciseFrames = document.querySelectorAll(".exercise-frame");
+
+			function syncExerciseTheme(theme) {
+				exerciseFrames.forEach((frame) => {
+					frame.contentWindow?.postMessage({ type: "theme-change", theme }, "*");
+				});
+			}
+
+			exerciseFrames.forEach((frame) => {
+				frame.addEventListener("load", () => {
+					syncExerciseTheme(document.documentElement.dataset.theme);
+				});
+			});
 
 			function setTheme(theme) {
 				document.documentElement.dataset.theme = theme;
 				themeToggle.setAttribute(
 					"aria-label",
-					theme === "dark" ? "Switch to light mode" : "Switch to dark mode",
+					theme === "dark" ? "Zum hellen Design wechseln" : "Zum dunklen Design wechseln",
 				);
-				themeToggle.title = theme === "dark" ? "Switch to light mode" : "Switch to dark mode";
+				themeToggle.title = theme === "dark" ? "Zum hellen Design wechseln" : "Zum dunklen Design wechseln";
 				localStorage.setItem("theme", theme);
+				syncExerciseTheme(theme);
 			}
 
 			setTheme(initialTheme);
@@ -88,7 +112,8 @@
 				setTheme(nextTheme);
 			});
 		</script>
-		<script src="{{ url_for('static', path='js/auth-guard.js') }}"></script>
+		<script src="{{ url_for('static', path='js/auth-guard.js') }}?v=2"></script>
+		<script src="{{ url_for('static', path='js/logout.js') }}"></script>
 
 		{% block scripts %}{% endblock scripts %}
 	</body>

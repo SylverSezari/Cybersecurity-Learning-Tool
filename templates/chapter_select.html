@@ -3,19 +3,19 @@
 {% block content %}
 <section class="chapter-select" aria-labelledby="chapter-select-title">
 	<header class="chapter-select-header">
-		<p class="section-kicker">Learning path</p>
-		<h1 id="chapter-select-title">Chapter Select</h1>
-		<p>Choose a chapter to begin learning.</p>
+		<p class="section-kicker">Lernpfad</p>
+		<h1 id="chapter-select-title">Kapitel auswählen</h1>
+		<p>Wähle ein Kapitel, um mit dem Lernen zu beginnen.</p>
 	</header>
 
 	<div class="chapter-grid">
 		{% for chapter in chapters %}
-		<article class="chapter-card">
+		<a class="chapter-card" href="{{ url_for('chapter_task', chapter_id=chapter.id) }}">
 			<span class="chapter-number">{{ "%02d"|format(loop.index) }}</span>
 			<h2>{{ chapter.title }}</h2>
-		</article>
+		</a>
 		{% else %}
-		<p class="empty-state">No chapters are available yet.</p>
+		<p class="empty-state">Es sind noch keine Kapitel verfügbar.</p>
 		{% endfor %}
 	</div>
 </section>

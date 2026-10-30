@@ -1,4 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+
+SolutionValue = StrictStr | StrictInt | StrictFloat | StrictBool
+SolutionList = list[SolutionValue]
 
 # Schemas for the http requests
 
@@ -10,7 +13,8 @@ class ExerciseResponse(BaseModel):
     id: int
     title: str = Field(min_length=1, max_length=100)
     html_filename: str = Field(min_length=1, max_length=100)
-    task: bool
+    solution: SolutionList = Field(default_factory=list)
+    requires_previous: bool = False
     chapter_id: int | None = Field(default=None)
     position: int | None = Field(default=None)
 
@@ -19,7 +23,8 @@ class ExerciseResponse(BaseModel):
 class ExercisePost(BaseModel):
     title: str = Field(min_length=1, max_length=100)
     html_filename: str = Field(min_length=1, max_length=100)
-    task: bool
+    solution: SolutionList = Field(default_factory=list)
+    requires_previous: bool = False
 
 
 ### for exercise assignments
@@ -32,7 +37,8 @@ class ExerciseAssignment(BaseModel):
 class ExercisePut(BaseModel):
     title: str | None = Field(default=None, min_length=1, max_length=100)
     html_filename: str | None = Field(default=None, min_length=1, max_length=100)
-    task: bool | None = Field(default=None)
+    solution: SolutionList = Field(default_factory=list)
+    requires_previous: bool | None = Field(default=None)
 
 
 ## Chapters

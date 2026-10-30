@@ -2,6 +2,7 @@ import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import main
 import models
 
 # Chapter Tests
@@ -18,6 +19,24 @@ async def add_chapter(
 	db_session.add(chapter)
 	await db_session.commit()
 	return chapter
+
+
+async def add_chapter_exercise(
+	db_session: AsyncSession,
+	chapter_id: int,
+	title: str,
+	html_filename: str,
+	position: int,
+) -> models.Exercise:
+	exercise = models.Exercise(
+		title=title,
+		html_filename=html_filename,
+		chapter_id=chapter_id,
+		position=position,
+	)
+	db_session.add(exercise)
+	await db_session.commit()
+	return exercise
 
 
 ## Test get_all_chapters
@@ -52,21 +71,123 @@ async def test_get_all_chapters_rejects_missing_token(client: AsyncClient):
 
 
 @pytest.mark.anyio
-async def test_chapter_select_page_orders_active_chapters_before_inactive(
+async def test_chapter_select_page_shows_only_active_chapters_in_order(
 	client: AsyncClient,
 	db_session: AsyncSession,
 ):
-	# Learners see active chapters in saved position order, followed by inactive ones.
+	# Learners see active chapters in saved position order, but not inactive chapters.
 	await add_chapter(db_session, "Later active", position=2, active=True)
 	await add_chapter(db_session, "Inactive chapter")
-	await add_chapter(db_session, "Earlier active", position=0, active=True)
+	earlier_active = await add_chapter(
+		db_session, "Earlier active", position=0, active=True
+	)
 
 	response = await client.get("/chapters")
 	content = response.text
 
 	assert response.status_code == 200
 	assert content.index("Earlier active") < content.index("Later active")
-	assert content.index("Later active") < content.index("Inactive chapter")
+	assert "Inactive chapter" not in content
+	assert f"/chapters/{earlier_active.id}" in content
+
+
+@pytest.mark.anyio
+async def test_chapter_start_redirects_to_first_exercise(
+	client: AsyncClient,
+	db_session: AsyncSession,
+):
+	chapter = await add_chapter(db_session, "Task chapter", position=0, active=True)
+	await add_chapter_exercise(db_session, chapter.id, "Second exercise", "second.html", 2)
+	first_exercise = await add_chapter_exercise(
+		db_session, chapter.id, "First exercise", "first.html", 0
+	)
+
+	response = await client.get(f"/chapters/{chapter.id}")
+
+	assert response.status_code == 303
+	assert response.headers["location"].endswith(
+		f"/chapters/{chapter.id}/exercises/{first_exercise.id}"
+	)
+
+
+@pytest.mark.anyio
+async def test_task_page_lists_exercises_and_loads_database_filename(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	user_auth_headers: dict[str, str],
+	tmp_path,
+	monkeypatch,
+):
+	chapter = await add_chapter(db_session, "Task chapter", position=0, active=True)
+	exercise = await add_chapter_exercise(
+		db_session, chapter.id, "Introduction", "intro.html", 0
+	)
+	(tmp_path / exercise.html_filename).write_text(
+		"<!doctype html><title>Lesson content</title>", encoding="utf-8"
+	)
+	monkeypatch.setattr(main, "EXERCISES_DIRECTORY", tmp_path)
+
+	page = await client.get(f"/chapters/{chapter.id}/exercises/{exercise.id}")
+	content = await client.get(
+		f"/exercise-content/{exercise.id}/{exercise.html_filename}",
+		headers=user_auth_headers,
+	)
+
+	assert page.status_code == 200
+	assert "Introduction" in page.text
+	assert "aria-label=\"Übungen in Task chapter\"" in page.text
+	assert f"/exercise-content/{exercise.id}/{exercise.html_filename}" in page.text
+	assert content.status_code == 200
+	assert "Lesson content" in content.text
+
+
+@pytest.mark.anyio
+async def test_admin_can_open_exercise_page_with_login_cookie(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	admin_auth_headers: dict[str, str],
+	tmp_path,
+	monkeypatch,
+):
+	chapter = await add_chapter(db_session, "Admin navigation chapter", position=0, active=True)
+	exercise = await add_chapter_exercise(
+		db_session, chapter.id, "Admin navigation lesson", "admin-lesson.html", 0
+	)
+	(tmp_path / exercise.html_filename).write_text(
+		"<!doctype html><title>Admin lesson</title>", encoding="utf-8"
+	)
+	monkeypatch.setattr(main, "EXERCISES_DIRECTORY", tmp_path)
+
+	response = await client.get(
+		f"/chapters/{chapter.id}/exercises/{exercise.id}"
+	)
+
+	assert response.status_code == 200
+	assert "Admin navigation lesson" in response.text
+
+
+@pytest.mark.anyio
+async def test_task_page_displays_error_when_exercise_file_is_missing(
+	client: AsyncClient,
+	db_session: AsyncSession,
+	user_auth_headers: dict[str, str],
+	tmp_path,
+	monkeypatch,
+):
+	chapter = await add_chapter(db_session, "Task chapter", position=0, active=True)
+	exercise = await add_chapter_exercise(
+		db_session, chapter.id, "Missing lesson", "missing.html", 0
+	)
+	monkeypatch.setattr(main, "EXERCISES_DIRECTORY", tmp_path)
+
+	response = await client.get(
+		f"/chapters/{chapter.id}/exercises/{exercise.id}",
+		headers=user_auth_headers,
+	)
+
+	assert response.status_code == 404
+	assert "Übung nicht verfügbar" in response.text
+	assert "missing.html" in response.text
 
 
 ## Test get_single_chapter
@@ -433,7 +554,6 @@ async def test_delete_chapter_unassigns_exercises_and_resets_position(
 		models.Exercise(
 			title=f"Exercise {position}",
 			html_filename=f"exercise-{position}.html",
-			task=True,
 			chapter_id=chapter.id,
 			position=position,
 		)

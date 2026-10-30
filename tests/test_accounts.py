@@ -372,6 +372,23 @@ async def test_login_returns_token_for_admin(client: AsyncClient):
 	assert response.json()["token_type"] == "bearer"
 	assert response.json()["access_token"]
 
+	session_response = await client.get(
+		"/api/accounts/session",
+		headers={"Authorization": f"Bearer {response.json()['access_token']}"},
+	)
+	assert session_response.status_code == 200
+	assert session_response.json() == {"valid": True, "role": "admin"}
+	assert "httponly" in response.headers["set-cookie"].lower()
+
+
+@pytest.mark.anyio
+async def test_logout_clears_page_authentication_cookie(client: AsyncClient):
+	response = await client.get("/logout", follow_redirects=False)
+
+	assert response.status_code == 303
+	assert response.headers["location"] == "/login"
+	assert "access_token=\"\"" in response.headers["set-cookie"]
+
 
 @pytest.mark.anyio
 async def test_login_returns_token_for_existing_user(

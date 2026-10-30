@@ -1,8 +1,8 @@
 import hmac
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy import func, select
+from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
+from sqlalchemy import delete, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from starlette.concurrency import run_in_threadpool
 
@@ -165,6 +165,8 @@ async def update_account(
 async def login(
     credentials: AccountLogin,
     db: Annotated[AsyncSession, Depends(get_db)],
+    request: Request,
+    response: Response,
 ):
     if credentials.username == settings.admin and hmac.compare_digest(
         credentials.password.encode("utf-8"),
@@ -174,6 +176,7 @@ async def login(
             subject=settings.admin,
             role="admin",
         )
+        _set_access_cookie(response, request, access_token)
         return Token(access_token=access_token, token_type="bearer")
 
     result = await db.execute(
@@ -196,7 +199,20 @@ async def login(
         subject=str(account.id),
         role="user",
     )
+    _set_access_cookie(response, request, access_token)
     return Token(access_token=access_token, token_type="bearer")
+
+
+def _set_access_cookie(response: Response, request: Request, token: str) -> None:
+    response.set_cookie(
+        "access_token",
+        token,
+        max_age=120 * 60,
+        httponly=True,
+        secure=request.url.scheme == "https",
+        samesite="lax",
+        path="/",
+    )
 
 
 ## delete account
@@ -220,6 +236,12 @@ async def delete_account(
             status_code=status.HTTP_404_NOT_FOUND, detail="Account not found"
         )
         
+    await db.execute(
+        delete(models.ExerciseCompletion).where(
+            models.ExerciseCompletion.account_id == account_id
+        )
+    )
+
     # delete account
     await db.delete(account)
     await db.commit()

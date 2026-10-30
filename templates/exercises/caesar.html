@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Die Caesar-Verschlüsselung</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
+  <link rel="stylesheet" href="/static/css/exercises.css">
+  <script src="/static/js/exercise-theme.js" defer></script>
+  <script src="/static/js/exercise-tasks.js" defer></script>
+</head>
+<body>
+  <main class="lesson">
+    <header class="lesson-header">
+      <p class="eyebrow">Lektion 03 · Eine feste Verschiebung</p>
+      <h1>Die Caesar-Verschlüsselung</h1>
+      <p class="lead">
+        Eine Nachricht aus dem alten Rom erreicht die falschen Hände. Kannst du erkennen,
+        wie eine einfache Verschiebung sie schützt und warum sie heute kein echtes Geheimnis mehr ist?
+      </p>
+    </header>
+
+    <section class="lesson-section" aria-labelledby="theorie-title">
+      <p class="section-label">Die Idee</p>
+      <h2 id="theorie-title">Jeder Buchstabe rückt weiter</h2>
+      <p>
+        Bei der Caesar-Verschlüsselung wird jeder Buchstabe um dieselbe Anzahl Stellen im
+        Alphabet verschoben. Diese Anzahl ist der <strong>Schlüssel</strong>. Für die Rechnung
+        nummerieren wir die Buchstaben: A = 0, B = 1, C = 2 und so weiter bis Z = 25. Ein
+        Schlüssel von 3 bedeutet also: Addiere zu jeder Buchstabenzahl 3 und lies die neue
+        Zahl wieder als Buchstaben. Zum Entschlüsseln ziehst du 3 ab.
+      </p>
+      <div class="worked-example">
+        <p><strong>Beispiel HALLO mit Schlüssel 3:</strong></p>
+        <p>H = 7, A = 0, L = 11, L = 11, O = 14</p>
+        <p>Nach dem Addieren: 10, 3, 14, 14, 17. Das ergibt KDOOR.</p>
+        <p><strong>Was bedeutet „mod 26“?</strong> „Modulo“ bedeutet: Wir betrachten den Rest nach einer Division. Bei 26 Buchstaben gibt es 26 mögliche Zahlen, von 0 bis 25. Wenn eine Rechnung über 25 hinausgeht, beginnen wir wieder bei 0. Zum Beispiel: Z hat den Wert 25. Mit Schlüssel 3 rechnen wir 25 + 3 = 28. Der Rest von 28 geteilt durch 26 ist 2, also wird daraus C. So wird das Alphabet wie ein Kreis behandelt.</p>
+        <p>In den Formeln steht P für den Klartextwert, C für den Geheimtextwert und k für den Schlüssel. Die Zahlen werden nach der Rechnung wieder auf den Bereich 0 bis 25 zurückgeführt:</p>
+        <p class="equation">Verschlüsseln: C = (P + k) mod 26</p>
+        <p class="equation">Entschlüsseln: P = (C − k) mod 26</p>
+        <p>Beim Entschlüsseln funktioniert derselbe Kreis rückwärts. Für A mit Schlüssel 3 rechnen wir 0 − 3 = −3. Drei Schritte rückwärts von A führen zu X. Rechnerisch ist −3 modulo 26 gleich 23, und der Buchstabe mit Wert 23 ist X.</p>
+      </div>
+    </section>
+
+    <section class="lesson-section" aria-labelledby="alphabet-title">
+      <p class="section-label">Zum Ausprobieren</p>
+      <h2 id="alphabet-title">Sieh die Verschiebung</h2>
+      <p>Bewege den Regler. Jede Position im unteren Alphabet gehört zu dem Buchstaben direkt darüber.</p>
+      <div class="alphabet-tool">
+        <div class="alphabet-control">
+          <label for="caesarShift">Schlüssel</label>
+          <input id="caesarShift" type="range" min="0" max="25" value="3" aria-label="Verschiebung in Buchstaben">
+          <output id="shiftValue" for="caesarShift">3</output>
+        </div>
+        <div class="alphabet-rows" aria-live="polite">
+          <div class="alphabet-row"><strong>Klartext</strong><output id="plainAlphabet"></output></div>
+          <div class="alphabet-row"><strong>Geheimtext</strong><output id="cipherAlphabet"></output></div>
+        </div>
+        <p class="note">Beispiel mit dem gewählten Schlüssel: <span class="equation" id="shiftedExample"></span></p>
+      </div>
+    </section>
+
+    <section class="lesson-section" aria-labelledby="geschichte-title">
+      <p class="section-label">Geschichte und Sicherheit</p>
+      <h2 id="geschichte-title">Vom römischen Feldlager zum Rätsel</h2>
+      <p>
+        Julius Caesar soll die Verschiebung für vertrauliche Nachrichten an seine Verbündeten
+        genutzt haben. Heute begegnet sie vor allem in Rätseln und im Unterricht. Für echte
+        Sicherheit reicht sie nicht: Es gibt nur 25 sinnvolle Verschiebungen, die man einfach
+        ausprobieren kann. Ausserdem bleiben typische Buchstabenhäufigkeiten erhalten.
+      </p>
+    </section>
+
+    <section class="lesson-section" aria-labelledby="aufgaben-title">
+      <p class="section-label">Auftrag aus dem Nachrichtenbüro</p>
+      <h2 id="aufgaben-title">Entschlüsseln und verschlüsseln</h2>
+      <div class="task-list">
+        <article class="exercise-task" data-solution-index="0">
+          <p class="task-story">Die Legionären der römischen Armee warten auf eine Nachricht mit dem Standort der Gegner. Endlich kommt eine Botin an und bringt ihnen eine Nachricht mit dem Schlüssel 29: XHEHU GLH DOSHQ. Der Hauptmann kennt den Schlüssel, aber nicht den Klartext.</p>
+          <p class="task-prompt">Kannst du ihm die Nachricht entschlüsseln?</p>
+          <div class="task-answer-row">
+            <input class="task-answer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Entschlüsselte Nachricht">
+            <button class="check-answer" type="button" disabled>Prüfen</button>
+          </div>
+          <p class="task-feedback" role="status" aria-live="polite"></p>
+        </article>
+
+        <article class="exercise-task" data-solution-index="1">
+          <p class="task-story">Bevor die Römer aufbrechen, wollen sie dem Senat noch mitteilen, wer ihr Gegner ist. Deshalb verschlüsseln sie das Wort HANNIBAL.</p>
+          <p class="task-prompt">Gib den Geheimtext ein.</p>
+          <div class="task-answer-row">
+            <input class="task-answer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Verschlüsseltes Wort">
+            <button class="check-answer" type="button" disabled>Prüfen</button>
+          </div>
+          <p class="task-feedback" role="status" aria-live="polite"></p>
+        </article>
+
+        <article class="exercise-task" data-solution-index="2">
+          <p class="task-story">Der Senat hat vor langer Zeit den Geheimtext VRHF erhalten und schon die Nachricht OKAY entschlüsselt. Nun wollen sie aber eine Nachricht zurückschicken, wissen aber den Schlüssel nicht mehr.</p>
+          <p class="task-prompt">Wie viele Stellen beträgt der Schlüssel?</p>
+          <div class="task-answer-row">
+            <input class="task-answer" type="number" min="0" max="25" step="1" aria-label="Anzahl der Verschiebungsstellen">
+            <button class="check-answer" type="button" disabled>Prüfen</button>
+          </div>
+          <p class="task-feedback" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+      <p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle Aufgaben richtig gelöst. Du kannst die Lektion jetzt als abgeschlossen markieren.</p>
+    </section>
+  </main>
+</body>
+</html>

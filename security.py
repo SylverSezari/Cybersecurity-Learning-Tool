@@ -2,7 +2,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal, TypedDict
 
 import jwt
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pwdlib import PasswordHash
 
@@ -42,13 +42,8 @@ def create_access_token(
     )
 
 
-# Validate the request's bearer token and return the authenticated principal.
-async def get_current_principal(
-    credentials: Annotated[
-        HTTPAuthorizationCredentials | None,
-        Depends(_bearer_scheme),
-    ],
-) -> Principal:
+# Decode a signed access token and return the authenticated principal.
+def _principal_from_token(token: str | None) -> Principal:
     # Use the same response for missing, malformed, invalid, and expired tokens.
     unauthorized = HTTPException(
         status_code=status.HTTP_401_UNAUTHORIZED,
@@ -56,13 +51,13 @@ async def get_current_principal(
         headers={"WWW-Authenticate": "Bearer"},
     )
 
-    if credentials is None:
+    if token is None:
         raise unauthorized
 
     # Decode verifies the token signature and expiration using the configured key and algorithm. Invalid JWTs are reported as an authentication failure.
     try:
         payload = jwt.decode(
-            credentials.credentials,
+            token,
             settings.secret_key.get_secret_value(),
             algorithms=[settings.algorithm],
         )
@@ -90,6 +85,34 @@ async def get_current_principal(
 
     # Reject unrecognized roles, mismatched admin subjects, and invalid user IDs.
     raise unauthorized
+
+
+# Validate bearer tokens for API requests.
+async def get_current_principal(
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None,
+        Depends(_bearer_scheme),
+    ],
+) -> Principal:
+    return _principal_from_token(
+        credentials.credentials if credentials is not None else None
+    )
+
+
+# Browser navigations cannot send Authorization headers, so accept the login cookie here.
+async def get_page_principal(
+    request: Request,
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None,
+        Depends(_bearer_scheme),
+    ],
+) -> Principal:
+    token = (
+        credentials.credentials
+        if credentials is not None
+        else request.cookies.get("access_token")
+    )
+    return _principal_from_token(token)
 
 def require_admin(principal: Principal) -> None:
     if principal["role"] != "admin":

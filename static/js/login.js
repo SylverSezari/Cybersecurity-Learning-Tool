@@ -6,7 +6,7 @@ loginForm.addEventListener("submit", async (event) => {
 	event.preventDefault();
 	loginError.hidden = true;
 	loginSubmit.disabled = true;
-	loginSubmit.textContent = "Signing in...";
+	loginSubmit.textContent = "Anmeldung läuft …";
 
 	const formData = new FormData(loginForm);
 
@@ -22,8 +22,8 @@ loginForm.addEventListener("submit", async (event) => {
 
 		if (!response.ok) {
 			loginError.textContent = response.status === 401
-				? "The username or password is incorrect."
-				: "Sign-in failed. Please try again.";
+				? "Benutzername oder Passwort ist falsch."
+				: "Die Anmeldung ist fehlgeschlagen. Bitte versuche es erneut.";
 			loginError.hidden = false;
 			return;
 		}
@@ -33,10 +33,10 @@ loginForm.addEventListener("submit", async (event) => {
 		sessionStorage.setItem("token_type", token.token_type);
 		window.location.assign("/");
 	} catch {
-		loginError.textContent = "Unable to reach the server. Please try again.";
+		loginError.textContent = "Der Server ist nicht erreichbar. Bitte versuche es erneut.";
 		loginError.hidden = false;
 	} finally {
 		loginSubmit.disabled = false;
-		loginSubmit.textContent = "Sign in";
+		loginSubmit.textContent = "Anmelden";
 	}
 });

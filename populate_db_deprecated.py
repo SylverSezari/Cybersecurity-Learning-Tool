@@ -41,7 +41,9 @@ CRYPTOGRAPHY_LESSONS = [
     ("Einführung", "intro.html", []),
     ("Symmetrische Verschlüsselung", "exercise2.html", ["same-key", "AES", True]),
     ("Caesar-Verschlüsselung", "caesar.html", ["HALLO", "YWJKKJS", 3]),
+    ("Caesar Python", "caesar_python.html", ["KDOOR"]),
     ("Vigenère-Verschlüsselung", "vigenere.html", ["TOYOA", "HALLO", True]),
+    ("Vigenère Python", "vigenere_python.html", ["EQURWCYDPS"]),
 ]
 
 

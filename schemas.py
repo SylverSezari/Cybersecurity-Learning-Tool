@@ -36,6 +36,10 @@ class ExerciseAssignment(BaseModel):
     position: int
 
 
+class ExerciseOrder(BaseModel):
+    exercise_ids: list[int]
+
+
 class ExerciseCompletionRequest(BaseModel):
     answers: SolutionList
 
@@ -56,6 +60,7 @@ class ExercisePut(BaseModel):
 class ChapterResponse(BaseModel):
     id: int
     title: str
+    picture: str | None = Field(default=None)
     position: int
     active: bool
     exercises: list[ExerciseResponse] = Field(default_factory=list)
@@ -64,11 +69,13 @@ class ChapterResponse(BaseModel):
 ### for post requests
 class ChapterPost(BaseModel):
     title: str = Field(min_length=1, max_length=100)
+    picture: str | None = Field(default=None)
 
 
 ### for put requests
 class ChapterPut(BaseModel):
     title: str = Field(min_length=1, max_length=100)
+    picture: str | None = Field(default=None)
 
 
 class ChapterActivation(BaseModel):

@@ -248,12 +248,13 @@ async def test_create_chapter_sets_inactive_defaults_for_admin(
     # An admin can create a chapter, which starts inactive at position -1.
     response = await client.post(
         "/api/chapters",
-        json={"title": "New chapter"},
+        json={"title": "New chapter", "picture": "network.jpg"},
         headers=admin_auth_headers,
     )
 
     assert response.status_code == 201
     assert response.json()["title"] == "New chapter"
+    assert response.json()["picture"] == "network.jpg"
     assert response.json()["position"] == -1
     assert response.json()["active"] is False
 
@@ -320,12 +321,13 @@ async def test_update_chapter_changes_title_for_admin(
 
     response = await client.put(
         f"/api/chapters/update/{chapter.id}",
-        json={"title": "New title"},
+        json={"title": "New title", "picture": "network.jpg"},
         headers=admin_auth_headers,
     )
 
     assert response.status_code == 200
     assert response.json()["title"] == "New title"
+    assert response.json()["picture"] == "network.jpg"
 
 
 @pytest.mark.anyio
@@ -345,6 +347,27 @@ async def test_update_chapter_accepts_its_existing_title(
 
     assert response.status_code == 200
     assert response.json()["title"] == "Current title"
+
+
+@pytest.mark.anyio
+async def test_update_chapter_preserves_picture_when_omitted(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    admin_auth_headers: dict[str, str],
+):
+    # A title-only API update leaves the existing picture unchanged.
+    chapter = await add_chapter(db_session, "Current title")
+    chapter.picture = "existing.jpg"
+    await db_session.commit()
+
+    response = await client.put(
+        f"/api/chapters/update/{chapter.id}",
+        json={"title": "Updated title"},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json()["picture"] == "existing.jpg"
 
 
 @pytest.mark.anyio

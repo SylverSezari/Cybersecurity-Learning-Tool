@@ -6,7 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import models
 from database import get_db
-from schemas import ExerciseAssignment, ExercisePost, ExercisePut, ExerciseResponse
+from schemas import (
+    ExerciseAssignment,
+    ExerciseOrder,
+    ExercisePost,
+    ExercisePut,
+    ExerciseResponse,
+)
 from security import Principal, get_current_principal, require_admin
 
 router = APIRouter()
@@ -186,6 +192,56 @@ async def assign_exercise(
     await db.commit()
     await db.refresh(exercise, attribute_names=["chapter"])
     return exercise
+
+
+## Reorder exercises assigned to a chapter
+@router.put("/assignment/order/{chapter_id}", response_model=list[ExerciseResponse])
+async def reorder_chapter_exercises(
+    chapter_id: int,
+    order: ExerciseOrder,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
+    # Save the complete order as one admin-only operation.
+    require_admin(principal)
+
+    result = await db.execute(
+        select(models.Chapter).where(models.Chapter.id == chapter_id)
+    )
+    if not result.scalars().first():
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="Chapter not found"
+        )
+
+    result = await db.execute(
+        select(models.Exercise).where(models.Exercise.chapter_id == chapter_id)
+    )
+    assigned = result.scalars().all()
+    submitted_ids = order.exercise_ids
+    assigned_by_id = {exercise.id: exercise for exercise in assigned}
+
+    if (
+        len(submitted_ids) != len(set(submitted_ids))
+        or set(submitted_ids) != set(assigned_by_id)
+    ):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Include each assigned exercise exactly once",
+        )
+
+    existing_positions = [
+        exercise.position for exercise in assigned if exercise.position is not None
+    ]
+    temporary_position = min(existing_positions, default=0) - len(assigned) - 1
+    for offset, exercise in enumerate(assigned):
+        exercise.position = temporary_position - offset
+    await db.flush()
+
+    for position, exercise_id in enumerate(submitted_ids):
+        assigned_by_id[exercise_id].position = position
+
+    await db.commit()
+    return [assigned_by_id[exercise_id] for exercise_id in submitted_ids]
 
 
 ## Update exercise name or filename

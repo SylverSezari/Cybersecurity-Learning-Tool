@@ -47,6 +47,18 @@ async def init_db():
             text("UPDATE chapters SET position = -1 WHERE position IS NULL")
         )
 
+        chapter_columns = await connection.run_sync(
+            lambda sync_connection: {
+                column["name"]
+                for column in inspect(sync_connection).get_columns("chapters")
+            }
+        )
+
+        if "picture" not in chapter_columns:
+            await connection.execute(
+                text("ALTER TABLE chapters ADD COLUMN picture VARCHAR")
+            )
+
         exercise_columns = await connection.run_sync(
             lambda sync_connection: {
                 column["name"]

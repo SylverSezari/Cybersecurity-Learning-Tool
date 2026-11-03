@@ -46,10 +46,22 @@ async def test_init_db_migrates_task_column_to_nullable_solution(
                 "VALUES (1, 'Legacy exercise', 'legacy.html', 1, 0, 1)"
             )
         )
+        await connection.execute(
+            text(
+                "INSERT INTO chapters (id, title, position, active) "
+                "VALUES (1, 'Legacy chapter', 0, 1)"
+            )
+        )
 
     try:
         await database.init_db()
         async with legacy_engine.connect() as connection:
+            chapter_columns = await connection.run_sync(
+                lambda sync_connection: {
+                    column["name"]: column
+                    for column in inspect(sync_connection).get_columns("chapters")
+                }
+            )
             columns = await connection.run_sync(
                 lambda sync_connection: {
                     column["name"]: column
@@ -60,6 +72,11 @@ async def test_init_db_migrates_task_column_to_nullable_solution(
                 text("SELECT solution FROM exercises WHERE id = 1")
             )
             assert result.scalar_one() == "[]"
+            picture_result = await connection.execute(
+                text("SELECT picture FROM chapters WHERE id = 1")
+            )
+            assert picture_result.scalar_one() is None
+        assert chapter_columns["picture"]["nullable"] is True
         assert "task" not in columns
         assert columns["solution"]["nullable"] is True
 

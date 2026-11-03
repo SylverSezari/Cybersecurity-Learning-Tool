@@ -10,7 +10,10 @@
 
 	<div class="chapter-grid">
 		{% for chapter in chapters %}
-		<a class="chapter-card" href="{{ url_for('chapter_task', chapter_id=chapter.id) }}">
+		<a class="chapter-card{% if chapter.picture %} has-picture{% endif %}" href="{{ url_for('chapter_task', chapter_id=chapter.id) }}">
+			{% if chapter.picture %}
+			<img class="chapter-card-picture" src="{{ url_for('static', path='pictures/chapters/' ~ chapter.picture) }}" alt="" />
+			{% endif %}
 			<span class="chapter-number">{{ "%02d"|format(loop.index) }}</span>
 			<h2>{{ chapter.title }}</h2>
 		</a>

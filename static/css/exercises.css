@@ -94,11 +94,31 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 .exercise-task.is-correct .task-feedback { color: var(--success, #247a52); }
 .exercise-task.is-incorrect .task-feedback { color: var(--error, #b42318); }
 .tasks-complete { margin: 1rem 0 0; padding: .8rem 1rem; background: var(--lesson-soft); font-weight: 700; }
+.python-exercise { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--lesson-line); border-top: 3px solid var(--lesson-accent); background: var(--surface); }
+.python-exercise h3 { margin: .25rem 0 .45rem; }
+.python-exercise > p:not(.section-label) { max-width: 49rem; }
+.python-hints { margin: .75rem 0 1rem; padding-left: 1.35rem; color: var(--lesson-muted); }
+.python-hints li + li { margin-top: .35rem; }
+.python-hints code, .python-help code { color: var(--lesson-ink); font-family: "Courier New", monospace; font-weight: 700; }
+.python-editor-label { display: block; margin-bottom: .35rem; font-weight: 700; }
+.python-code-editor { display: block; width: 100%; min-height: 17rem; resize: vertical; padding: .8rem; border: 1px solid var(--lesson-line); border-radius: 3px; background: var(--page-background); color: var(--lesson-ink); font: .9rem/1.55 "Cascadia Code", "Courier New", monospace; tab-size: 4; }
+.python-code-editor:focus-visible, .python-actions button:focus-visible { outline: 2px solid var(--lesson-accent); outline-offset: 2px; }
+.python-help { margin: .5rem 0; color: var(--lesson-muted); font-size: .88rem; }
+.python-actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .75rem; }
+.python-actions button { min-height: 2.65rem; padding: .5rem .85rem; border: 1px solid var(--lesson-accent); border-radius: 3px; font: inherit; font-weight: 700; cursor: pointer; }
+.python-run-button { background: var(--lesson-accent); color: #fff; }
+.python-reset-button { background: var(--surface); color: var(--lesson-ink); }
+.python-actions button:disabled { opacity: .6; cursor: wait; }
+.python-output { min-height: 3.2rem; margin: .75rem 0 0; padding: .7rem .8rem; overflow-x: auto; border: 1px solid var(--lesson-line); background: var(--page-background); color: var(--lesson-ink); white-space: pre-wrap; overflow-wrap: anywhere; font: .9rem/1.5 "Cascadia Code", "Courier New", monospace; }
+.python-exercise.is-correct .python-output { border-color: var(--success, #247a52); }
+.python-exercise.is-incorrect .python-output { border-color: var(--error, #b42318); }
 @media (max-width: 34rem) {
 	.alphabet-control { grid-template-columns: 1fr auto; }
 	.alphabet-control input { grid-column: 1 / -1; grid-row: 2; }
 	.alphabet-row { grid-template-columns: 1fr; gap: .15rem; }
 	.task-answer-row { grid-template-columns: minmax(0, 1fr); }
+  .python-exercise { padding: .8rem; }
+  .python-code-editor { min-height: 19rem; font-size: .82rem; }
 }
 
 :root {

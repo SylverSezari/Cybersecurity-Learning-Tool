@@ -26,6 +26,9 @@ if (window.location.pathname !== "/login") {
 					window.location.replace("/");
 					return;
 				}
+				if (session.role === "admin") {
+					document.getElementById("adminAccountButton")?.removeAttribute("hidden");
+				}
 			const logoutButtonId = session.role === "admin"
 				? "adminLogoutButton"
 				: "userLogoutButton";

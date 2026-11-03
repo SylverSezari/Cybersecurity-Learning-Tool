@@ -8,7 +8,8 @@
   <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/exercises.css">
   <script src="/static/js/exercise-theme.js" defer></script>
-  <script src="/static/js/exercise-tasks.js?v=2" defer></script>
+  <script src="/static/js/exercise-tasks.js?v=5" defer></script>
+  <script src="/static/js/python-exercises.js?v=2" defer></script>
 </head>
 <body>
   <main class="lesson">
@@ -35,11 +36,11 @@
         <p><strong>Beispiel HALLO mit Schlüssel 3:</strong></p>
         <p>H = 7, A = 0, L = 11, L = 11, O = 14</p>
         <p>Nach dem Addieren: 10, 3, 14, 14, 17. Das ergibt KDOOR.</p>
-        <p><strong>Was bedeutet „mod 26“?</strong> „Modulo“ bedeutet: Wir betrachten den Rest nach einer Division. Bei 26 Buchstaben gibt es 26 mögliche Zahlen, von 0 bis 25. Wenn eine Rechnung über 25 hinausgeht, beginnen wir wieder bei 0. Zum Beispiel: Z hat den Wert 25. Mit Schlüssel 3 rechnen wir 25 + 3 = 28. Der Rest von 28 geteilt durch 26 ist 2, also wird daraus C. So wird das Alphabet wie ein Kreis behandelt.</p>
         <p>In den Formeln steht P für den Klartextwert, C für den Geheimtextwert und k für den Schlüssel. Die Zahlen werden nach der Rechnung wieder auf den Bereich 0 bis 25 zurückgeführt:</p>
         <p class="equation">Verschlüsseln: C = (P + k) mod 26</p>
         <p class="equation">Entschlüsseln: P = (C − k) mod 26</p>
         <p>Beim Entschlüsseln funktioniert derselbe Kreis rückwärts. Für A mit Schlüssel 3 rechnen wir 0 − 3 = −3. Drei Schritte rückwärts von A führen zu X. Rechnerisch ist −3 modulo 26 gleich 23, und der Buchstabe mit Wert 23 ist X.</p>
+        <p><strong>Was bedeutet „mod 26“?</strong> „Modulo“ bedeutet: Wir betrachten den Rest nach einer Division. Bei 26 Buchstaben gibt es 26 mögliche Zahlen, von 0 bis 25. Wenn eine Rechnung über 25 hinausgeht, beginnen wir wieder bei 0. Zum Beispiel: Z hat den Wert 25. Mit Schlüssel 3 rechnen wir 25 + 3 = 28. Der Rest von 28 geteilt durch 26 ist 2, also wird daraus C. So wird das Alphabet wie ein Kreis behandelt.</p>
       </div>
     </section>
 
@@ -76,7 +77,7 @@
       <p class="section-label">Auftrag aus dem Nachrichtenbüro</p>
       <h2 id="aufgaben-title">Entschlüsseln und verschlüsseln</h2>
       <div class="task-list">
-        <article class="exercise-task" data-solution-index="0">
+        <article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Schlüssel 29 entspricht 3 modulo 26. Rückwärts verschoben ergibt XHEHU GLH DOSHQ den Klartext UEBER DIE ALPEN." data-incorrect-feedback="Tipp: 29 und 3 sind modulo 26 gleich. Zum Entschlüsseln gehst du drei Stellen zurück und beginnst vor A wieder bei Z.">
           <p class="task-story">Die Legionären der römischen Armee warten auf eine Nachricht mit dem Standort der Gegner. Endlich kommt eine Botin an und bringt ihnen eine Nachricht mit dem Schlüssel 29: XHEHU GLH DOSHQ. Der Hauptmann kennt den Schlüssel, aber nicht den Klartext.</p>
           <p class="task-prompt">Kannst du ihm die Nachricht entschlüsseln?</p>
           <div class="task-answer-row">
@@ -86,7 +87,7 @@
           <p class="task-feedback" role="status" aria-live="polite"></p>
         </article>
 
-        <article class="exercise-task" data-solution-index="1">
+        <article class="exercise-task" data-solution-index="1" data-correct-feedback="Genau: Mit Schlüssel 3 wird jeder Buchstabe von HANNIBAL um drei Stellen vorwärts verschoben." data-incorrect-feedback="Tipp: Nutze den Schlüssel 3 aus der Erklärung und verschiebe jeden Buchstaben vorwärts. Nach Z geht es bei A weiter.">
           <p class="task-story">Bevor die Römer aufbrechen, wollen sie dem Senat noch mitteilen, wer ihr Gegner ist. Deshalb verschlüsseln sie das Wort HANNIBAL.</p>
           <p class="task-prompt">Gib den Geheimtext ein.</p>
           <div class="task-answer-row">
@@ -96,7 +97,7 @@
           <p class="task-feedback" role="status" aria-live="polite"></p>
         </article>
 
-        <article class="exercise-task" data-solution-index="2">
+        <article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: V wird mit sieben Schritten rückwärts zu O. Der Schlüssel ist 7." data-incorrect-feedback="Tipp: Vergleiche den ersten Geheimtextbuchstaben V mit dem bekannten Klartext O. Wie viele Schritte liegen dazwischen?">
           <p class="task-story">Der Senat hat vor langer Zeit den Geheimtext VRHF erhalten und schon die Nachricht OKAY entschlüsselt. Nun wollen sie aber eine Nachricht zurückschicken, wissen aber den Schlüssel nicht mehr.</p>
           <p class="task-prompt">Wie viele Stellen beträgt der Schlüssel?</p>
           <div class="task-answer-row">

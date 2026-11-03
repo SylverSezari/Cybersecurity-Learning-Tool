@@ -85,6 +85,7 @@ async def create_chapter(
     # create new chapter
     new_chapter = models.Chapter(
         title=chapter.title,
+        picture=chapter.picture,
         position=-1,
         active=False,
     )
@@ -95,6 +96,7 @@ async def create_chapter(
     return ChapterResponse(
         id=new_chapter.id,
         title=new_chapter.title,
+        picture=new_chapter.picture,
         position=new_chapter.position,
         active=new_chapter.active,
         exercises=[],
@@ -140,6 +142,8 @@ async def update_chapter(
 
     # update title
     chapter.title = update_data.title
+    if "picture" in update_data.model_fields_set:
+        chapter.picture = update_data.picture
 
     await db.commit()
     await db.refresh(chapter)

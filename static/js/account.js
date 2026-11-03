@@ -16,6 +16,8 @@ const updateAccountSelect = document.getElementById("updateAccountSelect");
 const deleteAccountSelect = document.getElementById("deleteAccountSelect");
 let chapters = [];
 let exercises = [];
+let savedExerciseOrders = new Map();
+let exerciseOrderDrafts = new Map();
 let accounts = [];
 let savedOrder = "[]";
 const apiErrorMessages = new Map([
@@ -36,6 +38,7 @@ const apiErrorMessages = new Map([
 	["Exercise with this title already created", "Eine Übung mit diesem Titel existiert bereits."],
 	["Exercise with this filename already created", "Eine Übung mit diesem Dateinamen existiert bereits."],
 	["Position already assigned", "Diese Position ist bereits vergeben."],
+	["Include each assigned exercise exactly once", "Jede zugewiesene Übung muss genau einmal enthalten sein."],
 	["User account required", "Ein Benutzerkonto ist erforderlich."],
 	["Invalid or expired authentication token", "Die Sitzung ist ungültig oder abgelaufen."],
 	["Admin privileges required", "Administratorrechte erforderlich."],
@@ -238,7 +241,10 @@ function updateChapterOptions() {
 		select.disabled = chapters.length === 0;
 	}
 	const selectedChapter = chapters.find((chapter) => String(chapter.id) === updateSelect.value);
-	if (selectedChapter) document.getElementById("updateChapterTitle").value = selectedChapter.title;
+	if (selectedChapter) {
+		document.getElementById("updateChapterTitle").value = selectedChapter.title;
+		document.getElementById("updateChapterPicture").value = selectedChapter.picture || "";
+	}
 		updateExerciseChapterOptions();
 		renderExerciseLists();
 }
@@ -320,6 +326,46 @@ function makeExerciseRow(exercise, actionLabel, action) {
 	filename.textContent = exercise.html_filename;
 	details.append(title, filename);
 	row.append(details);
+	if (actionLabel === "Zuweisung aufheben") {
+		row.draggable = true;
+		row.dataset.exerciseId = String(exercise.id);
+		const controls = document.createElement("div");
+		controls.className = "exercise-order-controls";
+		controls.innerHTML = `
+			<button class="move-button" type="button" aria-label="Übung nach oben verschieben" title="Nach oben">&#8593;</button>
+			<button class="move-button" type="button" aria-label="Übung nach unten verschieben" title="Nach unten">&#8595;</button>
+			<span class="drag-grip" aria-hidden="true">&#8942;</span>`;
+		const [moveUp, moveDown] = controls.querySelectorAll(".move-button");
+		const rowIndex = [...row.parentElement?.children || []].length;
+		moveUp.disabled = rowIndex === 0;
+		moveDown.disabled = false;
+		moveUp.addEventListener("click", () => moveExercise(row, -1));
+		moveDown.addEventListener("click", () => moveExercise(row, 1));
+		row.addEventListener("dragstart", (event) => {
+			row.classList.add("is-dragging");
+			event.dataTransfer.setData("text/plain", String(exercise.id));
+			event.dataTransfer.effectAllowed = "move";
+		});
+		row.addEventListener("dragend", () => row.classList.remove("is-dragging"));
+		row.addEventListener("dragover", (event) => {
+			event.preventDefault();
+			event.dataTransfer.dropEffect = "move";
+		});
+		row.addEventListener("drop", (event) => {
+			event.preventDefault();
+			const draggedId = Number(event.dataTransfer.getData("text/plain"));
+			const draggedRow = [...row.parentElement.children].find(
+				(item) => Number(item.dataset.exerciseId) === draggedId,
+			);
+			if (!draggedRow || draggedRow === row) return;
+			const bounds = row.getBoundingClientRect();
+			const insertAfter = event.clientY > bounds.top + bounds.height / 2;
+			row.parentElement.insertBefore(draggedRow, insertAfter ? row.nextSibling : row);
+			captureExerciseOrderDraft(Number(exerciseChapterSelect.value));
+			renderExerciseLists();
+		});
+		row.append(controls);
+	}
 	if (actionLabel) {
 		const button = document.createElement("button");
 		button.className = "exercise-row-action";
@@ -331,6 +377,39 @@ function makeExerciseRow(exercise, actionLabel, action) {
 	return row;
 }
 
+function moveExercise(row, offset) {
+	const list = row.parentElement;
+	const target = list.children[[...list.children].indexOf(row) + offset];
+	if (!target) return;
+	if (offset < 0) list.insertBefore(row, target);
+	else list.insertBefore(target, row);
+	captureExerciseOrderDraft(Number(exerciseChapterSelect.value));
+	renderExerciseLists();
+	document.querySelector(`[data-exercise-id="${row.dataset.exerciseId}"] .move-button`).focus();
+}
+
+function captureExerciseOrderDraft(chapterId) {
+	exerciseOrderDrafts.set(
+		chapterId,
+		[...document.getElementById("assignedExercises").children]
+			.map((row) => Number(row.dataset.exerciseId)),
+	);
+	updateExerciseOrderDirtyState();
+}
+
+function updateExerciseOrderDirtyState() {
+	const chapterId = Number(exerciseChapterSelect.value);
+	const draft = exerciseOrderDrafts.get(chapterId) || [];
+	const saved = savedExerciseOrders.get(chapterId) || [];
+	const dirty = draft.length === saved.length && draft.some((id, index) => id !== saved[index]);
+	const saveExerciseOrder = document.getElementById("saveExerciseOrder");
+	const hint = document.getElementById("exerciseOrderHint");
+	saveExerciseOrder.disabled = !chapterId || !dirty;
+	hint.textContent = dirty
+		? "Reihenfolge geändert. Speichere, um die Änderungen zu übernehmen."
+		: "Änderungen an der Übungsreihenfolge sind noch nicht gespeichert.";
+}
+
 function renderExerciseLists() {
 	// Show selected-chapter assignments alongside the complete exercise catalog.
 	if (!exerciseChapterSelect) return;
@@ -338,6 +417,9 @@ function renderExerciseLists() {
 	const assigned = exercises
 		.filter((exercise) => exercise.chapter_id === chapterId)
 		.sort((first, second) => (first.position ?? 0) - (second.position ?? 0));
+	const assignedById = new Map(assigned.map((exercise) => [exercise.id, exercise]));
+	const draftOrder = exerciseOrderDrafts.get(chapterId) || assigned.map((exercise) => exercise.id);
+	assigned.splice(0, assigned.length, ...draftOrder.map((id) => assignedById.get(id)).filter(Boolean));
 	const unassigned = exercises.filter(
 		(exercise) => exercise.chapter_id === -1 || exercise.chapter_id === null,
 	);
@@ -345,8 +427,16 @@ function renderExerciseLists() {
 	const unassignedList = document.getElementById("unassignedExercises");
 	assignedList.replaceChildren();
 	unassignedList.replaceChildren();
-	for (const exercise of assigned) {
-		assignedList.append(makeExerciseRow(exercise, "Zuweisung aufheben", () => assignExercise(exercise.id, -1)));
+	for (const [index, exercise] of assigned.entries()) {
+		const row = makeExerciseRow(
+			exercise,
+			"Zuweisung aufheben",
+			() => assignExercise(exercise.id, -1),
+		);
+		const controls = row.querySelectorAll(".move-button");
+		controls[0].disabled = index === 0;
+		controls[1].disabled = index === assigned.length - 1;
+		assignedList.append(row);
 	}
 	for (const exercise of unassigned) {
 		unassignedList.append(makeExerciseRow(exercise, "Zuweisen", () => assignExercise(exercise.id, chapterId)));
@@ -355,6 +445,7 @@ function renderExerciseLists() {
 	document.getElementById("unassignedCount").textContent = String(unassigned.length);
 	document.getElementById("assignedEmpty").hidden = assigned.length > 0 || !chapterId;
 	document.getElementById("unassignedEmpty").hidden = unassigned.length > 0;
+	updateExerciseOrderDirtyState();
 	const allExercises = document.getElementById("allExercises");
 	allExercises.replaceChildren();
 	for (const exercise of [...exercises].sort((first, second) => first.title.localeCompare(second.title))) {
@@ -403,7 +494,43 @@ function fillExerciseUpdateForm() {
 
 async function loadExercises() {
 	exercises = await apiRequest("/api/exercises");
+	const chapterIds = new Set([
+		...chapters.map((chapter) => chapter.id),
+		...exercises.map((exercise) => exercise.chapter_id).filter((id) => id > 0),
+	]);
+	const nextSavedOrders = new Map();
+	const nextDrafts = new Map();
+	for (const chapterId of chapterIds) {
+		const persisted = exercises
+			.filter((exercise) => exercise.chapter_id === chapterId)
+			.sort((first, second) => (first.position ?? 0) - (second.position ?? 0))
+			.map((exercise) => exercise.id);
+		const previousDraft = exerciseOrderDrafts.get(chapterId) || persisted;
+		const persistedIds = new Set(persisted);
+		const draft = previousDraft.filter((id) => persistedIds.has(id));
+		draft.push(...persisted.filter((id) => !draft.includes(id)));
+		nextSavedOrders.set(chapterId, persisted);
+		nextDrafts.set(chapterId, draft);
+	}
+	savedExerciseOrders = nextSavedOrders;
+	exerciseOrderDrafts = nextDrafts;
 	renderExerciseLists();
+}
+
+async function saveExerciseOrder() {
+	const chapterId = Number(exerciseChapterSelect.value);
+	const exerciseIds = exerciseOrderDrafts.get(chapterId) || [];
+	if (!chapterId) return;
+	try {
+		await apiRequest(`/api/exercises/assignment/order/${chapterId}`, {
+			method: "PUT",
+			body: JSON.stringify({ exercise_ids: exerciseIds }),
+		});
+		await loadExercises();
+		setStatus("Übungsreihenfolge gespeichert");
+	} catch (error) {
+		showError(error);
+	}
 }
 
 async function assignExercise(exerciseId, chapterId) {
@@ -496,9 +623,13 @@ document.querySelectorAll(".admin-nav-button").forEach((button) => {
 document.getElementById("addChapterForm").addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const title = document.getElementById("newChapterTitle").value.trim();
+	const picture = document.getElementById("newChapterPicture").value.trim();
 	if (!title) return;
 	try {
-		await apiRequest("/api/chapters", { method: "POST", body: JSON.stringify({ title }) });
+		await apiRequest("/api/chapters", {
+			method: "POST",
+			body: JSON.stringify({ title, picture: picture || null }),
+		});
 		event.target.reset();
 		await loadChapters();
 		statusMessage.textContent = "Kapitel hinzugefügt und deaktiviert";
@@ -511,11 +642,12 @@ document.getElementById("updateChapterForm").addEventListener("submit", async (e
 	event.preventDefault();
 	const chapterId = updateSelect.value;
 	const title = document.getElementById("updateChapterTitle").value.trim();
+	const picture = document.getElementById("updateChapterPicture").value.trim();
 	if (!chapterId || !title) return;
 	try {
 		await apiRequest(`/api/chapters/update/${chapterId}`, {
 			method: "PUT",
-			body: JSON.stringify({ title }),
+			body: JSON.stringify({ title, picture: picture || null }),
 		});
 		await loadChapters();
 		statusMessage.textContent = "Kapiteltitel aktualisiert";
@@ -540,6 +672,7 @@ document.getElementById("deleteChapterForm").addEventListener("submit", async (e
 
 updateSelect.addEventListener("change", updateChapterOptions);
 exerciseChapterSelect.addEventListener("change", renderExerciseLists);
+document.getElementById("saveExerciseOrder").addEventListener("click", saveExerciseOrder);
 updateExerciseSelect.addEventListener("change", fillExerciseUpdateForm);
 updateAccountSelect.addEventListener("change", fillAccountUpdateForm);
 

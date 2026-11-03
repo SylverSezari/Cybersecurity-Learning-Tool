@@ -71,6 +71,8 @@
 							<h2>Kapitel hinzufügen</h2>
 							<label for="newChapterTitle">Kapiteltitel</label>
 							<input id="newChapterTitle" name="title" type="text" maxlength="100" required />
+							<label for="newChapterPicture">Bilddatei in static/pictures/chapters</label>
+							<input id="newChapterPicture" name="picture" type="text" maxlength="255" />
 							<button class="action-button" type="submit">Kapitel hinzufügen</button>
 						</form>
 
@@ -80,7 +82,9 @@
 							<select id="updateChapterSelect" required></select>
 							<label for="updateChapterTitle">Neuer Titel</label>
 							<input id="updateChapterTitle" name="title" type="text" maxlength="100" required />
-							<button class="action-button secondary-action" type="submit">Titel speichern</button>
+							<label for="updateChapterPicture">Bilddatei in static/pictures/chapters</label>
+							<input id="updateChapterPicture" name="picture" type="text" maxlength="255" />
+							<button class="action-button secondary-action" type="submit">Kapitel speichern</button>
 						</form>
 
 						<form class="chapter-tool-form delete-tool" id="deleteChapterForm">
@@ -115,6 +119,10 @@
 								</div>
 								<ul class="exercise-list" id="assignedExercises"></ul>
 								<p class="list-empty" id="assignedEmpty" hidden>Wähle ein Kapitel, um seine Übungen zu verwalten.</p>
+								<div class="exercise-order-save">
+									<p id="exerciseOrderHint">Änderungen an der Übungsreihenfolge sind noch nicht gespeichert.</p>
+									<button class="action-button save-button" id="saveExerciseOrder" type="button" disabled>Änderungen speichern</button>
+								</div>
 							</section>
 
 							<section class="exercise-list-section unassigned-exercise-section" aria-labelledby="unassigned-heading">

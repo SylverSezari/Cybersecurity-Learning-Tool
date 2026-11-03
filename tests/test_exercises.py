@@ -472,6 +472,89 @@ async def test_assign_exercise_rejects_regular_user(
     assert response.json()["detail"] == "Admin privileges required"
 
 
+@pytest.mark.anyio
+async def test_reorder_chapter_exercises_updates_positions_for_admin(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    admin_auth_headers: dict[str, str],
+):
+    # An admin can save a reordered list without position collisions.
+    chapter = models.Chapter(title="Reorder chapter", position=0, active=True)
+    db_session.add(chapter)
+    await db_session.commit()
+    first = await add_exercise(
+        db_session, "First ordered", "first-ordered.html", chapter_id=chapter.id, position=0
+    )
+    second = await add_exercise(
+        db_session, "Second ordered", "second-ordered.html", chapter_id=chapter.id, position=1
+    )
+    third = await add_exercise(
+        db_session, "Third ordered", "third-ordered.html", chapter_id=chapter.id, position=2
+    )
+
+    response = await client.put(
+        f"/api/exercises/assignment/order/{chapter.id}",
+        json={"exercise_ids": [third.id, first.id, second.id]},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert [exercise["id"] for exercise in response.json()] == [
+        third.id,
+        first.id,
+        second.id,
+    ]
+    assert [exercise["position"] for exercise in response.json()] == [0, 1, 2]
+
+
+@pytest.mark.anyio
+async def test_reorder_chapter_exercises_rejects_incomplete_list(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    admin_auth_headers: dict[str, str],
+):
+    # Reordering must include every assigned exercise exactly once.
+    chapter = models.Chapter(title="Incomplete reorder chapter", position=0, active=True)
+    db_session.add(chapter)
+    await db_session.commit()
+    first = await add_exercise(
+        db_session, "Required first", "required-first.html", chapter_id=chapter.id, position=0
+    )
+    await add_exercise(
+        db_session, "Required second", "required-second.html", chapter_id=chapter.id, position=1
+    )
+
+    response = await client.put(
+        f"/api/exercises/assignment/order/{chapter.id}",
+        json={"exercise_ids": [first.id]},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 400
+    assert response.json()["detail"] == "Include each assigned exercise exactly once"
+
+
+@pytest.mark.anyio
+async def test_reorder_chapter_exercises_rejects_regular_user(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    user_auth_headers: dict[str, str],
+):
+    # Only administrators can change exercise order.
+    chapter = models.Chapter(title="Protected reorder chapter", position=0, active=True)
+    db_session.add(chapter)
+    await db_session.commit()
+
+    response = await client.put(
+        f"/api/exercises/assignment/order/{chapter.id}",
+        json={"exercise_ids": []},
+        headers=user_auth_headers,
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Admin privileges required"
+
+
 ## Test update_exercise
 # Check admin field updates, unknown IDs, and denial of unauthenticated or regular users.
 

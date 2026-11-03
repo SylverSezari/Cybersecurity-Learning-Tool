@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<meta name="color-scheme" content="light dark" />
+		<title>Miras Vigenère-Nachricht mit Python</title>
+		<link rel="stylesheet" href="/static/css/theme.css" />
+		<link rel="stylesheet" href="/static/css/exercises.css" />
+		<script src="/static/js/exercise-theme.js" defer></script>
+		<script src="/static/js/exercise-tasks.js?v=5" defer></script>
+		<script src="/static/js/python-exercises.js?v=3" defer></script>
+	</head>
+	<body>
+		<main class="lesson">
+			<header class="lesson-header">
+				<p class="eyebrow">Python-Werkstatt · Vigenère-Chiffre</p>
+				<h1>Miras Nachricht mit Python verschlüsseln</h1>
+				<p class="lead">
+					Mira hat ein neues Medikament entwickelt und möchte ihr Rezept vor neugierigen
+					Rivalen schützen. In dieser Übung hilfst du ihr, die Nachricht mit Python zu verschlüsseln.
+				</p>
+			</header>
+
+			<section class="lesson-section" aria-labelledby="python-intro-title">
+				<p class="section-label">Schritt für Schritt</p>
+				<h2 id="python-intro-title">Wie arbeitet das Programm?</h2>
+				<p>
+					Der Computer liest den Code von oben nach unten. <code>text</code> enthält die Nachricht,
+					<code>key</code> das Schlüsselwort MOND und <code>alphabet</code> alle Buchstaben von A bis Z.
+					Die leere Zeichenfolge <code>encrypted</code> ist der Platz, an dem das Programm nach und
+					nach die verschlüsselte Nachricht sammelt.
+				</p>
+				<p>
+					Die Zeile <code>for index, letter in enumerate(text)</code> geht die Nachricht Buchstabe für
+					Buchstabe durch. <code>letter</code> ist der aktuelle Buchstabe. <code>index</code> ist seine
+					Position: Der erste Buchstabe hat Position 0, der zweite Position 1 und so weiter.
+				</p>
+				<p>
+					Das Schlüsselwort MOND ist kürzer als SCHOKOLADE und muss deshalb wiederholt werden:
+					MONDMONDMO. <code>key[index % len(key)]</code> wählt für jede Textposition den passenden
+					Schlüsselbuchstaben aus. <code>%</code> bedeutet hier: Wenn das Programm am Ende von MOND
+					angekommen ist, beginnt es wieder bei M.
+				</p>
+				<p>
+					Jeder Buchstabe hat eine Zahl: A ist 0, B ist 1 und Z ist 25. Mit
+					<code>alphabet.index(...)</code> findet das Programm die Zahl eines Buchstabens. Addiere
+					die Zahl des Schlüsselbuchstabens zur Zahl des Nachrichtenbuchstabens. Mit <code>% 26</code>
+					bleibt das Ergebnis zwischen 0 und 25; so geht es nach Z wieder bei A weiter. Der Code
+					setzt den Buchstaben mit dieser neuen Zahl zusammen und hängt ihn an <code>encrypted</code>.
+					<code>print(encrypted)</code> zeigt am Ende die fertige Nachricht.
+				</p>
+				<p>
+					Beispiel: S hat die Zahl 18 und M die Zahl 12. 18 + 12 = 30. Nach <code>% 26</code> bleibt
+					4 übrig, und der Buchstabe mit der Zahl 4 ist E.
+				</p>
+			</section>
+
+			<section class="lesson-section" aria-labelledby="python-task-title">
+				<p class="section-label">Miras nächster Schritt</p>
+				<h2 id="python-task-title">Das Rezept sicher weitergeben</h2>
+				<article
+					class="python-exercise"
+					data-python-exercise
+					data-solution-index="0"
+					data-expected-output="EQURWCYDPS"
+					data-correct-feedback="Richtig: Mit dem wiederholten Schlüssel MONDMONDMO wird SCHOKOLADE zu EQURWCYDPS verschlüsselt. Mira kann diese Nachricht nun weitergeben."
+					data-incorrect-feedback="Noch nicht: Finde die Zahl des Schlüsselbuchstabens mit alphabet.index(key_letter). Addiere sie zur Zahl des Nachrichtenbuchstabens und verwende % 26."
+					data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(encrypted) am Ende steht."
+				>
+					<p class="task-story">
+						Seit sie ihre Entdeckung gemacht hat, ist Mira vorsichtig geworden. Eine Rivalin könnte
+						ihre Notizen abfangen. Mira möchte deshalb die Nachricht SCHOKOLADE mit dem Schlüsselwort
+						MOND verschlüsseln. Der Anfang des Codes erledigt bereits die Wiederholung des Schlüssels;
+						du ergänzt die beiden fehlenden Rechenschritte.
+					</p>
+					<p>
+						Finde zuerst die Zahl des aktuellen Schlüsselbuchstabens. Berechne dann aus den beiden
+						Buchstabenzahlen die neue Position im Alphabet.
+					</p>
+					<ol class="python-hints">
+						<li><code>key_letter</code> enthält schon den passenden Buchstaben aus dem wiederholten Schlüssel.</li>
+						<li><code>alphabet.index(key_letter)</code> findet seine Zahl; addiere sie zu <code>position</code> und rechne mit <code>% 26</code>.</li>
+					</ol>
+					<label class="python-editor-label" for="vigenerePythonCode">Dein Python-Code</label>
+					<textarea
+						class="python-code-editor"
+						id="vigenerePythonCode"
+						spellcheck="false"
+						autocapitalize="off"
+						aria-describedby="vigenerePythonHelp"
+					>
+						text = "SCHOKOLADE"
+						key = "MOND"
+						alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+						encrypted = ""
+
+						for index, letter in enumerate(text):
+								position = alphabet.index(letter)
+								key_letter = key[index % len(key)]
+								# TODO 1: Finde die Nummer des Schlüsselbuchstabens.
+								key_position = 0
+								# TODO 2: Addiere beide Nummern und bleibe zwischen 0 und 25.
+								shifted_position = 0
+								encrypted += alphabet[shifted_position]
+
+						print(encrypted)
+					</textarea>
+					<p class="python-help" id="vigenerePythonHelp">
+						Ändere nur die beiden Zeilen mit <code>0</code>. Du kannst den Code zurücksetzen und
+						beliebig oft erneut starten.
+					</p>
+					<div class="python-actions">
+						<button class="python-run-button" type="button" data-python-run>Python starten</button>
+						<button
+							class="python-reset-button"
+							type="button"
+							data-python-reset="vigenerePythonCode"
+							aria-label="Python-Code zurücksetzen"
+							title="Code zurücksetzen"
+						>Zurücksetzen</button>
+					</div>
+					<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
+				</article>
+				<p class="tasks-complete" id="tasksComplete" role="status" hidden>
+					Miras Nachricht ist verschlüsselt. Die Übung wird jetzt als abgeschlossen markiert.
+				</p>
+			</section>
+		</main>
+	</body>
+</html>

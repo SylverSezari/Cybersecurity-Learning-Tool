@@ -26,13 +26,19 @@ function checkTask(task) {
 	task.classList.toggle("is-incorrect", !isCorrect);
 	task.dataset.solved = String(isCorrect);
 	feedback.textContent = isCorrect
-		? "Richtig. Gut gelöst!"
-		: "Noch nicht ganz. Prüfe Schlüssel und Buchstabenwerte und versuche es erneut.";
+		? task.dataset.correctFeedback || "Richtig. Gut gelöst!"
+		: task.dataset.incorrectFeedback || "Noch nicht ganz. Prüfe deine Antwort und versuche es erneut.";
 	if (isCorrect) answer.disabled = true;
 
+	completeLessonIfReady();
+}
+
+function completeLessonIfReady() {
 	const tasks = [...document.querySelectorAll(".exercise-task")];
+	const pythonTask = document.querySelector("[data-python-exercise]");
 	const completion = document.getElementById("tasksComplete");
-	const allTasksSolved = tasks.every((item) => item.dataset.solved === "true");
+	const allTasksSolved = tasks.every((item) => item.dataset.solved === "true")
+		&& (!pythonTask || pythonTask.dataset.solved === "true");
 	if (completion) completion.hidden = !allTasksSolved;
 	if (allTasksSolved && !completionSent && exerciseSolutions) {
 		completionSent = true;
@@ -47,9 +53,14 @@ function checkTask(task) {
 					? Number(value)
 					: value;
 		}
+		if (pythonTask?.dataset.solutionIndex !== undefined) {
+			answers[Number(pythonTask.dataset.solutionIndex)] = pythonTask.dataset.result;
+		}
 		parent.postMessage({ type: "exercise-tasks-complete", answers }, "*");
 	}
 }
+
+window.addEventListener("python-exercise-complete", completeLessonIfReady);
 
 document.querySelectorAll(".exercise-task").forEach((task) => {
 	task.querySelector(".check-answer").addEventListener("click", () => checkTask(task));
@@ -63,6 +74,7 @@ window.addEventListener("message", (event) => {
 		task.querySelector(".check-answer").disabled =
 			Number(task.dataset.solutionIndex) >= exerciseSolutions.length;
 	});
+		completeLessonIfReady();
 });
 
 const shiftControl = document.getElementById("caesarShift");

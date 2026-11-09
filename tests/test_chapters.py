@@ -1,5 +1,6 @@
 import pytest
 from httpx import AsyncClient
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import main
@@ -89,6 +90,58 @@ async def test_chapter_select_page_shows_only_active_chapters_in_order(
     assert content.index("Earlier active") < content.index("Later active")
     assert "Inactive chapter" not in content
     assert f"/chapters/{earlier_active.id}" in content
+
+
+@pytest.mark.anyio
+async def test_home_redirects_unauthenticated_visitors_to_login(client: AsyncClient):
+    response = await client.get("/", follow_redirects=False)
+
+    assert response.status_code == 303
+    assert response.headers["location"].endswith("/login")
+
+
+@pytest.mark.anyio
+async def test_home_shows_ordered_chapter_exercise_progress(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    user_auth_headers: dict[str, str],
+):
+    later_chapter = await add_chapter(
+        db_session, "Later chapter", position=2, active=True
+    )
+    await add_chapter(db_session, "Hidden chapter")
+    earlier_chapter = await add_chapter(
+        db_session, "Earlier chapter", position=0, active=True
+    )
+    completed_exercise = await add_chapter_exercise(
+        db_session, earlier_chapter.id, "Completed exercise", "done.html", 0
+    )
+    await add_chapter_exercise(
+        db_session, earlier_chapter.id, "Open exercise", "open.html", 1
+    )
+    await add_chapter_exercise(
+        db_session, later_chapter.id, "Later exercise", "later.html", 0
+    )
+    account_result = await db_session.execute(
+        select(models.Account.id).where(models.Account.username == "test_user")
+    )
+    db_session.add(
+        models.ExerciseCompletion(
+            account_id=account_result.scalar_one(),
+            exercise_id=completed_exercise.id,
+        )
+    )
+    await db_session.commit()
+
+    response = await client.get("/")
+    content = response.text
+
+    assert response.status_code == 200
+    assert content.index("Earlier chapter") < content.index("Later chapter")
+    assert "Hidden chapter" not in content
+    assert "1/2" in content
+    assert "Completed exercise: abgeschlossen" in content
+    assert "Open exercise: offen" in content
 
 
 @pytest.mark.anyio

@@ -101,8 +101,17 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 .python-hints li + li { margin-top: .35rem; }
 .python-hints code, .python-help code { color: var(--lesson-ink); font-family: "Courier New", monospace; font-weight: 700; }
 .python-editor-label { display: block; margin-bottom: .35rem; font-weight: 700; }
-.python-code-editor { display: block; width: 100%; min-height: 17rem; resize: vertical; padding: .8rem; border: 1px solid var(--lesson-line); border-radius: 3px; background: var(--page-background); color: var(--lesson-ink); font: .9rem/1.55 "Cascadia Code", "Courier New", monospace; tab-size: 4; }
-.python-code-editor:focus-visible, .python-actions button:focus-visible { outline: 2px solid var(--lesson-accent); outline-offset: 2px; }
+.python-editor-shell { position: relative; border: 1px solid var(--lesson-line); border-radius: 3px; background: var(--page-background); }
+.python-line-numbers, .python-code-highlight, .python-code-editor { font: .9rem/1.55 "Cascadia Code", "Courier New", monospace; tab-size: 4; }
+.python-line-numbers { position: absolute; inset: 0 auto 0 0; width: 3.25rem; overflow: hidden; padding: .8rem .55rem; border-right: 1px solid var(--lesson-line); color: var(--lesson-muted); text-align: right; white-space: pre; user-select: none; }
+.python-code-highlight { position: absolute; inset: 0 0 0 3.25rem; overflow: hidden; margin: 0; padding: .8rem; color: var(--lesson-ink); white-space: pre-wrap; overflow-wrap: anywhere; pointer-events: none; }
+.python-code-highlight code { display: block; font: inherit; }
+.python-comment { color: #247a52; }
+[data-theme="dark"] .python-comment { color: #83d89e; }
+.python-code-editor { position: relative; z-index: 1; display: block; width: 100%; min-height: 17rem; resize: vertical; padding: .8rem .8rem .8rem 4.05rem; border: 0; border-radius: 3px; outline: 0; background: transparent; color: transparent; -webkit-text-fill-color: transparent; caret-color: var(--lesson-ink); }
+.python-code-editor::selection { color: var(--lesson-ink); -webkit-text-fill-color: var(--lesson-ink); background: color-mix(in srgb, var(--lesson-accent) 28%, transparent); }
+.python-editor-shell:focus-within { outline: 2px solid var(--lesson-accent); outline-offset: 2px; }
+.python-actions button:focus-visible { outline: 2px solid var(--lesson-accent); outline-offset: 2px; }
 .python-help { margin: .5rem 0; color: var(--lesson-muted); font-size: .88rem; }
 .python-actions { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .75rem; }
 .python-actions button { min-height: 2.65rem; padding: .5rem .85rem; border: 1px solid var(--lesson-accent); border-radius: 3px; font: inherit; font-weight: 700; cursor: pointer; }
@@ -118,7 +127,8 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 	.alphabet-row { grid-template-columns: 1fr; gap: .15rem; }
 	.task-answer-row { grid-template-columns: minmax(0, 1fr); }
   .python-exercise { padding: .8rem; }
-  .python-code-editor { min-height: 19rem; font-size: .82rem; }
+  .python-line-numbers, .python-code-highlight, .python-code-editor { font-size: .82rem; }
+  .python-code-editor { min-height: 19rem; }
 }
 
 :root {

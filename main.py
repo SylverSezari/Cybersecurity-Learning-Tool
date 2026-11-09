@@ -17,7 +17,12 @@ from database import engine, get_db, init_db
 from exercise_progress import get_exercise_progress
 from routers import accounts, chapters, exercises
 from routers import progress as progress_router
-from security import Principal, get_current_principal, get_page_principal
+from security import (
+    Principal,
+    get_current_principal,
+    get_optional_page_principal,
+    get_page_principal,
+)
 
 
 @asynccontextmanager
@@ -85,9 +90,53 @@ app.include_router(progress_router.router, prefix="/api/progress", tags=["progre
 
 ## home
 @app.get("/", include_in_schema=False, name="home")
-async def home(request: Request):
-    # Render the learner landing page.
-    return templates.TemplateResponse(request, "home.html")
+async def home(
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal | None, Depends(get_optional_page_principal)],
+):
+    # Render active chapters with the current learner's completion state.
+    if principal is None:
+        return RedirectResponse(
+            url=request.url_for("login_page"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+    try:
+        await _ensure_existing_user_account(db, principal)
+    except HTTPException as error:
+        if error.status_code != status.HTTP_401_UNAUTHORIZED:
+            raise
+        return RedirectResponse(
+            url=request.url_for("login_page"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+    chapter_result = await db.execute(
+        select(models.Chapter)
+        .options(selectinload(models.Chapter.exercises))
+        .where(models.Chapter.active.is_(True))
+        .order_by(models.Chapter.position, models.Chapter.id)
+    )
+    chapters = chapter_result.scalars().all()
+
+    completed_ids: set[int] = set()
+    account_id = principal["account_id"]
+    if account_id is not None:
+        completion_result = await db.execute(
+            select(models.ExerciseCompletion.exercise_id)
+            .join(models.Exercise)
+            .join(models.Chapter)
+            .where(
+                models.ExerciseCompletion.account_id == account_id,
+                models.Chapter.active.is_(True),
+            )
+        )
+        completed_ids = set(completion_result.scalars().all())
+
+    return templates.TemplateResponse(
+        request,
+        "home.html",
+        {"chapters": chapters, "completed_exercise_ids": completed_ids},
+    )
 
 
 ## login

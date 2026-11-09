@@ -113,6 +113,28 @@ async def get_page_principal(
     return _principal_from_token(token)
 
 
+async def get_optional_page_principal(
+    request: Request,
+    credentials: Annotated[
+        HTTPAuthorizationCredentials | None,
+        Depends(_bearer_scheme),
+    ],
+) -> Principal | None:
+    # Allow public page handlers to redirect missing or stale sessions to login.
+    token = (
+        credentials.credentials
+        if credentials is not None
+        else request.cookies.get("access_token")
+    )
+    if token is None:
+        return None
+
+    try:
+        return _principal_from_token(token)
+    except HTTPException:
+        return None
+
+
 def require_admin(principal: Principal) -> None:
     # Raise a forbidden response when a route is called by a learner account.
     if principal["role"] != "admin":

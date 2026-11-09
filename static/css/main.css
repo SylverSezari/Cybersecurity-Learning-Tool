@@ -139,21 +139,23 @@ body {
 /* Landing page and chapter selection. */
 .home-options {
 	display: grid;
-	gap: clamp(2.5rem, 7vw, 5.5rem);
-	max-width: 60rem;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	align-items: stretch;
+	gap: 1.5rem;
+	max-width: 80rem;
 	margin: clamp(3rem, 10vh, 7rem) auto 0;
 }
 
 .home-option {
 	position: relative;
 	display: flex;
-	min-height: clamp(13rem, 30vw, 22rem);
+	min-height: 17rem;
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;
 	padding: 3rem;
 	border: 2px solid var(--accent);
-	border-radius: 1.2rem 0.5rem 1.6rem 0.7rem;
+	border-radius: 0.7rem;
 	background: var(--surface);
 	color: var(--text);
 	text-align: center;
@@ -162,7 +164,7 @@ body {
 	transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
 }
 
-.home-option:nth-child(2) {
+.home-option-disabled {
 	transform: rotate(0.3deg);
 }
 
@@ -210,8 +212,93 @@ body {
 }
 
 .home-option-disabled {
+	grid-column: 1 / -1;
 	border-color: var(--border);
 	opacity: 0.72;
+}
+
+.home-progress {
+	min-width: 0;
+	min-height: 17rem;
+	padding: 1.5rem;
+	border: 1px solid var(--border);
+	border-radius: 0.7rem;
+	background: var(--surface);
+}
+
+.home-progress-title {
+	margin: 0 0 1rem;
+	font-size: 1.2rem;
+}
+
+.home-progress-list {
+	display: grid;
+	gap: 0.2rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.home-progress-row {
+	display: grid;
+	grid-template-columns: minmax(5.5rem, 0.8fr) minmax(0, 1fr) auto;
+	align-items: center;
+	gap: 0.65rem;
+	min-height: 2.45rem;
+	border-bottom: 1px solid var(--border);
+}
+
+.home-progress-chapter {
+	overflow-wrap: anywhere;
+	font-size: 0.88rem;
+	font-weight: 650;
+}
+
+.home-progress-points {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.35rem;
+}
+
+.home-progress-point {
+	width: 0.72rem;
+	height: 0.72rem;
+	flex: 0 0 0.72rem;
+	border-radius: 50%;
+	background: #c23b32;
+}
+
+.home-progress-point.is-complete {
+	background: #16834b;
+}
+
+.home-progress-count {
+	color: var(--muted-text);
+	font-size: 0.82rem;
+	font-variant-numeric: tabular-nums;
+	white-space: nowrap;
+}
+
+.home-progress-empty {
+	margin: 0;
+	color: var(--muted-text);
+}
+
+@media (max-width: 42rem) {
+	.home-options {
+		grid-template-columns: minmax(0, 1fr);
+		margin-top: 1.5rem;
+	}
+
+	.home-option,
+	.home-progress {
+		min-height: 14rem;
+	}
+
+	.home-progress-row {
+		grid-template-columns: minmax(4.5rem, 0.8fr) minmax(0, 1fr) auto;
+		gap: 0.45rem;
+	}
 }
 
 .chapter-select {

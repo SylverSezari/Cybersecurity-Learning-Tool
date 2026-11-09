@@ -8,6 +8,33 @@
 		<span class="home-option-arrow" aria-hidden="true">&#8594;</span>
 	</a>
 
+	<section class="home-progress" aria-labelledby="home-progress-title">
+		<h1 class="home-progress-title" id="home-progress-title">Dein Lernfortschritt</h1>
+		{% if chapters %}
+		<ul class="home-progress-list">
+			{% for chapter in chapters %}
+			{% set chapter_completed = chapter.exercises | selectattr('id', 'in', completed_exercise_ids) | list | length %}
+			<li class="home-progress-row">
+				<span class="home-progress-chapter">{{ chapter.title }}</span>
+				<span class="home-progress-points" role="img" aria-label="Übungen in {{ chapter.title }}">
+					{% for exercise in chapter.exercises %}
+					{% set completed = exercise.id in completed_exercise_ids %}
+					<span
+						class="home-progress-point{% if completed %} is-complete{% endif %}"
+						title="{{ exercise.title }}: {{ 'abgeschlossen' if completed else 'offen' }}"
+						aria-label="{{ exercise.title }}: {{ 'abgeschlossen' if completed else 'offen' }}"
+					></span>
+					{% endfor %}
+				</span>
+				<span class="home-progress-count">{{ chapter_completed }}/{{ chapter.exercises | length }}</span>
+			</li>
+			{% endfor %}
+		</ul>
+		{% else %}
+		<p class="home-progress-empty">Noch keine Kapitel verfügbar.</p>
+		{% endif %}
+	</section>
+
 	<div class="home-option home-option-disabled" aria-disabled="true">
 		<span class="home-option-title">Herausforderungen</span>
 		<span class="home-option-description">Wende dein Wissen in praktischen Aufgaben an.</span>

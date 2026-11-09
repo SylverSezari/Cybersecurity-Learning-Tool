@@ -29,17 +29,76 @@ function removeTemplateIndentation(value) {
 	return lines.map((line) => line.slice(indentation)).join("\n");
 }
 
+function escapeHtml(value) {
+	return value.replace(/[&<>"']/g, (character) => ({
+		"&": "&amp;",
+		"<": "&lt;",
+		">": "&gt;",
+		'"': "&quot;",
+		"'": "&#39;",
+	})[character]);
+}
+
+function highlightPythonComments(source) {
+	return source.split("\n").map((line) => {
+		let quote = null;
+		let escaped = false;
+
+		for (let index = 0; index < line.length; index += 1) {
+			const character = line[index];
+			if (quote) {
+				if (escaped) escaped = false;
+				else if (character === "\\") escaped = true;
+				else if (character === quote) quote = null;
+			} else if (character === "\"" || character === "'") {
+				quote = character;
+			} else if (character === "#") {
+				return `${escapeHtml(line.slice(0, index))}<span class="python-comment">${escapeHtml(line.slice(index))}</span>`;
+			}
+		}
+
+		return escapeHtml(line);
+	}).join("\n");
+}
+
 const pythonExercise = document.querySelector("[data-python-exercise]");
 
 if (pythonExercise) {
 	const editor = pythonExercise.querySelector(".python-code-editor");
 	const runButton = pythonExercise.querySelector("[data-python-run]");
 	const output = pythonExercise.querySelector("[data-python-output]");
+	const editorShell = document.createElement("div");
+	const lineNumbers = document.createElement("div");
+	const highlightedCode = document.createElement("pre");
+	const highlightedCodeContent = document.createElement("code");
+	editorShell.className = "python-editor-shell";
+	lineNumbers.className = "python-line-numbers";
+	lineNumbers.setAttribute("aria-hidden", "true");
+	highlightedCode.className = "python-code-highlight";
+	highlightedCode.setAttribute("aria-hidden", "true");
+	highlightedCode.append(highlightedCodeContent);
+	editor.parentNode.insertBefore(editorShell, editor);
+	editorShell.append(lineNumbers, highlightedCode, editor);
+	const updateEditorPresentation = () => {
+		const lines = editor.value.split("\n");
+		lineNumbers.textContent = lines.map((_, index) => index + 1).join("\n");
+		highlightedCodeContent.innerHTML = `${highlightPythonComments(editor.value)}\n`;
+	};
 	const starterCode = removeTemplateIndentation(editor.value);
 	editor.value = starterCode;
+	updateEditorPresentation();
+
+	editor.addEventListener("input", updateEditorPresentation);
+	editor.addEventListener("scroll", () => {
+		lineNumbers.scrollTop = editor.scrollTop;
+		highlightedCode.scrollTop = editor.scrollTop;
+	});
 
 	pythonExercise.querySelector("[data-python-reset]").addEventListener("click", () => {
 		editor.value = starterCode;
+		updateEditorPresentation();
+		lineNumbers.scrollTop = 0;
+		highlightedCode.scrollTop = 0;
 		pythonExercise.dataset.solved = "false";
 		delete pythonExercise.dataset.result;
 		pythonExercise.classList.remove("is-correct", "is-incorrect");

@@ -35,10 +35,10 @@ function checkTask(task) {
 
 function completeLessonIfReady() {
 	const tasks = [...document.querySelectorAll(".exercise-task")];
-	const pythonTask = document.querySelector("[data-python-exercise]");
+	const pythonTasks = [...document.querySelectorAll("[data-python-exercise]")];
 	const completion = document.getElementById("tasksComplete");
 	const allTasksSolved = tasks.every((item) => item.dataset.solved === "true")
-		&& (!pythonTask || pythonTask.dataset.solved === "true");
+		&& pythonTasks.every((item) => item.dataset.solved === "true");
 	if (completion) completion.hidden = !allTasksSolved;
 	if (allTasksSolved && !completionSent && exerciseSolutions) {
 		completionSent = true;
@@ -53,14 +53,22 @@ function completeLessonIfReady() {
 					? Number(value)
 					: value;
 		}
-		if (pythonTask?.dataset.solutionIndex !== undefined) {
-			answers[Number(pythonTask.dataset.solutionIndex)] = pythonTask.dataset.result;
+		for (const pythonTask of pythonTasks) {
+			if (pythonTask.dataset.solutionIndex !== undefined) {
+				answers[Number(pythonTask.dataset.solutionIndex)] = pythonTask.dataset.result;
+			}
 		}
 		parent.postMessage({ type: "exercise-tasks-complete", answers }, "*");
 	}
 }
 
 window.addEventListener("python-exercise-complete", completeLessonIfReady);
+
+window.addEventListener("message", (event) => {
+	if (event.source !== parent || event.data?.type !== "exercise-completion-saved") return;
+	const completion = document.getElementById("tasksComplete");
+	if (completion) completion.textContent = "Die Übung wurde als abgeschlossen markiert.";
+});
 
 document.querySelectorAll(".exercise-task").forEach((task) => {
 	task.querySelector(".check-answer").addEventListener("click", () => checkTask(task));
@@ -85,6 +93,11 @@ if (shiftControl) {
 	const cipherOutput = document.getElementById("cipherAlphabet");
 	const shiftOutput = document.getElementById("shiftValue");
 	const exampleOutput = document.getElementById("shiftedExample");
+	const letterCell = (letter) => {
+		const cell = document.createElement("span");
+		cell.textContent = letter;
+		return cell;
+	};
 
 	function shiftText(text, shift) {
 		return [...text].map((character) => {
@@ -96,10 +109,11 @@ if (shiftControl) {
 
 	function updateAlphabet() {
 		const shift = Number(shiftControl.value);
-		plainOutput.textContent = alphabet.join(" ");
-		cipherOutput.textContent = alphabet.map((_, index) => alphabet[(index + shift) % 26]).join(" ");
-		shiftOutput.value = String(shift);
-		exampleOutput.textContent = `HALLO → ${shiftText("HALLO", shift)}`;
+		plainOutput.replaceChildren(...alphabet.map(letterCell));
+		cipherOutput.replaceChildren(...alphabet.map((_, index) => letterCell(alphabet[(index + shift) % 26])));
+		shiftOutput.textContent = String(shift);
+		shiftOutput.style.gridColumn = `${shift + 1} / span 1`;
+		if (exampleOutput) exampleOutput.textContent = `HALLO → ${shiftText("HALLO", shift)}`;
 	}
 
 	shiftControl.addEventListener("input", updateAlphabet);

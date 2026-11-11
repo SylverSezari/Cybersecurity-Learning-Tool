@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<title>RSA-Verschlüsselung</title>
+	<link rel="stylesheet" href="/static/css/theme.css">
+	<link rel="stylesheet" href="/static/css/exercises.css">
+	<script src="/static/js/exercise-theme.js" defer></script>
+	<script src="/static/js/exercise-tasks.js?v=7" defer></script>
+</head>
+<body>
+	<main class="lesson">
+		<header class="lesson-header">
+			<p class="eyebrow">Lektion 08 · Ein bekanntes Schlüsselpaar</p>
+			<h1>RSA-Verschlüsselung</h1>
+			<p class="lead">
+				RSA ist ein bekanntes asymmetrisches Verfahren. Es verwendet einen öffentlichen und
+				einen privaten Schlüssel, die zusammengehören, aber verschiedene Aufgaben haben.
+			</p>
+		</header>
+
+		<section class="lesson-section" aria-labelledby="prinzip-title">
+			<p class="section-label">Die Grundidee</p>
+			<h2 id="prinzip-title">Ein Schlüssel wird geteilt, einer bleibt geheim</h2>
+			<p>
+				Bei RSA erstellt eine Person ein <strong>Schlüsselpaar</strong>. Den öffentlichen
+				Schlüssel kann sie an andere weitergeben. Der private Schlüssel gehört dazu, muss aber
+				geheim bleiben. Aus dem öffentlichen Schlüssel lässt sich der private Schlüssel mit
+				heutigen Mitteln nicht praktikabel berechnen.
+			</p>
+			<p>
+				Möchte Noé Mira eine geheime Nachricht schicken, verwendet er Miras öffentlichen
+				Schlüssel zum Verschlüsseln. Die Nachricht kann anschliessend nur mit dem passenden
+				privaten Schlüssel gelesen werden, den Mira aufbewahrt. Noé muss dafür kein gemeinsames
+				Geheimnis mit Mira vorher austauschen.
+			</p>
+			<div class="worked-example" aria-label="RSA-Verschlüsselung und Entschlüsselung">
+				<p><strong>Noé:</strong> Klartext + Miras öffentlicher Schlüssel → Geheimtext</p>
+				<p><strong>Mira:</strong> Geheimtext + Miras privater Schlüssel → Klartext</p>
+			</div>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="mathematik-title">
+			<p class="section-label">Warum ist das sicher?</p>
+			<h2 id="mathematik-title">Leicht in eine Richtung, schwer zurück</h2>
+			<p>
+				Bei der Erzeugung eines RSA-Schlüsselpaares werden zwei sehr grosse Primzahlen
+				verwendet. Aus ihnen wird eine grosse Zahl berechnet, die Teil des öffentlichen
+				Schlüssels ist. Zwei grosse Zahlen zu multiplizieren ist einfach. Nur aus ihrem Produkt
+				wieder die ursprünglichen Primzahlen zu finden, ist bei passend grossen Zahlen extrem
+				aufwendig. Auf dieser Schwierigkeit beruht die Sicherheit von RSA.
+			</p>
+			<aside class="note">
+				<strong>Nur ein Bild, keine echte RSA-Rechnung:</strong> Ein Vorhängeschloss lässt sich
+				mit dem öffentlichen Schlüssel schliessen. Öffnen kann es nur, wer den passenden
+				privaten Schlüssel besitzt. In echten Systemen sind die Schlüssel und Berechnungen viel
+				grösser und komplexer.
+			</aside>
+			<p>
+				RSA ist nicht automatisch sicher, nur weil es RSA heisst. In echten Anwendungen werden
+				bewährte Bibliotheken und zusätzliche Schutzverfahren eingesetzt. Ein öffentliches
+				Verfahren darf bekannt sein; der private Schlüssel muss geschützt werden.
+			</p>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="signatur-title">
+			<p class="section-label">Mehr als Geheimhaltung</p>
+			<h2 id="signatur-title">Auch digitale Signaturen</h2>
+			<p>
+				RSA kann auch für digitale Signaturen verwendet werden. Dabei erstellt die absendende
+				Person eine Signatur mit ihrem privaten Schlüssel. Andere prüfen sie mit dem
+				zugehörigen öffentlichen Schlüssel. So können sie erkennen, ob die Signatur zu diesem
+				Schlüssel gehört und ob die signierten Daten verändert wurden. Eine Signatur macht den
+				Inhalt nicht geheim.
+			</p>
+			<div class="worked-example" aria-label="RSA in einem kombinierten Verfahren">
+				<p><strong>In der Praxis:</strong> Asymmetrische Verfahren sind rechenaufwendig und
+					werden oft mit symmetrischer Verschlüsselung kombiniert.</p>
+				<p>Sie helfen zum Beispiel dabei, einen Sitzungsschlüssel zu schützen. Ein schnelles
+					Verfahren wie AES verschlüsselt danach grössere Datenmengen.</p>
+			</div>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="aufgaben-title">
+			<p class="section-label">Drei kurze Situationen</p>
+			<h2 id="aufgaben-title">Kannst du RSA richtig anwenden?</h2>
+			<div class="task-list">
+				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Noé verschlüsselt mit Miras öffentlichem Schlüssel. Miras passender privater Schlüssel wird zum Entschlüsseln gebraucht." data-incorrect-feedback="Tipp: Für eine geheime Nachricht an Mira nimmt Noé den Schlüssel, den Mira öffentlich teilen darf.">
+					<p class="task-story">Noé möchte Mira eine vertrauliche Nachricht schicken.</p>
+					<p class="task-prompt">Welchen Schlüssel verwendet Noé zum Verschlüsseln?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Schlüssel zum Verschlüsseln auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="Noés privater Schlüssel">Noés privater Schlüssel</option>
+							<option value="Miras privater Schlüssel">Miras privater Schlüssel</option>
+							<option value="Miras öffentlicher Schlüssel">Miras öffentlicher Schlüssel</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Genau: Mira entschlüsselt die Nachricht mit ihrem privaten Schlüssel. Diesen gibt sie nicht weiter." data-incorrect-feedback="Tipp: Der Schlüssel zum Entschlüsseln einer Nachricht an Mira muss geheim bleiben und gehört zu ihrem öffentlichen Schlüssel.">
+					<p class="task-story">Mira erhält den Geheimtext, der mit ihrem öffentlichen Schlüssel verschlüsselt wurde.</p>
+					<p class="task-prompt">Welchen Schlüssel braucht Mira zum Entschlüsseln?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Schlüssel zum Entschlüsseln auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="Miras öffentlicher Schlüssel">Miras öffentlicher Schlüssel</option>
+							<option value="Miras privater Schlüssel">Miras privater Schlüssel</option>
+							<option value="Noés privater Schlüssel">Noés privater Schlüssel</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Noé erstellt die Signatur mit seinem privaten Schlüssel. Mira prüft sie mit Noés öffentlichem Schlüssel. Die Signatur bestätigt nicht die Geheimhaltung des Inhalts." data-incorrect-feedback="Tipp: Zum Erstellen einer Signatur verwendet Noé den Schlüssel, den nur er besitzt. Mira prüft sie mit dem passenden öffentlichen Schlüssel.">
+					<p class="task-story">Noé möchte zeigen, dass eine Nachricht wirklich von ihm stammt.</p>
+					<p class="task-prompt">Wie kann eine RSA-Signatur geprüft werden?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Signatur-Verfahren auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="signature">Noé signiert mit seinem privaten Schlüssel; Mira prüft mit Noés öffentlichem Schlüssel</option>
+							<option value="encrypt">Noé verschlüsselt mit Miras öffentlichem Schlüssel; Mira prüft mit ihrem privaten Schlüssel</option>
+							<option value="shared">Noé und Mira verwenden denselben geheimen Schlüssel</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+			</div>
+			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle Aufgaben richtig gelöst. Die Lektion wird jetzt als abgeschlossen markiert.</p>
+		</section>
+	</main>
+</body>
+</html>

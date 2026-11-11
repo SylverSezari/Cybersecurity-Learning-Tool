@@ -4,21 +4,22 @@
 		<meta charset="utf-8" />
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<meta name="color-scheme" content="light dark" />
-		<title>Miras Vigenère-Nachricht mit Python</title>
+		<title>Miras Vigenère-Nachrichten mit Python ver- und entschlüsseln</title>
 		<link rel="stylesheet" href="/static/css/theme.css" />
 		<link rel="stylesheet" href="/static/css/exercises.css" />
 		<script src="/static/js/exercise-theme.js" defer></script>
-		<script src="/static/js/exercise-tasks.js?v=5" defer></script>
-		<script src="/static/js/python-exercises.js?v=4" defer></script>
+		<script src="/static/js/exercise-tasks.js?v=7" defer></script>
+		<script src="/static/js/python-exercises.js?v=9" defer></script>
 	</head>
 	<body>
 		<main class="lesson">
 			<header class="lesson-header">
 				<p class="eyebrow">Python-Werkstatt · Vigenère-Chiffre</p>
-				<h1>Miras Nachricht mit Python verschlüsseln</h1>
+				<h1>Miras Nachrichten mit Python ver- und entschlüsseln</h1>
 				<p class="lead">
-					Mira hat ein neues Medikament entwickelt und möchte ihr Rezept vor neugierigen
-					Rivalen schützen. In dieser Übung hilfst du ihr, die Nachricht mit Python zu verschlüsseln.
+					Mira möchte ihre Nachrichten vor neugierigen Rivalen schützen und ihrem Freund schicken. In dieser Übung hilfst du
+					ihr, eine Nachricht mit Python zu verschlüsseln und eine gemischt geschriebene Nachricht
+					wieder zu entschlüsseln.
 				</p>
 			</header>
 
@@ -27,7 +28,7 @@
 				<h2 id="python-intro-title">Wie arbeitet das Programm?</h2>
 				<p>
 					Der Computer liest den Code von oben nach unten. <code>text</code> enthält die Nachricht,
-					<code>key</code> das Schlüsselwort MOND und <code>alphabet</code> alle Buchstaben von A bis Z.
+					<code>key</code> das Schlüsselwort BARES und <code>alphabet</code> alle Buchstaben von A bis Z.
 					Die leere Zeichenfolge <code>encrypted</code> ist der Platz, an dem das Programm nach und
 					nach die verschlüsselte Nachricht sammelt.
 				</p>
@@ -37,10 +38,8 @@
 					Position: Der erste Buchstabe hat Position 0, der zweite Position 1 und so weiter.
 				</p>
 				<p>
-					Das Schlüsselwort MOND ist kürzer als SCHOKOLADE und muss deshalb wiederholt werden:
-					MONDMONDMO. <code>key[index % len(key)]</code> wählt für jede Textposition den passenden
-					Schlüsselbuchstaben aus. <code>%</code> bedeutet hier: Wenn das Programm am Ende von MOND
-					angekommen ist, beginnt es wieder bei M.
+					Das Schlüsselwort BARES ist kürzer als ERFINDUNG und muss deshalb wiederholt werden:
+					BARESBARE. Dies kann man mit Modulo erreichen. <code>len(abc)</code> kann verwendet werden um die Länge eines Texts herauszufinden.
 				</p>
 				<p>
 					Jeder Buchstabe hat eine Zahl: A ist 0, B ist 1 und Z ist 25. Mit
@@ -51,36 +50,44 @@
 					<code>print(encrypted)</code> zeigt am Ende die fertige Nachricht.
 				</p>
 				<p>
-					Beispiel: S hat die Zahl 18 und M die Zahl 12. 18 + 12 = 30. Nach <code>% 26</code> bleibt
-					4 übrig, und der Buchstabe mit der Zahl 4 ist E.
+					Beispiel: E hat die Zahl 4 und B die Zahl 1. 4 + 1 = 5, also wird E zu F.
 				</p>
 			</section>
 
 			<section class="lesson-section" aria-labelledby="python-task-title">
 				<p class="section-label">Miras nächster Schritt</p>
-				<h2 id="python-task-title">Das Rezept sicher weitergeben</h2>
+				<h2 id="python-task-title">Nachrichten ver- und entschlüsseln</h2>
 				<article
 					class="python-exercise"
 					data-python-exercise
 					data-solution-index="0"
-					data-expected-output="EQURWCYDPS"
-					data-correct-feedback="Richtig: Mit dem wiederholten Schlüssel MONDMONDMO wird SCHOKOLADE zu EQURWCYDPS verschlüsselt. Mira kann diese Nachricht nun weitergeben."
+					data-expected-output="FRWMFEUEK"
+					data-correct-feedback="Richtig: Mit dem wiederholten Schlüssel BARESBARE wird ERFINDUNG zu FRWMFEUEK verschlüsselt. Mira kann diese Nachricht nun weitergeben."
 					data-incorrect-feedback="Noch nicht: Finde die Zahl des Schlüsselbuchstabens mit alphabet.index(key_letter). Addiere sie zur Zahl des Nachrichtenbuchstabens und verwende % 26."
-					data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(encrypted) am Ende steht."
+					data-empty-feedback="Es wurde nichts ausgegeben. Ergänze alle drei TODO-Zeilen und prüfe, ob print(encrypted) am Ende steht."
 				>
 					<p class="task-story">
 						Seit sie ihre Entdeckung gemacht hat, ist Mira vorsichtig geworden. Eine Rivalin könnte
-						ihre Notizen abfangen. Mira möchte deshalb die Nachricht SCHOKOLADE mit dem Schlüsselwort
-						MOND verschlüsseln. Der Anfang des Codes erledigt bereits die Wiederholung des Schlüssels;
-						du ergänzt die beiden fehlenden Rechenschritte.
+						ihre Notizen abfangen. Mira möchte deshalb die Nachricht ERFINDUNG mit dem Schlüsselwort
+						BARES verschlüsseln. Kannst du alle drei TODOs vervollständigen?
 					</p>
 					<p>
-						Finde zuerst die Zahl des aktuellen Schlüsselbuchstabens. Berechne dann aus den beiden
-						Buchstabenzahlen die neue Position im Alphabet.
+						Finde den passenden Schlüsselbuchstaben und seine Zahl. Addiere beide Buchstabenzahlen
+						und verwende <code>% 26</code>, damit das Ergebnis im Alphabet bleibt.
 					</p>
 					<ol class="python-hints">
-						<li><code>key_letter</code> enthält schon den passenden Buchstaben aus dem wiederholten Schlüssel.</li>
-						<li><code>alphabet.index(key_letter)</code> findet seine Zahl; addiere sie zu <code>position</code> und rechne mit <code>% 26</code>.</li>
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 1</summary>
+								<p><code>key_letter</code> soll den Buchstaben vom Schlüssel an der passenden Position haben.</p>
+							</details>
+						</li>
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 2</summary>
+								<p><code>alphabet.index(key_letter)</code> findet seine Zahl; addiere sie zu <code>position</code> und rechne mit <code>% 26</code>.</p>
+							</details>
+						</li>
 					</ol>
 					<label class="python-editor-label" for="vigenerePythonCode">Dein Python-Code</label>
 					<textarea
@@ -90,24 +97,25 @@
 						autocapitalize="off"
 						aria-describedby="vigenerePythonHelp"
 					>
-						text = "SCHOKOLADE"
-						key = "MOND"
+						text = "ERFINDUNG"
+						key = "BARES"
 						alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 						encrypted = ""
 
 						for index, letter in enumerate(text):
 								position = alphabet.index(letter)
-								key_letter = key[index % len(key)]
-								# TODO 1: Finde die Nummer des Schlüsselbuchstabens.
+								# TODO 1: Finde den passenden Schlüsselbuchstaben.
+								key_letter = "A"
+								# TODO 2: Finde seine Nummer im Alphabet.
 								key_position = 0
-								# TODO 2: Addiere beide Nummern und bleibe zwischen 0 und 25.
+								# TODO 3: Addiere beide Nummern und bleibe zwischen 0 und 25.
 								shifted_position = 0
 								encrypted += alphabet[shifted_position]
 
 						print(encrypted)
 					</textarea>
 					<p class="python-help" id="vigenerePythonHelp">
-						Ändere nur die beiden Zeilen mit <code>0</code>. Du kannst den Code zurücksetzen und
+						Ergänze nur die drei Zeilen unter den TODOs. Du kannst den Code zurücksetzen und
 						beliebig oft erneut starten.
 					</p>
 					<div class="python-actions">
@@ -122,8 +130,91 @@
 					</div>
 					<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
 				</article>
+				<article
+					class="python-exercise"
+					data-python-exercise
+					data-solution-index="1"
+					data-expected-output="GIB MIR DETAILS"
+					data-correct-feedback="Richtig: Du hast die gemischt geschriebenen Buchstaben zuerst grossgeschrieben, die Leerzeichen beibehalten und mit ENDLICH entschlüsselt. Die Nachricht lautet GIB MIR DETAILS."
+					data-incorrect-feedback="Noch nicht: Wandle jeden Geheimtextbuchstaben vor alphabet.index in Grossbuchstaben um. Ziehe den passenden Schlüsselwert ab und rücke den Schlüsselindex nur bei einem Buchstaben weiter."
+					data-empty-feedback="Es wurde nichts ausgegeben. Ergänze die drei TODO-Zeilen und prüfe, ob print(decrypted) am Ende steht."
+				>
+					<p class="task-story">
+						Mira empfängt endlich die verschlüsselte Nachricht von ihrer Kollegin: <strong>kVe xQt kIgDtTu</strong>.
+						Das Schlüsselwort lautet ENDLICH. Die Gross- und Kleinbuchstaben im Geheimtext
+						sind absichtlich gemischt. Entschlüssle die Nachricht und gib alle Buchstaben gross aus.
+					</p>
+					<p>
+						Ergänze die drei TODOs. Lass Leerzeichen unverändert, wandle jeden Buchstaben vor der
+						Suche im Alphabet in einen Grossbuchstaben um und ziehe den Schlüsselwert ab.
+					</p>
+					<ol class="python-hints">
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 1</summary>
+								<p><code>letter.upper()</code> wandelt einen Buchstaben in einen Grossbuchstaben um.</p>
+							</details>
+						</li>
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 2</summary>
+								<p>Wähle die Position des Schlüssels gleich wie vorher. Erhöhe <code>key_index</code> nur im Zweig für Buchstaben, nicht bei einem Leerzeichen.</p>
+							</details>
+						</li>
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 3</summary>
+								<p>Ziehe die Schlüsselzahl von der Geheimtextzahl ab und verwende <code>% 26</code>, damit du vor A wieder bei Z landest.</p>
+							</details>
+						</li>
+					</ol>
+					<label class="python-editor-label" for="vigenereDecryptPythonCode">Dein Python-Code</label>
+					<textarea
+						class="python-code-editor"
+						id="vigenereDecryptPythonCode"
+						spellcheck="false"
+						autocapitalize="off"
+						aria-describedby="vigenereDecryptPythonHelp"
+					>
+						text = "kVe xQt kIgDtTu"
+						key = "ENDLICH"
+						alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+						decrypted = ""
+						key_index = 0
+
+						for letter in text:
+							if letter == " ":
+								decrypted += " "
+							else:
+								# TODO 1: Wandle den Geheimtextbuchstaben in einen Grossbuchstaben um.
+								letter = ""
+								# TODO 2: Wähle den passenden Schlüsselbuchstaben.
+								key_letter = ""
+								# TODO 3: Ziehe den Schlüsselwert ab und verwende % 26.
+								decrypted_position = 0
+								decrypted += alphabet[decrypted_position]
+								key_index += 1
+
+						print(decrypted)
+					</textarea>
+					<p class="python-help" id="vigenereDecryptPythonHelp">
+						Ändere nur die drei Zeilen unter den TODOs. Du kannst den Code zurücksetzen und
+						beliebig oft erneut starten.
+					</p>
+					<div class="python-actions">
+						<button class="python-run-button" type="button" data-python-run>Python starten</button>
+						<button
+							class="python-reset-button"
+							type="button"
+							data-python-reset="vigenereDecryptPythonCode"
+							aria-label="Python-Code zurücksetzen"
+							title="Code zurücksetzen"
+						>Zurücksetzen</button>
+					</div>
+					<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
+				</article>
 				<p class="tasks-complete" id="tasksComplete" role="status" hidden>
-					Miras Nachricht ist verschlüsselt. Die Übung wird jetzt als abgeschlossen markiert.
+					Mira hat ihren Freund erfolgreich kontaktiert. Die Übung wird jetzt als abgeschlossen markiert.
 				</p>
 			</section>
 		</main>

@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="/static/css/theme.css" />
     <link rel="stylesheet" href="/static/css/exercises.css" />
     <script src="/static/js/exercise-theme.js" defer></script>
-    <script src="/static/js/exercise-tasks.js?v=5" defer></script>
+    <script src="/static/js/exercise-tasks.js?v=7" defer></script>
   </head>
   <body>
     <main class="lesson">
@@ -112,19 +112,21 @@
         <p class="section-label">Zum Visualisieren</p>
         <h2 id="alphabet-title">Sieh die Verschiebung</h2>
         <div class="alphabet-tool">
-          <div class="alphabet-control">
-            <label for="caesarShift">Schlüssel</label>
-            <input
-              id="caesarShift"
-              type="range"
-              min="0"
-              max="25"
-              value="3"
-              aria-label="Verschiebung in Buchstaben"
-            />
-            <output id="shiftValue" for="caesarShift">3</output>
-          </div>
           <div class="alphabet-rows" aria-live="polite">
+            <div class="alphabet-row">
+              <strong>Schlüssel</strong>
+              <div class="alphabet-key-track">
+                <input
+                  id="caesarShift"
+                  type="range"
+                  min="0"
+                  max="25"
+                  value="3"
+                  aria-label="Verschiebung in Buchstaben"
+                />
+                <output id="shiftValue" class="alphabet-key-marker" for="caesarShift">3</output>
+              </div>
+            </div>
             <div class="alphabet-row">
               <strong>Klartext</strong><output id="plainAlphabet"></output>
             </div>

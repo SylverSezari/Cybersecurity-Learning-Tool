@@ -48,14 +48,15 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 .equation { font-family: "Courier New", monospace; font-weight: 700; }
 .alphabet-tool { margin-top: 1rem; }
 /* Interactive alphabet mapping used by the cipher lessons. */
-.alphabet-control { display: grid; grid-template-columns: auto minmax(8rem, 1fr) 3rem; gap: .75rem; align-items: center; }
-.alphabet-control label { font-weight: 700; }
-.alphabet-control output { color: var(--lesson-accent); font-weight: 800; text-align: center; }
-.alphabet-control input { width: 100%; accent-color: var(--lesson-accent); }
-.alphabet-rows { margin-top: .9rem; border-top: 1px solid var(--lesson-line); }
-.alphabet-row { display: grid; grid-template-columns: 7rem minmax(0, 1fr); gap: .7rem; padding: .55rem 0; border-bottom: 1px solid var(--lesson-line); }
+.alphabet-rows { margin-top: .9rem; overflow-x: auto; border-top: 1px solid var(--lesson-line); }
+.alphabet-row { display: grid; grid-template-columns: 7rem minmax(32.5rem, 1fr); gap: .7rem; min-width: 40.2rem; padding: .55rem 0; border-bottom: 1px solid var(--lesson-line); }
 .alphabet-row strong { color: var(--lesson-muted); font-size: .8rem; }
-.alphabet-row output { overflow-wrap: anywhere; font-family: "Courier New", monospace; font-weight: 700; letter-spacing: .12em; }
+.alphabet-row output:not(.alphabet-key-marker), .alphabet-key-track { display: grid; grid-template-columns: repeat(26, minmax(1.25rem, 1fr)); min-width: 32.5rem; font-family: "Courier New", monospace; font-weight: 700; text-align: center; }
+.alphabet-key-track { position: relative; align-items: center; min-height: 2rem; }
+.alphabet-key-track::before { position: absolute; inset: 50% 0 auto; height: 2px; background: var(--lesson-line); content: ""; transform: translateY(-50%); }
+.alphabet-key-track input { position: absolute; z-index: 2; inset: 0; width: 100%; height: 100%; margin: 0; opacity: 0; cursor: ew-resize; }
+.alphabet-key-marker { position: relative; z-index: 1; grid-row: 1; display: grid; min-height: 1.75rem; place-items: center; border-radius: 3px; background: var(--lesson-accent); color: #fff; font: 700 .78rem "Courier New", monospace; pointer-events: none; }
+.alphabet-key-track input:focus-visible + .alphabet-key-marker { outline: 2px solid var(--lesson-accent); outline-offset: 2px; }
 .task-list { display: grid; gap: 1rem; margin-top: 1rem; }
 /* Answer inputs, validation feedback, and the all-tasks-complete state. */
 .exercise-task { padding: 1rem; border: 1px solid var(--lesson-line); background: var(--surface); }
@@ -97,8 +98,12 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 .python-exercise { margin-top: 1.25rem; padding: 1rem; border: 1px solid var(--lesson-line); border-top: 3px solid var(--lesson-accent); background: var(--surface); }
 .python-exercise h3 { margin: .25rem 0 .45rem; }
 .python-exercise > p:not(.section-label) { max-width: 49rem; }
-.python-hints { margin: .75rem 0 1rem; padding-left: 1.35rem; color: var(--lesson-muted); }
-.python-hints li + li { margin-top: .35rem; }
+.python-hints { display: grid; gap: .45rem; margin: .75rem 0 1rem; padding: 0; list-style: none; }
+.python-hint-disclosure summary { display: flex; justify-content: space-between; gap: 1rem; padding: .55rem .75rem; border: 1px solid var(--lesson-line); border-radius: 3px; background: color-mix(in srgb, var(--lesson-muted) 14%, var(--surface)); color: var(--lesson-ink); font-weight: 700; cursor: pointer; }
+.python-hint-disclosure summary::after { content: "Anzeigen"; color: var(--lesson-muted); font-size: .85em; font-weight: 500; }
+.python-hint-disclosure[open] summary::after { content: "Ausblenden"; }
+.python-hint-disclosure summary:focus-visible { outline: 2px solid var(--lesson-accent); outline-offset: 3px; }
+.python-hint-disclosure > p { margin: 0; padding: .65rem .75rem; color: var(--lesson-muted); }
 .python-hints code, .python-help code { color: var(--lesson-ink); font-family: "Courier New", monospace; font-weight: 700; }
 .python-editor-label { display: block; margin-bottom: .35rem; font-weight: 700; }
 .python-editor-shell { position: relative; border: 1px solid var(--lesson-line); border-radius: 3px; background: var(--page-background); }
@@ -122,9 +127,6 @@ h3 { margin: 0 0 .35rem; font-size: 1.12rem; }
 .python-exercise.is-correct .python-output { border-color: var(--success, #247a52); }
 .python-exercise.is-incorrect .python-output { border-color: var(--error, #b42318); }
 @media (max-width: 34rem) {
-	.alphabet-control { grid-template-columns: 1fr auto; }
-	.alphabet-control input { grid-column: 1 / -1; grid-row: 2; }
-	.alphabet-row { grid-template-columns: 1fr; gap: .15rem; }
 	.task-answer-row { grid-template-columns: minmax(0, 1fr); }
   .python-exercise { padding: .8rem; }
   .python-line-numbers, .python-code-highlight, .python-code-editor { font-size: .82rem; }

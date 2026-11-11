@@ -71,7 +71,24 @@ async function submitExerciseCompletion(answers) {
 			};
 			throw new Error(messages[result.detail] || "Der Lernfortschritt konnte nicht gespeichert werden.");
 		}
-		window.location.reload();
+		if (status) {
+			status.textContent = "Abgeschlossen";
+			status.classList.remove("task-progress-status");
+			status.classList.add("task-completed-status");
+		}
+		completeButton?.remove();
+		const currentExerciseName = document.querySelector(
+			".task-exercise-link.is-current .task-exercise-name",
+		);
+		if (currentExerciseName && !currentExerciseName.querySelector("small")) {
+			const completionLabel = document.createElement("small");
+			completionLabel.textContent = "Abgeschlossen";
+			currentExerciseName.append(completionLabel);
+		}
+		exerciseFrame?.contentWindow?.postMessage(
+			{ type: "exercise-completion-saved" },
+			"*",
+		);
 	} catch (error) {
 		status.textContent = error.message;
 		completionPending = false;

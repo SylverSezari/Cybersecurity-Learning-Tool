@@ -4,18 +4,18 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<meta name="color-scheme" content="light dark">
-	<title>Eine römische Botschaft mit Python</title>
+	<title>Caesar ver- und entschlüsseln mit Python</title>
 	<link rel="stylesheet" href="/static/css/theme.css">
 	<link rel="stylesheet" href="/static/css/exercises.css">
 	<script src="/static/js/exercise-theme.js" defer></script>
-	<script src="/static/js/exercise-tasks.js?v=5" defer></script>
-	<script src="/static/js/python-exercises.js?v=4" defer></script>
+	<script src="/static/js/exercise-tasks.js?v=7" defer></script>
+	<script src="/static/js/python-exercises.js?v=9" defer></script>
 </head>
 <body>
 	<main class="lesson">
 		<header class="lesson-header">
 			<p class="eyebrow">Python-Werkstatt · Caesar-Chiffre</p>
-			<h1>Eine römische Botschaft verschlüsseln</h1>
+			<h1>Caesar-Nachrichten ver- und entschlüsseln</h1>
 			<p class="lead">
 				Ein römischer Bote soll eine Nachricht durchs feindliche Gebiet bringen. Du hilfst ihm,
 				jeden Buchstaben mit Python drei Stellen weiterzuschieben.
@@ -35,7 +35,7 @@
 				Die Schleife <code>for letter in text</code> bearbeitet die Nachricht Buchstabe für
 				Buchstabe. Mit <code>alphabet.index(letter)</code> findest du die Nummer eines Buchstabens:
 				A hat Nummer 0, B hat Nummer 1 und so weiter. Addiere dann den Schlüssel 3. Weil das
-				Alphabet nur 26 Buchstaben hat, sorgt <code>% 26</code> dafür, dass es nach Z wieder bei A
+				Alphabet nur 26 Buchstaben hat, sorgt <code>% 26</code> (% bedeutet Modulo) dafür, dass es nach Z wieder bei A
 				weitergeht. Zum Schluss fügt der Code den neuen Buchstaben an <code>encrypted</code> an.
 			</p>
 			<p>
@@ -46,7 +46,7 @@
 
 		<section class="lesson-section" aria-labelledby="python-task-title">
 			<p class="section-label">Auftrag des römischen Boten</p>
-			<h2 id="python-task-title">Verschlüssle die Nachricht</h2>
+			<h2 id="python-task-title">Verschlüsseln und entschlüsseln</h2>
 			<article class="python-exercise" data-python-exercise data-solution-index="0" data-expected-output="KDOOR" data-correct-feedback="Richtig: Der Bote erhält KDOOR. Jeder Buchstabe aus HALLO wurde drei Plätze weitergeschoben." data-incorrect-feedback="Noch nicht: Finde zuerst die Stelle des Buchstabens. Addiere dann 3 und verwende % 26, damit du nach Z wieder am Anfang des Alphabets weiterzählst." data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(encrypted) am Ende steht.">
 				<p class="task-story">
 					Im römischen Lager muss ein Bote die Nachricht HALLO an seine Verbündeten schicken,
@@ -58,9 +58,22 @@
 					aktuellen Buchstabens. Berechne danach seine neue Nummer, indem du den Schlüssel addierst
 					und mit <code>% 26</code> im Alphabet bleibst.
 				</p>
+
+				<p><code>alphabet.index(letter)</code> liefert die Stelle des Buchstabens, zum Beispiel 0 für A.</p>
+
 				<ol class="python-hints">
-					<li><code>alphabet.index(letter)</code> liefert die Stelle des Buchstabens, zum Beispiel 0 für A.</li>
-					<li>Die neue Stelle ist die alte Stelle plus <code>key</code>, gerechnet mit <code>% 26</code>.</li>
+					<li>
+						<details class="python-hint-disclosure">
+							<summary>Hinweis 1</summary>
+							<p>Die neue Stelle ist die alte Stelle plus <code>key</code>, gerechnet mit <code>% 26</code>.</p>
+						</details>
+					</li>
+					<li>
+						<details class="python-hint-disclosure">
+							<summary>Hinweis 2</summary>
+							<p><code>alphabet[3]</code> lifert den Buchstaben an der 4 Position, da 0 den Buchstaben an der ersten Position enthält</p>
+						</details>
+					</li>
 				</ol>
 				<label class="python-editor-label" for="caesarPythonCode">Dein Python-Code</label>
 				<textarea class="python-code-editor" id="caesarPythonCode" spellcheck="false" autocapitalize="off" aria-describedby="caesarPythonHelp">
@@ -70,16 +83,15 @@
 					encrypted = ""
 
 					for letter in text:
-							# TODO 1: Finde die Nummer dieses Buchstabens im Alphabet.
-							position = 0
-							# TODO 2: Addiere den Schlüssel und bleibe zwischen 0 und 25.
-							shifted_position = 0
-							encrypted += alphabet[shifted_position]
+						# TODO 1: Finde die Nummer dieses Buchstabens im Alphabet.
+						position = 0
+						# TODO 2: Addiere den Schlüssel und bleibe zwischen 0 und 25.
+						encrypted += alphabet[]
 
 					print(encrypted)
 				</textarea>
 				<p class="python-help" id="caesarPythonHelp">
-					Ändere nur die beiden Zeilen mit <code>0</code>. Du kannst den Code jederzeit zurücksetzen
+					Ändere nur die beiden Zeilen unter den TODOs. Du kannst den Code jederzeit zurücksetzen
 					und erneut starten.
 				</p>
 				<div class="python-actions">
@@ -88,7 +100,65 @@
 				</div>
 				<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
 			</article>
-			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Die Nachricht ist erfolgreich verschlüsselt. Die Übung wird jetzt als abgeschlossen markiert.</p>
+			<article class="python-exercise" data-python-exercise data-solution-index="1" data-expected-output="Ave Caesar" data-correct-feedback="Richtig: Die Nachricht lautet Ave Caesar. Das Leerzeichen bleibt unverändert, während jeder Buchstabe drei Stellen zurückrückt." data-incorrect-feedback="Noch nicht: Lass das Leerzeichen unverändert. Ziehe bei jedem Buchstaben den Schlüssel ab und verwende % 26, damit du vor A wieder bei Z weiterzählst." data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(decrypted) am Ende steht.">
+				<p class="task-story">
+					Ein Bote fängt die verschlüsselte Nachricht <code>ToX VTxLTk</code> ab. Der Schlüssel ist 19.
+					Entschlüssle den Text, ohne das Leerzeichen zwischen den Wörtern zu verlieren und schreibe alles gross.
+				</p>
+				<p>
+					Ergänze alle TODO-Zeilen, um die
+					 Buchstaben jeweils 19 Stellen zurückzuschieben.
+				</p>
+				<ol class="python-hints">
+					<li>
+						<details class="python-hint-disclosure">
+							<summary>Hinweis 1</summary>
+							<p>Ein Leerzeichen steht nicht im Alphabet. Mit dem If-Statement kannst du es direkt in die Lösung hineinfügen.</p>
+						</details>
+					</li>
+					<li>
+						<details class="python-hint-disclosure">
+							<summary>Hinweis 2</summary>
+							<p><code>letter.upper()</code>transformiert alle Buchstaben in grossgeschriebene Versionen</p>
+						</details>
+					</li>
+					<li>
+						<details class="python-hint-disclosure">
+							<summary>Hinweis 3</summary>
+							<p><code>alphabet</code> enthält nur Grrossbuchstaben, heisst du <code>index()</code> darf auuch nur Grossbuchstaben enthalten</p>
+						</details>
+					</li>
+				</ol>
+				<label class="python-editor-label" for="caesarDecryptPythonCode">Dein Python-Code</label>
+				<textarea class="python-code-editor" id="caesarDecryptPythonCode" spellcheck="false" autocapitalize="off" aria-describedby="caesarDecryptPythonHelp">
+					text = "ToX VTxLTk"
+					key = 19
+					alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+					decrypted = ""
+
+					for letter in text:
+						# TODO 1: Füge die Leertaste seperat hinzu, da sie nicht im Alphabet vorkommt.
+						if a == b:
+							print(" ")
+						else:
+							# TODO 2: Finde die Nummer des Buchstabens im Alphabet.
+							position = 0
+							# TODO 3: Ziehe den Schlüssel ab und bleibe zwischen 0 und 25.
+							decrypted_letter = alphabet[]
+							decrypted += decrypted_letter
+
+					print(decrypted)
+				</textarea>
+				<p class="python-help" id="caesarDecryptPythonHelp">
+					Ergänze alle TODOs und starte dann den Code.
+				</p>
+				<div class="python-actions">
+					<button class="python-run-button" type="button" data-python-run>Python starten</button>
+					<button class="python-reset-button" type="button" data-python-reset="caesarDecryptPythonCode" aria-label="Python-Code zurücksetzen" title="Code zurücksetzen">Zurücksetzen</button>
+				</div>
+				<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
+			</article>
+			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Beide Python-Aufgaben sind gelöst. Die Übung wird jetzt als abgeschlossen markiert.</p>
 		</section>
 	</main>
 </body>

@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<title>Asymmetrische Verschlüsselung</title>
+	<link rel="stylesheet" href="/static/css/theme.css">
+	<link rel="stylesheet" href="/static/css/exercises.css">
+	<script src="/static/js/exercise-theme.js" defer></script>
+	<script src="/static/js/exercise-tasks.js?v=7" defer></script>
+</head>
+<body>
+	<main class="lesson">
+		<header class="lesson-header">
+			<p class="eyebrow">Lektion 07 · Ein Schlüsselpaar</p>
+			<h1>Asymmetrische Verschlüsselung</h1>
+			<p class="lead">
+				Wie kann Mira jemandem eine geheime Nachricht schicken, ohne vorher einen gemeinsamen
+				Schlüssel auszutauschen? Ein öffentliches und ein privates Schlüsselpaar hilft dabei.
+			</p>
+		</header>
+
+		<section class="lesson-section" aria-labelledby="prinzip-title">
+			<p class="section-label">Das Prinzip</p>
+			<h2 id="prinzip-title">Zwei zusammengehörige Schlüssel</h2>
+			<p>
+				Bei asymmetrischer Kryptografie besitzt eine Person ein <strong>Schlüsselpaar</strong>:
+				einen öffentlichen Schlüssel und einen privaten Schlüssel. Der öffentliche Schlüssel
+				darf geteilt werden. Der private Schlüssel bleibt geheim und wird sicher aufbewahrt.
+				Beide Schlüssel hängen mathematisch zusammen, aber aus dem öffentlichen Schlüssel soll
+				sich der private praktisch nicht berechnen lassen.
+			</p>
+			<div class="worked-example" aria-label="Ablauf zum vertraulichen Senden einer Nachricht">
+				<p><strong>Senden:</strong> Klartext + Empfängerin Miras öffentlicher Schlüssel → Geheimtext</p>
+				<p><strong>Lesen:</strong> Geheimtext + Miras privater Schlüssel → Klartext</p>
+			</div>
+			<p>
+				Möchte Noé Mira eine vertrauliche Nachricht schicken, verschlüsselt er sie mit Miras
+				öffentlichem Schlüssel. Nur Mira kann sie mit dem passenden privaten Schlüssel
+				entschlüsseln. Noé braucht Miras privaten Schlüssel dafür nicht.
+			</p>
+			<aside class="note">
+				<strong>Wichtig:</strong> Ein öffentlicher Schlüssel darf öffentlich sein, aber Noé muss
+				sicher sein, dass er wirklich zu Mira gehört. Sonst könnte eine andere Person ihren
+				eigenen öffentlichen Schlüssel als Miras ausgeben.
+			</aside>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="anwendungen-title">
+			<p class="section-label">Verschlüsseln, unterschreiben, vereinbaren</p>
+			<h2 id="anwendungen-title">Drei Aufgaben für Schlüssel</h2>
+			<p>
+				Asymmetrische Verfahren können für unterschiedliche Aufgaben eingesetzt werden. Bei
+				<strong>Vertraulichkeit</strong> verschlüsselt der Sender mit dem öffentlichen Schlüssel
+				der Empfängerin; entschlüsselt wird mit deren privatem Schlüssel.
+			</p>
+			<p>
+				Eine <strong>digitale Signatur</strong> funktioniert anders als Verschlüsselung: Die
+				signierende Person erstellt sie mit ihrem privaten Schlüssel. Andere prüfen sie mit dem
+				zugehörigen öffentlichen Schlüssel. So lässt sich feststellen, ob die Signatur zum
+				passenden Schlüssel gehört und die signierten Daten verändert wurden. Eine Signatur
+				macht eine Nachricht nicht automatisch geheim.
+			</p>
+			<p>
+				<strong>RSA</strong> ist ein bekanntes asymmetrisches Verfahren, das unter anderem für
+				Verschlüsselung und Signaturen eingesetzt werden kann. <strong>Diffie–Hellman</strong>
+				hat eine andere Aufgabe: Zwei Seiten können damit über einen öffentlichen Kanal ein
+				gemeinsames Geheimnis ableiten. Es verschlüsselt nicht selbst die anschliessenden
+				Nachrichten.
+			</p>
+			<div class="worked-example" aria-label="Asymmetrische und symmetrische Verfahren zusammen">
+				<p><strong>In der Praxis:</strong> Asymmetrische Kryptografie hilft beim sicheren
+					Vereinbaren oder Schützen eines Schlüssels.</p>
+				<p>Ein schnelles symmetrisches Verfahren schützt danach oft die eigentlichen Daten.</p>
+			</div>
+			<p>
+				Asymmetrische Verfahren erleichtern den Schlüsselaustausch, benötigen aber mehr
+				Rechenaufwand als symmetrische Verfahren. Darum werden beide Ansätze häufig kombiniert.
+				Wie bei anderen Kryptoverfahren soll die Sicherheit nicht davon abhängen, dass der
+				Algorithmus geheim bleibt: Geschützt werden müssen die privaten Schlüssel.
+			</p>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="aufgaben-title">
+			<p class="section-label">Drei kurze Situationen</p>
+			<h2 id="aufgaben-title">Ordne Schlüssel und Verfahren zu</h2>
+			<div class="task-list">
+				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Zum asymmetrischen Verfahren gehören ein öffentlicher Schlüssel und ein privater Schlüssel. Der öffentliche darf geteilt werden, der private bleibt geheim." data-incorrect-feedback="Tipp: Asymmetrisch bedeutet, dass zwei mathematisch zusammengehörige Schlüssel unterschiedliche Rollen haben.">
+					<p class="task-story">Mira richtet ein asymmetrisches Schlüsselpaar ein.</p>
+					<p class="task-prompt">Welche Aussage beschreibt dieses Paar?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Aussage zum Schlüsselpaar auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="same-secret">Beide Seiten teilen denselben geheimen Schlüssel</option>
+							<option value="key-pair">Es besteht aus einem öffentlichen und einem privaten Schlüssel</option>
+							<option value="two-public">Beide Schlüssel werden öffentlich verteilt</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Genau: Noé verschlüsselt mit Miras öffentlichem Schlüssel. Zum Entschlüsseln braucht Mira ihren privaten Schlüssel." data-incorrect-feedback="Tipp: Noé möchte eine Nachricht an Mira schicken. Welcher ihrer Schlüssel darf geteilt werden und kann zum Verschlüsseln für sie verwendet werden?">
+					<p class="task-story">Noé möchte Mira eine Nachricht schicken, die nur sie lesen kann.</p>
+					<p class="task-prompt">Mit welchem Schlüssel verschlüsselt Noé die Nachricht?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Schlüssel zum Verschlüsseln auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="Noés privater Schlüssel">Noés privater Schlüssel</option>
+							<option value="Miras privater Schlüssel">Miras privater Schlüssel</option>
+							<option value="Miras öffentlicher Schlüssel">Miras öffentlicher Schlüssel</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Diffie–Hellman ermöglicht es beiden Seiten, ein gemeinsames Geheimnis abzuleiten. Dieses kann anschliessend als Schlüssel für ein symmetrisches Verfahren dienen." data-incorrect-feedback="Tipp: Diffie–Hellman dient dem Vereinbaren eines gemeinsamen Geheimnisses. Es sendet den privaten Wert nicht an die andere Seite.">
+					<p class="task-story">Mira und Noé möchten über einen öffentlichen Kanal einen gemeinsamen Schlüssel vereinbaren.</p>
+					<p class="task-prompt">Wofür eignet sich Diffie–Hellman?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Einsatz von Diffie–Hellman auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="direct-encryption">Es verschlüsselt alle Nachrichten direkt, ohne weitere Verfahren</option>
+							<option value="shared-secret">Es hilft beiden Seiten, dasselbe gemeinsame Geheimnis abzuleiten</option>
+							<option value="send-private">Es überträgt den privaten Schlüssel an die andere Seite</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+			</div>
+			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle Aufgaben richtig gelöst. Die Lektion wird jetzt als abgeschlossen markiert.</p>
+		</section>
+	</main>
+</body>
+</html>

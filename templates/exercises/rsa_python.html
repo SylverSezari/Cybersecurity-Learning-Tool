@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="de">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="color-scheme" content="light dark">
+		<title>RSA mit Python</title>
+		<link rel="stylesheet" href="/static/css/theme.css">
+		<link rel="stylesheet" href="/static/css/exercises.css">
+		<script src="/static/js/exercise-theme.js" defer></script>
+		<script src="/static/js/exercise-tasks.js?v=7" defer></script>
+		<script src="/static/js/python-exercises.js?v=9" defer></script>
+	</head>
+	<body>
+		<main class="lesson">
+			<header class="lesson-header">
+				<p class="eyebrow">Python-Werkstatt · RSA</p>
+				<h1>RSA ver- und entschlüsseln mit Python</h1>
+				<p class="lead">
+					Nutze denselben winzigen Spielzeugschlüssel wie in der Rechenübung, um eine Zahl
+					mit Python zu verschlüsseln und wieder zu entschlüsseln.
+				</p>
+			</header>
+
+			<section class="lesson-section" aria-labelledby="python-theorie-title">
+				<p class="section-label">Die Bausteine im Code</p>
+				<h2 id="python-theorie-title">Was bedeuten die Werte?</h2>
+				<p>
+					Wir verwenden <code>n = 15</code>, den öffentlichen Exponenten <code>e = 3</code> und
+					den privaten Exponenten <code>d = 3</code>. Das sind absichtlich kleine Zahlen zum
+					Üben und kein sicherer RSA-Schlüssel. Die Nachricht ist ebenfalls eine Zahl.
+				</p>
+				<p>
+					Python hat eine eingebaute Funktion namens <code>pow()</code>. Mit zwei Werten berechnet
+					sie eine Potenz: <code>pow(2, 3)</code> bedeutet 2 hoch 3. Mit drei Werten berechnet sie
+					zusätzlich direkt den Rest:
+				</p>
+				<div class="worked-example" aria-label="Aufbau der Python-Funktion pow">
+					<p class="equation"><code>pow(zahl, exponent, modulus)</code></p>
+					<p>
+						Das entspricht mathematisch „zahl hoch exponent, Rest bei Division durch modulus“.
+						Zum Beispiel ergibt <code>pow(2, 3, 15)</code> den Wert 8, denn 2³ = 8 und der
+						Rest von 8 ÷ 15 ist 8.
+					</p>
+				</div>
+				<p>
+					Zum Verschlüsseln setzt du die Nachricht, den öffentlichen Exponenten und n in dieser
+					Reihenfolge ein: <code>pow(plaintext, public_exponent, modulus)</code>. Zum Entschlüsseln
+					verwendest du den Geheimtext, den privaten Exponenten und dasselbe n:
+					<code>pow(ciphertext, private_exponent, modulus)</code>. Die Funktion <code>print()</code>
+					zeigt das Ergebnis an.
+				</p>
+				<aside class="note">
+					<strong>Merke:</strong> <code>pow()</code> ist eine eingebaute Python-Funktion, du musst
+					kein Modul importieren. Die drei Argumente sind Basis, Exponent und Modulo-Zahl.
+					Echte RSA-Anwendungen gehören in bewährte Kryptografie-Bibliotheken.
+				</aside>
+			</section>
+
+			<section class="lesson-section" aria-labelledby="python-aufgaben-title">
+				<p class="section-label">Zwei kleine Programme</p>
+				<h2 id="python-aufgaben-title">Verschlüsseln und entschlüsseln</h2>
+				<article
+					class="python-exercise"
+					data-python-exercise
+					data-solution-index="0"
+					data-expected-output="13"
+					data-correct-feedback="Richtig: pow(7, 3, 15) berechnet den Rest von 7³ bei Division durch 15. Der Geheimtext ist 13."
+					data-incorrect-feedback="Noch nicht: Verwende pow(plaintext, public_exponent, modulus). Die drei Werte stehen in genau dieser Reihenfolge."
+					data-empty-feedback="Es wurde nichts ausgegeben. Ergänze die TODO-Zeile und prüfe, ob print(ciphertext) am Ende steht."
+				>
+					<p class="task-story">
+						Noé möchte die Zahl 7 mit dem öffentlichen Schlüssel (n = 15, e = 3)
+						verschlüsseln. Ergänze die TODO-Zeile, damit das Programm den Geheimtext ausgibt.
+					</p>
+					<ol class="python-hints">
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 1</summary>
+								<p>Setze die Nachricht zuerst, danach den öffentlichen Exponenten und zuletzt n ein.</p>
+							</details>
+						</li>
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 2</summary>
+								<p>Die vollständige Form ist <code>pow(plaintext, public_exponent, modulus)</code>.</p>
+							</details>
+						</li>
+					</ol>
+					<label class="python-editor-label" for="rsaEncryptPythonCode">Dein Python-Code</label>
+					<textarea
+						class="python-code-editor"
+						id="rsaEncryptPythonCode"
+						spellcheck="false"
+						autocapitalize="off"
+						aria-describedby="rsaEncryptPythonHelp"
+					>
+						plaintext = 7
+						public_exponent = 3
+						modulus = 15
+						ciphertext = 0  # TODO: Verschlüssele plaintext mit dem öffentlichen Schlüssel.
+
+						print(ciphertext)
+					</textarea>
+					<p class="python-help" id="rsaEncryptPythonHelp">
+						Ersetze nur die <code>0</code> in der TODO-Zeile und starte dann den Code.
+					</p>
+					<div class="python-actions">
+						<button class="python-run-button" type="button" data-python-run>Python starten</button>
+						<button class="python-reset-button" type="button" data-python-reset="rsaEncryptPythonCode" aria-label="Python-Code zurücksetzen" title="Code zurücksetzen">Zurücksetzen</button>
+					</div>
+					<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
+				</article>
+
+				<article
+					class="python-exercise"
+					data-python-exercise
+					data-solution-index="1"
+					data-expected-output="7"
+					data-correct-feedback="Richtig: pow(13, 3, 15) berechnet den Rest von 13³ bei Division durch 15. Mira erhält die ursprüngliche Nachricht 7 zurück."
+					data-incorrect-feedback="Noch nicht: Verwende den Geheimtext als Basis, den privaten Exponenten als Exponent und n als letzten Wert in pow()."
+					data-empty-feedback="Es wurde nichts ausgegeben. Ergänze die TODO-Zeile und prüfe, ob print(plaintext) am Ende steht."
+				>
+					<p class="task-story">
+						Mira erhält den Geheimtext 13. Ihr privater Schlüssel hat den Exponenten d = 3
+						und n = 15. Ergänze die TODO-Zeile, damit das Programm die Nachricht entschlüsselt.
+					</p>
+					<ol class="python-hints">
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 1</summary>
+								<p>Für die Basis verwendest du den Geheimtext. Der private Exponent ist der zweite Wert.</p>
+							</details>
+						</li>
+						<li>
+							<details class="python-hint-disclosure">
+								<summary>Hinweis 2</summary>
+								<p>Verwende <code>pow(ciphertext, private_exponent, modulus)</code>.</p>
+							</details>
+						</li>
+					</ol>
+					<label class="python-editor-label" for="rsaDecryptPythonCode">Dein Python-Code</label>
+					<textarea
+						class="python-code-editor"
+						id="rsaDecryptPythonCode"
+						spellcheck="false"
+						autocapitalize="off"
+						aria-describedby="rsaDecryptPythonHelp"
+					>
+						ciphertext = 13
+						private_exponent = 3
+						modulus = 15
+						plaintext = 0  # TODO: Entschlüssele ciphertext mit dem privaten Schlüssel.
+
+						print(plaintext)
+					</textarea>
+					<p class="python-help" id="rsaDecryptPythonHelp">
+						Ersetze nur die <code>0</code> in der TODO-Zeile und starte dann den Code.
+					</p>
+					<div class="python-actions">
+						<button class="python-run-button" type="button" data-python-run>Python starten</button>
+						<button class="python-reset-button" type="button" data-python-reset="rsaDecryptPythonCode" aria-label="Python-Code zurücksetzen" title="Code zurücksetzen">Zurücksetzen</button>
+					</div>
+					<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
+				</article>
+				<p class="tasks-complete" id="tasksComplete" role="status" hidden>
+					RSA-Verschlüsselung und Entschlüsselung abgeschlossen. Die Lektion wird jetzt als abgeschlossen markiert.
+				</p>
+			</section>
+		</main>
+	</body>
+</html>

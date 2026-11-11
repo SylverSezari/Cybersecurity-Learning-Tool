@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<title>RSA mit Zahlen</title>
+	<link rel="stylesheet" href="/static/css/theme.css">
+	<link rel="stylesheet" href="/static/css/exercises.css">
+	<script src="/static/js/exercise-theme.js" defer></script>
+	<script src="/static/js/exercise-tasks.js?v=7" defer></script>
+</head>
+<body>
+	<main class="lesson">
+		<header class="lesson-header">
+			<p class="eyebrow">Lektion 09 · RSA zum Nachrechnen</p>
+			<h1>RSA mit kleinen Zahlen</h1>
+			<p class="lead">
+				Bei RSA werden Zahlen verschlüsselt und entschlüsselt. Wir rechnen mit winzigen
+				Beispielschlüsseln, damit du den Ablauf nachvollziehen kannst.
+			</p>
+		</header>
+
+		<section class="lesson-section" aria-labelledby="schluessel-title">
+			<p class="section-label">Der Schlüssel entsteht</p>
+			<h2 id="schluessel-title">Von Primzahlen zu zwei Schlüsseln</h2>
+			<p>
+				Für ein vereinfachtes RSA-Beispiel wählen wir zwei Primzahlen, zum Beispiel
+				<strong>p = 3</strong> und <strong>q = 7</strong>. Wir multiplizieren sie:
+				<strong>n = p · q = 21</strong>. Die Zahl n kommt in den öffentlichen und den privaten
+				Schlüssel.
+			</p>
+			<p>
+				Für die nächste Rechnung bilden wir eine Hilfszahl aus den Vorgängern der Primzahlen:
+				<strong>(p − 1) · (q − 1) = 2 · 6 = 12</strong>. Wir wählen einen öffentlichen Exponenten
+				<strong>e = 5</strong> und einen privaten Exponenten <strong>d = 5</strong>, denn
+				5 · 5 = 25. Bei der Division von 25 durch 12 bleibt der Rest 1. Diese Rest-Eigenschaft
+				sorgt dafür, dass die Entschlüsselung die Verschlüsselung rückgängig macht.
+			</p>
+			<div class="worked-example" aria-label="Vereinfachtes RSA-Beispiel mit n gleich 21">
+				<p><strong>Öffentlicher Schlüssel:</strong> (n = 21, e = 5)</p>
+				<p><strong>Privater Schlüssel:</strong> (n = 21, d = 5)</p>
+				<p>Der öffentliche Schlüssel darf geteilt werden. Der private Schlüssel bleibt geheim.</p>
+			</div>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="rechnen-title">
+			<p class="section-label">Verschlüsseln und entschlüsseln</p>
+			<h2 id="rechnen-title">Immer den Rest nehmen</h2>
+			<p>
+				Für unser Beispiel ist die Nachricht eine Zahl <strong>P = 2</strong>. Zum Verschlüsseln
+				rechnen wir P hoch e und nehmen den Rest bei der Division durch n:
+			</p>
+			<div class="worked-example" aria-label="Verschlüsselung und Entschlüsselung des Zahlenwerts 2">
+				<p class="equation">Verschlüsseln: C = Rest von Pᵉ ÷ n</p>
+				<p>2⁵ = 32. Bei 32 ÷ 21 bleibt Rest 11. Der Geheimtext ist also C = 11.</p>
+				<p class="equation">Entschlüsseln: P = Rest von Cᵈ ÷ n</p>
+				<p>
+					11⁵ ist eine grosse Zahl. Wir können zwischendurch immer wieder den Rest nehmen:
+					11² = 121, Rest 16 bei Division durch 21; 11⁴ hat dann denselben Rest wie
+					16² = 256, also 4; 11⁵ hat denselben Rest wie 4 · 11 = 44, also 2. Die Nachricht
+					kommt wieder als P = 2 heraus.
+				</p>
+			</div>
+			<p>
+				<strong>Rest</strong> bedeutet, was bei einer Division übrig bleibt. In der Schreibweise
+				„mod n“ nehmen wir genau diesen Rest. So bleiben die Zahlen im Bereich von 0 bis n − 1.
+			</p>
+			<aside class="note">
+				<strong>Nur zum Lernen:</strong> Die Zahlen 3 und 7 sind viel zu klein für echte Sicherheit.
+				Reale RSA-Schlüssel sind enorm gross. In echten Anwendungen sollte man dafür bewährte
+				Kryptografie-Bibliotheken verwenden und RSA nicht selbst implementieren.
+			</aside>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="aufgaben-title">
+			<p class="section-label">Jetzt selbst rechnen</p>
+			<h2 id="aufgaben-title">Drei RSA-Schritte</h2>
+			<p>Verwende für alle Aufgaben diesen Spielzeugschlüssel: p = 3, q = 5, n = 15, e = 3 und d = 3.</p>
+			<div class="task-list">
+				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: n ist das Produkt der beiden Primzahlen, also 3 · 5 = 15." data-incorrect-feedback="Tipp: Multipliziere p und q, um n zu erhalten.">
+					<p class="task-story">Der öffentliche und der private Schlüssel enthalten beide n.</p>
+					<p class="task-prompt">Berechne n aus p = 3 und q = 5.</p>
+					<div class="task-answer-row">
+						<input class="task-answer" type="number" step="1" aria-label="Wert von n">
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Richtig: 7³ = 343. Beim Teilen durch 15 bleibt Rest 13, also ist der Geheimtext C = 13." data-incorrect-feedback="Tipp: Rechne 7 · 7 · 7 und teile das Ergebnis durch n = 15. Gib den Rest ein.">
+					<p class="task-story">Noé möchte die Zahl P = 7 mit dem öffentlichen Exponenten e = 3 verschlüsseln.</p>
+					<p class="task-prompt">Welcher Geheimtext entsteht bei n = 15? Gib den Rest von 7³ ÷ 15 ein.</p>
+					<div class="task-answer-row">
+						<input class="task-answer" type="number" step="1" aria-label="RSA-Geheimtext">
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: 13³ = 2197. Bei der Division durch 15 bleibt Rest 7, also erhält Mira die ursprüngliche Nachricht P = 7 zurück." data-incorrect-feedback="Tipp: Rechne 13 · 13 · 13 und teile durch n = 15. Der Rest ist die entschlüsselte Nachricht.">
+					<p class="task-story">Mira erhält C = 13. Zum Entschlüsseln verwendet sie d = 3 und n = 15.</p>
+					<p class="task-prompt">Welche Zahl bleibt als Rest von 13³ ÷ 15?</p>
+					<div class="task-answer-row">
+						<input class="task-answer" type="number" step="1" aria-label="Entschlüsselte RSA-Nachricht">
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+			</div>
+			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle RSA-Rechnungen gelöst. Die Lektion wird jetzt als abgeschlossen markiert.</p>
+		</section>
+	</main>
+</body>
+</html>

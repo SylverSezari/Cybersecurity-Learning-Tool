@@ -61,9 +61,7 @@ function highlightPythonComments(source) {
 	}).join("\n");
 }
 
-const pythonExercise = document.querySelector("[data-python-exercise]");
-
-if (pythonExercise) {
+document.querySelectorAll("[data-python-exercise]").forEach((pythonExercise) => {
 	const editor = pythonExercise.querySelector(".python-code-editor");
 	const runButton = pythonExercise.querySelector("[data-python-run]");
 	const output = pythonExercise.querySelector("[data-python-output]");
@@ -89,6 +87,39 @@ if (pythonExercise) {
 	updateEditorPresentation();
 
 	editor.addEventListener("input", updateEditorPresentation);
+	editor.addEventListener("keydown", (event) => {
+		const start = editor.selectionStart;
+		const end = editor.selectionEnd;
+		const pairs = { "(": ")", "[": "]", "{": "}", "'": "'", '"': '"' };
+
+		if (event.key === "Tab" && !event.shiftKey) {
+			event.preventDefault();
+			editor.setRangeText("    ", start, end, "end");		} else if (event.key === "Enter") {
+			event.preventDefault();
+			const lineStart = editor.value.lastIndexOf("\n", start - 1) + 1;
+			const currentLine = editor.value.slice(lineStart, start);
+			const indentation = currentLine.match(/^[\t ]*/)[0];
+			const extraIndentation = currentLine.trimEnd().endsWith(":") ? "    " : "";
+			editor.setRangeText(`\n${indentation}${extraIndentation}`, start, end, "end");
+		} else if (Object.hasOwn(pairs, event.key)) {
+			event.preventDefault();
+			const selectedText = editor.value.slice(start, end);
+			editor.setRangeText(`${event.key}${selectedText}${pairs[event.key]}`, start, end, "end");
+			editor.setSelectionRange(start + 1, start + 1 + selectedText.length);
+		} else if (
+			start === end
+			&& Object.values(pairs).includes(event.key)
+			&& editor.value[start] === event.key
+		) {
+			event.preventDefault();
+			editor.setSelectionRange(start + 1, start + 1);
+			return;
+		} else {
+			return;
+		}
+
+		editor.dispatchEvent(new Event("input", { bubbles: true }));
+	});
 	editor.addEventListener("scroll", () => {
 		lineNumbers.scrollTop = editor.scrollTop;
 		highlightedCode.scrollTop = editor.scrollTop;
@@ -118,10 +149,10 @@ if (pythonExercise) {
 		runButton.disabled = true;
 		pythonExercise.classList.remove("is-correct", "is-incorrect");
 		output.textContent = "Python wird im Browser gestartet. Beim ersten Start kann das Laden kurz dauern ...";
+		const printedLines = [];
 
 		try {
 			const pyodide = await getPyodideInstance();
-			const printedLines = [];
 			pyodide.setStdout({ batched: (line) => printedLines.push(line) });
 			try {
 				await pyodide.runPythonAsync(editor.value);
@@ -131,7 +162,9 @@ if (pythonExercise) {
 
 			const result = printedLines.join("\n").trim();
 			pythonExercise.dataset.result = result;
-			const isCorrect = result === pythonExercise.dataset.expectedOutput;
+			const normalizeOutput = (value) => value.normalize("NFC").trim().toLocaleUpperCase("de-CH");
+			const isCorrect = normalizeOutput(result)
+				=== normalizeOutput(pythonExercise.dataset.expectedOutput);
 			pythonExercise.classList.toggle("is-correct", isCorrect);
 			pythonExercise.classList.toggle("is-incorrect", !isCorrect);
 			pythonExercise.dataset.solved = String(isCorrect);
@@ -147,9 +180,10 @@ if (pythonExercise) {
 		} catch (error) {
 			pythonExercise.dataset.solved = "false";
 			pythonExercise.classList.add("is-incorrect");
-			output.textContent = `Python-Fehler:\n${error.message}`;
+			const partialOutput = printedLines.join("\n").trim();
+			output.textContent = `Python-Fehler:\n${error.message}${partialOutput ? `\n\nAusgabe vor dem Fehler:\n${partialOutput}` : ""}`;
 		} finally {
 			runButton.disabled = false;
 		}
 	});
-}
+});

@@ -43,6 +43,26 @@ async function loadExercise() {
 
 const completeButton = document.getElementById("completeExercise");
 
+async function refreshExerciseNavigation() {
+	const sidebar = document.querySelector(".task-sidebar");
+	if (!sidebar) return;
+
+	try {
+		const response = await fetch(window.location.href, {
+			headers: { Authorization: `Bearer ${accessToken}` },
+			cache: "no-store",
+		});
+		if (!response.ok) return;
+
+		const refreshedSidebar = new DOMParser()
+			.parseFromString(await response.text(), "text/html")
+			.querySelector(".task-sidebar");
+		if (refreshedSidebar) sidebar.replaceWith(refreshedSidebar);
+	} catch {
+		// Completion is already saved; a navigation refresh can be retried on the next page load.
+	}
+}
+
 async function submitExerciseCompletion(answers) {
 	// The API checks both completion answers and prerequisite locks before persisting progress.
 	if (completionPending) return;
@@ -85,6 +105,7 @@ async function submitExerciseCompletion(answers) {
 			completionLabel.textContent = "Abgeschlossen";
 			currentExerciseName.append(completionLabel);
 		}
+		await refreshExerciseNavigation();
 		exerciseFrame?.contentWindow?.postMessage(
 			{ type: "exercise-completion-saved" },
 			"*",

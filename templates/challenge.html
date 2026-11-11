@@ -3,7 +3,7 @@
 {% block content %}
 <section class="task-workspace" aria-label="Kapitelübungen">
 	{# The sidebar shows sequence, completion, and prerequisite locks for this chapter. #}
-	<aside class="task-sidebar">
+	<aside class="task-sidebar" data-chapter-id="{{ chapter.id }}">
 			<a class="task-back-link" href="{{ url_for('chapters') }}">&larr; Alle Kapitel</a>
 		<p class="section-kicker">Kapitel</p>
 		<h2 class="task-chapter-title">{{ chapter.title }}</h2>
@@ -12,7 +12,12 @@
 				{% for item in exercises %}
 				<li>
 					{% if item.id in locked_by %}
-					<span class="task-exercise-link is-locked" aria-disabled="true">
+					<span
+						class="task-exercise-link is-locked"
+						aria-disabled="true"
+						data-exercise-id="{{ item.id }}"
+						data-exercise-url="{{ url_for('task_exercise', chapter_id=chapter.id, exercise_id=item.id) }}"
+					>
 						<span class="task-exercise-number">{{ "%02d"|format(loop.index) }}</span>
 						<span class="task-exercise-name">{{ item.title }}<small>Gesperrt</small></span>
 					</span>
@@ -20,6 +25,8 @@
 					<a
 						class="task-exercise-link{% if exercise and item.id == exercise.id %} is-current{% endif %}"
 						href="{{ url_for('task_exercise', chapter_id=chapter.id, exercise_id=item.id) }}"
+						data-exercise-id="{{ item.id }}"
+						data-exercise-url="{{ url_for('task_exercise', chapter_id=chapter.id, exercise_id=item.id) }}"
 						{% if exercise and item.id == exercise.id %}aria-current="page"{% endif %}
 					>
 						<span class="task-exercise-number">{{ "%02d"|format(loop.index) }}</span>
@@ -86,5 +93,5 @@
 {% endblock content %}
 
 {% block scripts %}
-<script src="{{ url_for('static', path='js/exercise-player.js') }}?v=2" defer></script>
+<script src="{{ url_for('static', path='js/exercise-player.js') }}?v=4" defer></script>
 {% endblock scripts %}

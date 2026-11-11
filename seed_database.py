@@ -29,7 +29,7 @@ EXERCISES = (
     },
     {
         "title": "Symmetrische Verschlüsselung",
-        "html_filename": "exercise2.html",
+        "html_filename": "symmetric.html",
         "solution": ["same-key", "AES", True],
         "requires_previous": False,
         "position": 1,

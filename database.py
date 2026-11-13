@@ -32,6 +32,7 @@ async def init_db():
         models.Exercise.__tablename__,
         models.Account.__tablename__,
         models.ExerciseCompletion.__tablename__,
+        models.Challenge.__tablename__,
     }
 
     async with engine.begin() as connection:
@@ -57,6 +58,79 @@ async def init_db():
         if "picture" not in chapter_columns:
             await connection.execute(
                 text("ALTER TABLE chapters ADD COLUMN picture VARCHAR")
+            )
+
+        # Add challenge-run fields in place so existing learner accounts are preserved.
+        account_columns = await connection.run_sync(
+            lambda sync_connection: {
+                column["name"]
+                for column in inspect(sync_connection).get_columns("accounts")
+            }
+        )
+
+        if "record_time" not in account_columns:
+            await connection.execute(
+                text("ALTER TABLE accounts ADD COLUMN record_time INTEGER")
+            )
+
+        if "start_time" not in account_columns:
+            await connection.execute(
+                text("ALTER TABLE accounts ADD COLUMN start_time DATETIME")
+            )
+
+        if "end_time" not in account_columns:
+            await connection.execute(
+                text("ALTER TABLE accounts ADD COLUMN end_time DATETIME")
+            )
+
+        if "previous_record_time" not in account_columns:
+            await connection.execute(
+                text("ALTER TABLE accounts ADD COLUMN previous_record_time INTEGER")
+            )
+
+        if "current_challenge_id" not in account_columns:
+            await connection.execute(
+                text("ALTER TABLE accounts ADD COLUMN current_challenge_id INTEGER")
+            )
+
+        if "current_challenge_complete" not in account_columns:
+            await connection.execute(
+                text(
+                    "ALTER TABLE accounts ADD COLUMN "
+                    "current_challenge_complete BOOLEAN NOT NULL DEFAULT 0"
+                )
+            )
+
+        # Upgrade older challenge tables and assign a stable initial order by ID.
+        challenge_columns = await connection.run_sync(
+            lambda sync_connection: {
+                column["name"]
+                for column in inspect(sync_connection).get_columns("challenges")
+            }
+        )
+
+        if "position" not in challenge_columns:
+            await connection.execute(
+                text(
+                    "ALTER TABLE challenges "
+                    "ADD COLUMN position INTEGER NOT NULL DEFAULT -1"
+                )
+            )
+            challenge_ids = await connection.execute(
+                text("SELECT id FROM challenges ORDER BY id")
+            )
+            for position, (challenge_id,) in enumerate(challenge_ids):
+                await connection.execute(
+                    text(
+                        "UPDATE challenges SET position = :position WHERE id = :id"
+                    ),
+                    {"position": position, "id": challenge_id},
+                )
+
+        # Challenge answers are generated per run; discard legacy stored answer keys.
+        if "solution" in challenge_columns:
+            await connection.execute(
+                text("ALTER TABLE challenges DROP COLUMN solution")
             )
 
         exercise_columns = await connection.run_sync(

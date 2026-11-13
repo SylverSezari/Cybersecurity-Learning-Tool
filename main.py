@@ -13,9 +13,10 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 import models
+import challenge_pages
 from database import engine, get_db, init_db
 from exercise_progress import get_exercise_progress
-from routers import accounts, chapters, exercises
+from routers import accounts, challenges, chapters, exercises
 from routers import progress as progress_router
 from security import (
     Principal,
@@ -81,8 +82,11 @@ async def _ensure_existing_user_account(
 
 app.include_router(chapters.router, prefix="/api/chapters", tags=["chapters"])
 app.include_router(exercises.router, prefix="/api/exercises", tags=["exercises"])
+# API routes check answers; the page routes below manage learner-facing run navigation.
+app.include_router(challenges.router, prefix="/api/challenges", tags=["challenges"])
 app.include_router(accounts.router, prefix="/api/accounts", tags=["accounts"])
 app.include_router(progress_router.router, prefix="/api/progress", tags=["progress"])
+app.include_router(challenge_pages.router)
 
 
 # Web functions
@@ -110,6 +114,7 @@ async def home(
             url=request.url_for("login_page"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
+    await challenge_pages.abandon_active_run(db, principal)
     chapter_result = await db.execute(
         select(models.Chapter)
         .options(selectinload(models.Chapter.exercises))
@@ -135,20 +140,35 @@ async def home(
     return templates.TemplateResponse(
         request,
         "home.html",
-        {"chapters": chapters, "completed_exercise_ids": completed_ids},
+        {
+            "chapters": chapters,
+            "completed_exercise_ids": completed_ids,
+            # Admins manage challenge content but cannot start learner runs.
+            "can_run_challenges": principal["role"] == "user",
+        },
     )
 
 
 ## login
 @app.get("/login", include_in_schema=False, name="login_page")
-async def login_page(request: Request):
+async def login_page(
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal | None, Depends(get_optional_page_principal)],
+):
     # Render the sign-in form.
+    await challenge_pages.abandon_active_run(db, principal)
     return templates.TemplateResponse(request, "login.html", {"title": "Anmelden"})
 
 
 @app.get("/logout", include_in_schema=False, name="logout")
-async def logout(request: Request):
+async def logout(
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal | None, Depends(get_optional_page_principal)],
+):
     # Clear the browser's HTTP-only access cookie and return to sign-in.
+    await challenge_pages.abandon_active_run(db, principal)
     response = RedirectResponse(url="/login", status_code=status.HTTP_303_SEE_OTHER)
     response.delete_cookie(
         "access_token",
@@ -162,8 +182,13 @@ async def logout(request: Request):
 
 ## account management
 @app.get("/account", include_in_schema=False, name="account_page")
-async def account_page(request: Request):
+async def account_page(
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal | None, Depends(get_optional_page_principal)],
+):
     # Render the administration interface; the client guard checks the role.
+    await challenge_pages.abandon_active_run(db, principal)
     return templates.TemplateResponse(
         request, "account.html", {"title": "Kontoverwaltung"}
     )
@@ -172,9 +197,12 @@ async def account_page(request: Request):
 ## chapter select
 @app.get("/chapters", include_in_schema=False, name="chapters")
 async def chapter_select(
-    request: Request, db: Annotated[AsyncSession, Depends(get_db)]
+    request: Request,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal | None, Depends(get_optional_page_principal)],
 ):
     # List active chapters in their configured learning order.
+    await challenge_pages.abandon_active_run(db, principal)
     result = await db.execute(
         select(models.Chapter)
         .where(models.Chapter.active.is_(True))
@@ -198,8 +226,10 @@ async def chapter_task(
     chapter_id: int,
     request: Request,
     db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal | None, Depends(get_optional_page_principal)],
 ):
     # Open a chapter at its first exercise, or show its empty-state message.
+    await challenge_pages.abandon_active_run(db, principal)
     result = await db.execute(
         select(models.Chapter)
         .options(selectinload(models.Chapter.exercises))
@@ -217,7 +247,7 @@ async def chapter_task(
     if not chapter.exercises:
         return templates.TemplateResponse(
             request,
-            "challenge.html",
+            "exerciseframe.html",
             {
                 "chapter": chapter,
                 "exercises": [],
@@ -248,6 +278,7 @@ async def task_exercise(
 ):
     # Render one active exercise together with the learner's lock state.
     await _ensure_existing_user_account(db, principal)
+    await challenge_pages.abandon_active_run(db, principal)
     result = await db.execute(
         select(models.Chapter)
         .options(selectinload(models.Chapter.exercises))
@@ -288,7 +319,7 @@ async def task_exercise(
 
     return templates.TemplateResponse(
         request,
-        "challenge.html",
+        "exerciseframe.html",
         {
             "chapter": chapter,
             "exercises": chapter.exercises,

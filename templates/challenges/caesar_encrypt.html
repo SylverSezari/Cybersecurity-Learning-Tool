@@ -1,0 +1,34 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Caesar verschlüsseln</title>
+  <link rel="stylesheet" href="/static/css/theme.css">
+  <link rel="stylesheet" href="/static/css/exercises.css">
+  <script src="/static/js/exercise-tasks.js?v=8" defer></script>
+  <script src="/static/js/randomized-cipher.js?v=1" defer></script>
+</head>
+<body>
+  <main class="lesson">
+    <section class="lesson-section">
+      <p class="section-label">Zufällige Caesar-Aufgabe</p>
+      <h1 id="cipherTaskHeading">Caesar verschlüsseln</h1>
+      <div class="task-list">
+        <article class="exercise-task" data-solution-index="0">
+          <p class="task-story" id="cipherTaskStory">Verschlüssle die Buchstaben mit dem angegebenen Schlüssel.</p>
+          <p class="task-prompt">Klartext: <strong id="cipherText"></strong></p>
+          <p class="task-prompt">Schlüssel: <strong id="cipherKey"></strong></p>
+          <div class="task-answer-row">
+            <input class="task-answer" type="text" autocomplete="off" autocapitalize="characters" spellcheck="false" aria-label="Antwort eingeben">
+            <button class="check-answer" type="button" disabled>Prüfen</button>
+          </div>
+          <p class="task-feedback" role="status" aria-live="polite"></p>
+        </article>
+      </div>
+      <p class="tasks-complete" id="tasksComplete" role="status" hidden>Richtig. Du kannst fortfahren.</p>
+    </section>
+  </main>
+</body>
+</html>

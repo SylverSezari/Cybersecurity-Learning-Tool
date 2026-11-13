@@ -1,0 +1,25 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{# Times and record status are calculated from the persisted UTC timestamps and best time. #}
+<section class="challenge-page challenge-victory" aria-labelledby="challenge-victory-title">
+	<p class="section-kicker">Challenge abgeschlossen</p>
+	<h1 id="challenge-victory-title">Geschafft!</h1>
+	{% if is_record %}
+	<p class="challenge-new-record" role="status">Neuer Rekord</p>
+	{% endif %}
+	<dl class="challenge-results">
+		<div>
+			<dt>Deine Zeit</dt>
+			<dd>{{ current_time }}</dd>
+		</div>
+		<div>
+			<dt>Dein bisheriger Rekord</dt>
+			<dd>{{ previous_record or "Noch kein Rekord" }}</dd>
+		</div>
+	</dl>
+	<a class="challenge-primary-button challenge-return-button" href="{{ url_for('challenge_intro') }}">
+		Zur Challenge-Startseite
+	</a>
+</section>
+{% endblock content %}

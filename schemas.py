@@ -1,5 +1,7 @@
 # Validated request and response shapes for the HTTP API.
 
+from datetime import datetime
+
 from pydantic import BaseModel, Field, StrictBool, StrictFloat, StrictInt, StrictStr
 
 # Strict scalar members prevent JSON booleans and numbers from being coerced silently.
@@ -99,13 +101,13 @@ class AccountResponse(BaseModel):
 
 ### for post requests
 class AccountCreate(BaseModel):
-    username: str = Field(min_length=1, max_length=20)
-    password: str = Field(min_length=4)
+    username: str = Field(min_length=1, max_length=40)
+    password: str = Field(min_length=4, max_length=20)
 
 
 class AccountPut(BaseModel):
-    username: str | None = Field(default=None, min_length=1, max_length=20)
-    password: str | None = Field(default=None, min_length=4)
+    username: str | None = Field(default=None, min_length=1, max_length=40)
+    password: str | None = Field(default=None, min_length=4, max_length=20)
 
 
 class AccountLogin(BaseModel):
@@ -117,3 +119,47 @@ class AccountLogin(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+## Challenges
+
+
+# Challenge answer keys are generated per run and are never part of challenge metadata.
+class ChallengeResponse(BaseModel):
+    id: int
+    title: str = Field(min_length=1, max_length=100)
+    html_filename: str = Field(min_length=1, max_length=100)
+    position: int
+
+
+class ChallengeCreate(BaseModel):
+    title: str = Field(min_length=1, max_length=100)
+    html_filename: str = Field(min_length=1, max_length=100)
+
+
+class ChallengeOrder(BaseModel):
+    # The API accepts a full permutation, not a partial move operation.
+    challenge_ids: list[int]
+
+
+class ChallengeUpdate(BaseModel):
+    title: str | None = Field(default=None, min_length=1, max_length=100)
+    html_filename: str | None = Field(default=None, min_length=1, max_length=100)
+
+
+class ChallengeCheckRequest(BaseModel):
+    # Strict scalar types keep JSON booleans distinct from numeric answers.
+    answers: SolutionList
+
+
+class ChallengeCheckResponse(BaseModel):
+    # Completion unlocks the separate next/finish form; it does not advance by itself.
+    completed: bool
+    is_last: bool
+
+
+class AccountChallengeTiming(BaseModel):
+    # Timestamps are UTC-aware; record_time is a non-negative millisecond duration.
+    start_time: datetime | None = None
+    end_time: datetime | None = None
+    record_time: int | None = Field(default=None, ge=0)

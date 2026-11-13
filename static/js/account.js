@@ -12,10 +12,20 @@ const updateExerciseSelect = document.getElementById("updateExerciseSelect");
 const deleteExerciseSelect = document.getElementById("deleteExerciseSelect");
 const exerciseStatus = document.getElementById("exerciseStatus");
 const accountStatus = document.getElementById("accountsStatus");
+const challengeStatus = document.getElementById("challengeStatus");
 const updateAccountSelect = document.getElementById("updateAccountSelect");
 const deleteAccountSelect = document.getElementById("deleteAccountSelect");
+const updateChallengeSelect = document.getElementById("updateChallengeSelect");
+const deleteChallengeSelect = document.getElementById("deleteChallengeSelect");
+const challengeOrderList = document.getElementById("challengeOrderList");
+const saveChallengeOrder = document.getElementById("saveChallengeOrder");
+const challengeOrderHint = document.getElementById("challengeOrderHint");
 let chapters = [];
 let exercises = [];
+let challenges = [];
+// Keep the saved server order separate from the admin's unsaved draft.
+let savedChallengeOrder = [];
+let draftChallengeOrder = [];
 let savedExerciseOrders = new Map();
 let exerciseOrderDrafts = new Map();
 let accounts = [];
@@ -37,6 +47,11 @@ const apiErrorMessages = new Map([
 	["Include each existing chapter exactly once", "Jedes vorhandene Kapitel muss genau einmal enthalten sein."],
 	["Exercise with this title already created", "Eine Übung mit diesem Titel existiert bereits."],
 	["Exercise with this filename already created", "Eine Übung mit diesem Dateinamen existiert bereits."],
+	["Challenge not found", "Challenge nicht gefunden."],
+	["Challenge with this title already exists", "Eine Challenge mit diesem Titel existiert bereits."],
+	["Challenge with this filename already exists", "Eine Challenge mit diesem Dateinamen existiert bereits."],
+	["Challenge file has no registered randomizer", "Für diese Challenge-Datei ist kein Zufallsgenerator registriert."],
+	["Include each challenge exactly once", "Jede Challenge muss genau einmal in der Reihenfolge enthalten sein."],
 	["Position already assigned", "Diese Position ist bereits vergeben."],
 	["Include each assigned exercise exactly once", "Jede zugewiesene Übung muss genau einmal enthalten sein."],
 	["User account required", "Ein Benutzerkonto ist erforderlich."],
@@ -116,9 +131,7 @@ function readSolutions(containerId) {
 
 document.querySelectorAll("[data-add-solution]").forEach((button) => {
 	button.addEventListener("click", () => {
-		const containerId = button.dataset.addSolution === "new"
-			? "newExerciseSolutions"
-			: "updateExerciseSolutions";
+		const containerId = button.dataset.addSolution;
 		const row = createSolutionRow();
 		document.getElementById(containerId).append(row);
 		row.querySelector(".solution-value").focus();
@@ -129,6 +142,7 @@ function setStatus(message) {
 	if (statusMessage) statusMessage.textContent = message;
 	if (exerciseStatus) exerciseStatus.textContent = message;
 	if (accountStatus) accountStatus.textContent = message;
+	if (challengeStatus) challengeStatus.textContent = message;
 }
 
 // Chapter activation and ordering are edited locally, then saved as one validated snapshot.
@@ -606,6 +620,105 @@ async function loadAccounts() {
 	setStatus(`${accounts.length} Benutzerkonten geladen`);
 }
 
+function challengeOrderChanged() {
+	// The save button is enabled only while the local ordering differs from the server.
+	const dirty = JSON.stringify(draftChallengeOrder) !== JSON.stringify(savedChallengeOrder);
+	saveChallengeOrder.disabled = !dirty;
+	challengeOrderHint.textContent = dirty
+		? "Reihenfolge geändert. Speichere, um die Änderungen zu übernehmen."
+		: "Änderungen an der Reihenfolge sind noch nicht gespeichert.";
+}
+
+function renderChallengeOrder() {
+	// Rebuild the list from IDs so moving items never changes challenge definitions.
+	const byId = new Map(challenges.map((challenge) => [challenge.id, challenge]));
+	challengeOrderList.replaceChildren();
+	draftChallengeOrder.forEach((challengeId, index) => {
+		const challenge = byId.get(challengeId);
+		if (!challenge) return;
+		const row = document.createElement("li");
+		row.className = "chapter-row";
+		const title = document.createElement("span");
+		title.className = "chapter-row-title";
+		title.textContent = challenge.title;
+		const filename = document.createElement("span");
+		filename.className = "catalog-metadata";
+		filename.textContent = challenge.html_filename;
+		const details = document.createElement("div");
+		details.append(title, filename);
+		const controls = document.createElement("div");
+		controls.className = "challenge-order-controls";
+		const moveUp = document.createElement("button");
+		moveUp.className = "move-button";
+		moveUp.type = "button";
+		moveUp.textContent = "↑";
+		moveUp.setAttribute("aria-label", `${challenge.title} nach oben verschieben`);
+		moveUp.disabled = index === 0;
+		const moveDown = document.createElement("button");
+		moveDown.className = "move-button";
+		moveDown.type = "button";
+		moveDown.textContent = "↓";
+		moveDown.setAttribute("aria-label", `${challenge.title} nach unten verschieben`);
+		moveDown.disabled = index === draftChallengeOrder.length - 1;
+		moveUp.addEventListener("click", () => moveChallenge(index, -1));
+		moveDown.addEventListener("click", () => moveChallenge(index, 1));
+		controls.append(moveUp, moveDown);
+		row.append(details, controls);
+		challengeOrderList.append(row);
+	});
+	document.getElementById("challengeOrderEmpty").hidden = challenges.length > 0;
+	challengeOrderChanged();
+}
+
+function moveChallenge(index, offset) {
+	// Swap adjacent IDs and re-render so keyboard focus follows the moved row.
+	const targetIndex = index + offset;
+	if (targetIndex < 0 || targetIndex >= draftChallengeOrder.length) return;
+	[draftChallengeOrder[index], draftChallengeOrder[targetIndex]] =
+		[draftChallengeOrder[targetIndex], draftChallengeOrder[index]];
+	renderChallengeOrder();
+	challengeOrderList.children[targetIndex]?.querySelector(".move-button")?.focus();
+}
+
+function updateChallengeOptions() {
+	for (const select of [updateChallengeSelect, deleteChallengeSelect]) {
+		const selectedId = select.value;
+		select.replaceChildren(new Option("Challenge auswählen", ""));
+		for (const challenge of challenges) {
+			select.add(new Option(challenge.title, String(challenge.id)));
+		}
+		if (challenges.some((challenge) => String(challenge.id) === selectedId)) {
+			select.value = selectedId;
+		}
+		select.disabled = challenges.length === 0;
+	}
+	fillChallengeUpdateForm();
+}
+
+function fillChallengeUpdateForm() {
+	const challenge = challenges.find(
+		(item) => String(item.id) === updateChallengeSelect.value,
+	);
+	if (!challenge) {
+		document.getElementById("updateChallengeTitle").value = "";
+		document.getElementById("updateChallengeFilename").value = "";
+		return;
+	}
+	document.getElementById("updateChallengeTitle").value = challenge.title;
+	document.getElementById("updateChallengeFilename").value = challenge.html_filename;
+}
+
+async function loadChallenges() {
+	challenges = await apiRequest("/api/challenges");
+	challenges.sort((first, second) => first.position - second.position || first.id - second.id);
+	// A reload discards any stale draft and starts from the persisted server order.
+	savedChallengeOrder = challenges.map((challenge) => challenge.id);
+	draftChallengeOrder = [...savedChallengeOrder];
+	renderChallengeOrder();
+	updateChallengeOptions();
+	setStatus(`${challenges.length} Challenges geladen`);
+}
+
 document.querySelectorAll(".admin-nav-button").forEach((button) => {
 	button.addEventListener("click", () => {
 		document.querySelectorAll(".admin-nav-button").forEach((item) => {
@@ -613,7 +726,7 @@ document.querySelectorAll(".admin-nav-button").forEach((button) => {
 			if (item === button) item.setAttribute("aria-current", "page");
 			else item.removeAttribute("aria-current");
 		});
-		for (const section of ["chapters", "exercises", "accounts"]) {
+		for (const section of ["chapters", "exercises", "challenges", "accounts"]) {
 			document.getElementById(`${section}Section`).hidden = button.dataset.section !== section;
 		}
 	});
@@ -674,7 +787,75 @@ updateSelect.addEventListener("change", updateChapterOptions);
 exerciseChapterSelect.addEventListener("change", renderExerciseLists);
 document.getElementById("saveExerciseOrder").addEventListener("click", saveExerciseOrder);
 updateExerciseSelect.addEventListener("change", fillExerciseUpdateForm);
+updateChallengeSelect.addEventListener("change", fillChallengeUpdateForm);
 updateAccountSelect.addEventListener("change", fillAccountUpdateForm);
+
+// Challenge answer keys are generated per run from the registered challenge file.
+document.getElementById("addChallengeForm").addEventListener("submit", async (event) => {
+	event.preventDefault();
+	const title = document.getElementById("newChallengeTitle").value.trim();
+	const html_filename = document.getElementById("newChallengeFilename").value.trim();
+	if (!title || !html_filename) return;
+	try {
+		await apiRequest("/api/challenges", {
+			method: "POST",
+			body: JSON.stringify({ title, html_filename }),
+		});
+		event.target.reset();
+		await loadChallenges();
+		setStatus("Challenge hinzugefügt");
+	} catch (error) {
+		showError(error);
+	}
+});
+
+// Keep an edited challenge's HTML reference and answer key in sync with its server record.
+document.getElementById("updateChallengeForm").addEventListener("submit", async (event) => {
+	event.preventDefault();
+	const challengeId = updateChallengeSelect.value;
+	const title = document.getElementById("updateChallengeTitle").value.trim();
+	const html_filename = document.getElementById("updateChallengeFilename").value.trim();
+	if (!challengeId || !title || !html_filename) return;
+	try {
+		await apiRequest(`/api/challenges/update/${challengeId}`, {
+			method: "PUT",
+			body: JSON.stringify({ title, html_filename }),
+		});
+		await loadChallenges();
+		setStatus("Challenge aktualisiert");
+	} catch (error) {
+		showError(error);
+	}
+});
+
+// Removing a challenge also clears any learner run that points at it on the server.
+document.getElementById("deleteChallengeForm").addEventListener("submit", async (event) => {
+	event.preventDefault();
+	const challengeId = deleteChallengeSelect.value;
+	const challenge = challenges.find((item) => String(item.id) === challengeId);
+	if (!challenge || !window.confirm(`Möchtest du die Challenge „${challenge.title}“ löschen?`)) return;
+	try {
+		await apiRequest(`/api/challenges/delete/${challengeId}`, { method: "DELETE" });
+		await loadChallenges();
+		setStatus("Challenge gelöscht");
+	} catch (error) {
+		showError(error);
+	}
+});
+
+// Send the complete draft because the API validates the order as a full permutation.
+saveChallengeOrder.addEventListener("click", async () => {
+	try {
+		await apiRequest("/api/challenges/order", {
+			method: "PUT",
+			body: JSON.stringify({ challenge_ids: draftChallengeOrder }),
+		});
+		await loadChallenges();
+		setStatus("Challenge-Reihenfolge gespeichert");
+	} catch (error) {
+		showError(error);
+	}
+});
 
 // Account forms send only the fields the administrator intends to change.
 document.getElementById("addAccountForm").addEventListener("submit", async (event) => {
@@ -830,4 +1011,4 @@ window.addEventListener("beforeunload", (event) => {
 	}
 });
 
-Promise.all([loadChapters(), loadExercises(), loadAccounts()]).catch(showError);
+Promise.all([loadChapters(), loadExercises(), loadChallenges(), loadAccounts()]).catch(showError);

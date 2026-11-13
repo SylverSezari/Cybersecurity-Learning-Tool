@@ -16,13 +16,16 @@
 	</header>
 
 	<div class="admin-layout">
-		{# The navigation switches among the three administration workflows below. #}
+		{# The navigation switches among the administration workflows below. #}
 		<nav class="admin-sidebar" aria-label="Verwaltungsbereiche">
 			<button class="admin-nav-button is-selected" type="button" data-section="chapters" aria-current="page">
 				<span class="admin-nav-index"></span>Kapitel
 			</button>
 			<button class="admin-nav-button" type="button" data-section="exercises">
 				<span class="admin-nav-index"></span>Übungen
+			</button>
+			<button class="admin-nav-button" type="button" data-section="challenges">
+				<span class="admin-nav-index"></span>Challenges
 			</button>
 			<button class="admin-nav-button" type="button" data-section="accounts">
 				<span class="admin-nav-index"></span>Benutzerkonten
@@ -153,7 +156,7 @@
 						<input id="newExerciseFilename" type="text" maxlength="100" required />
 						<span class="solution-editor-label">Lösungen in Aufgabenreihenfolge</span>
 						<div class="solution-rows" id="newExerciseSolutions" aria-label="Lösungen für die neue Übung"></div>
-						<button class="action-button secondary-action solution-add-button" type="button" data-add-solution="new">Lösung hinzufügen</button>
+						<button class="action-button secondary-action solution-add-button" type="button" data-add-solution="newExerciseSolutions">Lösung hinzufügen</button>
 						<p class="form-hint">Keine Lösungen bedeutet: Diese Übung hat keine Aufgaben.</p>
 						<label class="exercise-setting-field" for="newExerciseRequiresPrevious">
 							<input id="newExerciseRequiresPrevious" type="checkbox" />
@@ -172,7 +175,7 @@
 						<input id="updateExerciseFilename" type="text" maxlength="100" required />
 						<span class="solution-editor-label">Lösungen in Aufgabenreihenfolge</span>
 						<div class="solution-rows" id="updateExerciseSolutions" aria-label="Lösungen für die ausgewählte Übung"></div>
-						<button class="action-button secondary-action solution-add-button" type="button" data-add-solution="update">Lösung hinzufügen</button>
+						<button class="action-button secondary-action solution-add-button" type="button" data-add-solution="updateExerciseSolutions">Lösung hinzufügen</button>
 						<p class="form-hint">Keine Lösungen bedeutet: Diese Übung hat keine Aufgaben.</p>
 						<label class="exercise-setting-field" for="updateExerciseRequiresPrevious">
 							<input id="updateExerciseRequiresPrevious" type="checkbox" />
@@ -186,6 +189,63 @@
 						<label for="deleteExerciseSelect">Übung</label>
 						<select id="deleteExerciseSelect" required></select>
 						<button class="action-button danger-action" type="submit">Übung löschen</button>
+					</form>
+				</aside>
+			</section>
+			{# Only registered randomized challenge types can be added to this sequence. #}
+			<section class="admin-section challenge-manager" id="challengesSection" hidden aria-labelledby="challenges-heading">
+				<div class="challenge-order-panel">
+					<header class="exercise-section-heading">
+						<div>
+							<p class="section-kicker">Zeit-Challenge</p>
+							<h2 id="challenges-heading">Challenge-Reihenfolge</h2>
+						</div>
+						<p class="account-status" id="challengeStatus" role="status" aria-live="polite"></p>
+					</header>
+					<p class="form-hint">
+						Die HTML-Dateien liegen in <code>templates/challenges/</code>.
+						Es können nur Challenge-Dateien mit registriertem Zufallsgenerator
+						verwendet werden: <code>caesar_encrypt.html</code>,
+						<code>caesar_decrypt.html</code>, <code>vigenere_encrypt.html</code>
+						oder <code>vigenere_decrypt.html</code>. Antworten werden pro Lauf
+						generiert und nicht gespeichert.
+					</p>
+					<ol class="chapter-list" id="challengeOrderList" aria-label="Challenge-Reihenfolge"></ol>
+					<p class="list-empty" id="challengeOrderEmpty" hidden>Erstelle zuerst eine Challenge.</p>
+					<div class="exercise-order-save">
+						<p id="challengeOrderHint">Änderungen an der Reihenfolge sind noch nicht gespeichert.</p>
+						<button class="action-button save-button" id="saveChallengeOrder" type="button" disabled>
+							Reihenfolge speichern
+						</button>
+					</div>
+				</div>
+
+				<aside class="exercise-tools" aria-label="Challenge-Aktionen">
+					<form class="chapter-tool-form" id="addChallengeForm">
+						<h3>Challenge hinzufügen</h3>
+						<label for="newChallengeTitle">Titel</label>
+						<input id="newChallengeTitle" type="text" maxlength="100" required />
+						<label for="newChallengeFilename">HTML-Dateiname</label>
+						<input id="newChallengeFilename" type="text" maxlength="100" required />
+						<button class="action-button" type="submit">Challenge hinzufügen</button>
+					</form>
+
+					<form class="chapter-tool-form" id="updateChallengeForm">
+						<h3>Challenge bearbeiten</h3>
+						<label for="updateChallengeSelect">Challenge</label>
+						<select id="updateChallengeSelect" required></select>
+						<label for="updateChallengeTitle">Titel</label>
+						<input id="updateChallengeTitle" type="text" maxlength="100" required />
+						<label for="updateChallengeFilename">HTML-Dateiname</label>
+						<input id="updateChallengeFilename" type="text" maxlength="100" required />
+						<button class="action-button secondary-action" type="submit">Challenge speichern</button>
+					</form>
+
+					<form class="chapter-tool-form delete-tool" id="deleteChallengeForm">
+						<h3>Challenge löschen</h3>
+						<label for="deleteChallengeSelect">Challenge</label>
+						<select id="deleteChallengeSelect" required></select>
+						<button class="action-button danger-action" type="submit">Challenge löschen</button>
 					</form>
 				</aside>
 			</section>

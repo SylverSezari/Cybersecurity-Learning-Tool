@@ -1,0 +1,38 @@
+{% extends "layout.html" %}
+
+{% block content %}
+{# The run starts only from this form, so the server records the start timestamp on submit. #}
+<section class="challenge-page challenge-intro" aria-labelledby="challenge-title">
+	<p class="section-kicker">Zeit-Challenge</p>
+	<h1 id="challenge-title">Bist du bereit?</h1>
+	{% if challenge_count %}
+	<p class="challenge-lead">
+		Löse {{ challenge_count }} Challenges nacheinander. Du kannst erst weitergehen,
+		wenn deine aktuelle Lösung richtig ist.
+	</p>
+	{% else %}
+	<p class="challenge-lead">Hier kannst du eine zeitlich gemessene Challenge-Reihe lösen.</p>
+	{% endif %}
+	<ol class="challenge-rules">
+		<li>Die Zeit startet, sobald du auf „Start“ klickst.</li>
+		<li>Gib bei jeder Challenge deine Lösung ein und prüfe sie.</li>
+		<li>Mit „Weiter“ geht es zur nächsten Challenge; mit „Beenden“ schliesst du den Lauf ab.</li>
+		<li>Wenn du aufgibst oder die Challenge verlässt, wird der Lauf abgebrochen.</li>
+	</ol>
+	{% if has_record %}
+	<p class="challenge-record">Dein bisheriger Rekord: <strong>{{ record_time }}</strong></p>
+	{% else %}
+	<p class="challenge-record">Du hast noch keinen Rekord aufgestellt.</p>
+	{% endif %}
+	{% if challenge_count %}
+	<form method="post" action="{{ url_for('challenge_start') }}">
+		<button class="challenge-primary-button challenge-start-button" type="submit">Start</button>
+	</form>
+	{% else %}
+	<p class="challenge-unavailable" role="status">
+		Die Challenges sind noch nicht eingerichtet. Bitte versuche es später erneut.
+	</p>
+	{% endif %}
+	<a class="challenge-back-link" href="{{ url_for('home') }}">Zurück zur Startseite</a>
+</section>
+{% endblock content %}

@@ -35,10 +35,12 @@
 		{% endif %}
 	</section>
 
-	<div class="home-option home-option-disabled" aria-disabled="true">
+	{% if can_run_challenges %}
+	<a class="home-option home-option-link" href="{{ url_for('challenge_intro') }}">
 		<span class="home-option-title">Herausforderungen</span>
-		<span class="home-option-description">Wende dein Wissen in praktischen Aufgaben an.</span>
-		<span class="home-option-status">Demnächst verfügbar</span>
-	</div>
+		<span class="home-option-description">Löse mehrere Challenges nacheinander und stelle einen Zeitrekord auf.</span>
+		<span class="home-option-arrow" aria-hidden="true">&#8594;</span>
+	</a>
+	{% endif %}
 </section>
 {% endblock content %}

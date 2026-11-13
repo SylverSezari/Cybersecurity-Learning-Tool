@@ -1,0 +1,192 @@
+<!doctype html>
+<html lang="de">
+<head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="color-scheme" content="light dark">
+	<title>Moderne Anwendungen symmetrischer Verschlüsselung</title>
+	<link rel="stylesheet" href="/static/css/theme.css">
+	<link rel="stylesheet" href="/static/css/exercises.css">
+	<script src="/static/js/exercise-theme.js" defer></script>
+	<script src="/static/js/exercise-tasks.js?v=8" defer></script>
+</head>
+<body>
+	<main class="lesson">
+		<header class="lesson-header">
+			<p class="eyebrow">Lektion 11 · Verschlüsselung im Alltag</p>
+			<h1>Moderne Anwendungen symmetrischer Verschlüsselung</h1>
+			<p class="lead">
+				Online einkaufen, Nachrichten schreiben oder ein Smartphone verlieren: In vielen
+				Situationen schützt symmetrische Verschlüsselung unsere Daten. Hier lernst du, wo sie
+				eingesetzt wird und was sie leisten kann – und was nicht.
+			</p>
+		</header>
+
+		<section class="lesson-section" aria-labelledby="prinzip-title">
+			<p class="section-label">Die Grundidee</p>
+			<h2 id="prinzip-title">Ein gemeinsamer geheimer Schlüssel</h2>
+			<p>
+				Bei symmetrischer Verschlüsselung verwenden Sender und Empfänger denselben geheimen
+				Schlüssel: Mit ihm werden Daten verschlüsselt und später wieder lesbar gemacht.
+				<strong>AES</strong> ist ein verbreiteter moderner Standard. Programme verwenden oft
+				<strong>AES-GCM</strong> oder <strong>ChaCha20-Poly1305</strong>: Diese schützen nicht
+				nur den Inhalt, sondern helfen auch zu erkennen, wenn verschlüsselte Daten verändert
+				wurden.
+			</p>
+			<div class="worked-example" aria-label="Beispiel für den gemeinsamen Schlüssel">
+				<p><strong>Vorher:</strong> lesbare Nachricht + geheimer Schlüssel</p>
+				<p><strong>Danach:</strong> verschlüsselte Daten, die ohne den passenden Schlüssel unlesbar sind</p>
+				<p><strong>Wichtig:</strong> Beide Seiten müssen den Schlüssel sicher erhalten und schützen.</p>
+			</div>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="web-title">
+			<p class="section-label">Daten unterwegs</p>
+			<h2 id="web-title">Webseiten und Apps schützen Verbindungen</h2>
+			<p>
+				Wenn du eine Webseite mit <strong>HTTPS</strong> besuchst, nutzt sie normalerweise
+				<strong>TLS</strong>, um die Verbindung zwischen deinem Browser und dem Webserver zu
+				schützen. Zu Beginn vereinbaren die beiden Seiten passende Sitzungsschlüssel. Danach
+				werden die vielen Daten der Verbindung schnell mit symmetrischer Verschlüsselung
+				geschützt. So können andere im Netzwerk die übertragenen Inhalte nicht einfach mitlesen.
+			</p>
+			<p>
+				Das Schloss im Browser bedeutet nicht, dass die Webseite vertrauenswürdig ist oder
+				dein Gerät frei von Schadsoftware ist. Es schützt die Verbindung – nicht alles, was
+				vor dem Senden oder nach dem Empfang auf den Geräten passiert.
+			</p>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="speicher-title">
+			<p class="section-label">Daten auf einem Gerät</p>
+			<h2 id="speicher-title">Laptops, Smartphones und Backups verschlüsseln</h2>
+			<p>
+				<strong>Festplatten- oder Geräteverschlüsselung</strong> schützt gespeicherte Dateien.
+				Wenn ein ausgeschalteter Laptop verloren geht, sollen Unbefugte die Daten auf seiner
+				gesperrten Festplatte nicht ohne den Schlüssel lesen können. Auch verschlüsselte
+				USB-Sticks, Dateiordner und Backups nutzen dieses Prinzip.
+			</p>
+			<p>
+				Sobald das Gerät entsperrt ist, kann es die Daten für dich lesen. Das ist praktisch,
+				bedeutet aber auch: Eine Person oder Schadsoftware, die Zugriff auf eine bereits
+				entsperrte Sitzung hat, kann unter Umständen ebenfalls an die Daten gelangen.
+			</p>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="nachrichten-title">
+			<p class="section-label">Nachrichten im Team</p>
+			<h2 id="nachrichten-title">Ende-zu-Ende-Verschlüsselung</h2>
+			<p>
+				Bei Ende-zu-Ende-verschlüsselten Chats werden Nachrichten auf dem Gerät der sendenden
+				Person verschlüsselt und erst auf dem Gerät der empfangenden Person wieder lesbar
+				gemacht. Häufig werden dafür gemeinsame symmetrische Sitzungsschlüssel für den
+				Nachrichteninhalt verwendet. Andere Verfahren helfen der App, diese Schlüssel sicher
+				zu vereinbaren.
+			</p>
+			<p>
+				Der Anbieter soll den Inhalt dann nicht lesen können. Das schützt aber nicht
+				zwingend alle <strong>Metadaten</strong>, zum Beispiel wer wann mit wem kommuniziert.
+				Und wenn jemand eines der beteiligten Geräte entsperrt nutzen kann, kann die Person
+				die Nachrichten möglicherweise dort lesen.
+			</p>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="vorteile-title">
+			<p class="section-label">Stärken und Grenzen</p>
+			<h2 id="vorteile-title">Warum wird symmetrisch verschlüsselt?</h2>
+			<ul class="concept-list">
+				<li><strong>Vorteil – schnell:</strong> Symmetrische Verfahren benötigen wenig Rechenaufwand und eignen sich für grosse Datenmengen, etwa Videos, Backups oder laufende Internetverbindungen.</li>
+				<li><strong>Vorteil – weit verbreitet:</strong> Standards wie AES werden von vielen Geräten und Programmen unterstützt.</li>
+				<li><strong>Nachteil – Schlüssel schützen:</strong> Der Schlüssel muss sicher vereinbart, gespeichert und weitergegeben werden. Wer ihn erhält, kann die damit geschützten Daten lesen.</li>
+				<li><strong>Nachteil – kein Rundumschutz:</strong> Verschlüsselung schützt keine bereits entsperrten Geräte und verbirgt nicht automatisch Metadaten.</li>
+				<li><strong>Wichtig für die Sicherheit:</strong> Gute Systeme nutzen eine passende, geprüfte Verschlüsselung mit Schutz vor unbemerkten Änderungen. Falsche Einstellungen können trotzdem unsicher sein.</li>
+			</ul>
+			<aside class="note">
+				<strong>Merke:</strong> Verschlüsselung ist ein wichtiger Schutz, aber kein Ersatz für
+				sichere Geräte, starke Passwörter und sorgfältigen Umgang mit Schlüsseln.
+			</aside>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="quellen-title">
+			<p class="section-label">Zum Weiterlesen</p>
+			<h2 id="quellen-title">Quellen</h2>
+			<ul class="concept-list">
+				<li>Lisa Bock, <em>Modern Cryptography for Cybersecurity Professionals</em>, Packt Publishing, 2021 – besonders Kapitel 4 und die Abschnitte zu TLS und symmetrischer Verschlüsselung.</li>
+				<li>Maha A. Sayal, „Modern Cryptography: A Comprehensive Review of Symmetric and Asymmetric Encryption Algorithms“, 2026, S. 108–111. DOI: <a href="https://doi.org/10.61401/rmaps.v3i2.527">10.61401/rmaps.v3i2.527</a>.</li>
+				<li>NIST, <em>Advanced Encryption Standard (AES)</em>, FIPS 197: <a href="https://csrc.nist.gov/pubs/fips/197/final">csrc.nist.gov/pubs/fips/197/final</a>.</li>
+				<li>NIST, <em>Galois/Counter Mode (GCM) and GMAC</em>, SP 800-38D: <a href="https://csrc.nist.gov/pubs/sp/800/38/d/final">csrc.nist.gov/pubs/sp/800/38/d/final</a>.</li>
+				<li>IETF, <em>The Transport Layer Security (TLS) Protocol Version 1.3</em>, RFC 8446: <a href="https://datatracker.ietf.org/doc/html/rfc8446">datatracker.ietf.org/doc/html/rfc8446</a>.</li>
+				<li>IETF, <em>ChaCha20 and Poly1305 for IETF Protocols</em>, RFC 8439: <a href="https://datatracker.ietf.org/doc/html/rfc8439">datatracker.ietf.org/doc/html/rfc8439</a>.</li>
+				<li>NIST, <em>Guide to Storage Encryption Technologies for End User Devices</em>, SP 800-111: <a href="https://csrc.nist.gov/pubs/sp/800/111/final">csrc.nist.gov/pubs/sp/800/111/final</a>.</li>
+			</ul>
+		</section>
+
+		<section class="lesson-section" aria-labelledby="aufgaben-title">
+			<p class="section-label">Vier kurze Situationen</p>
+			<h2 id="aufgaben-title">Finde die passende Anwendung</h2>
+			<div class="task-list">
+				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Bei einer HTTPS-Verbindung schützt TLS die übertragenen Daten mit symmetrischen Sitzungsschlüsseln." data-incorrect-feedback="Tipp: Gesucht ist der verbreitete Schutz für die Verbindung zwischen Browser und Webseite.">
+					<p class="task-story">Noé meldet sich im Browser bei seiner Bank an. Er möchte verhindern, dass andere im WLAN die übertragenen Daten mitlesen.</p>
+					<p class="task-prompt">Welche Technologie schützt typischerweise die Verbindung?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Technologie für die Webverbindung auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="TLS">TLS bei einer HTTPS-Verbindung</option>
+							<option value="Festplattenverschlüsselung">Festplattenverschlüsselung</option>
+							<option value="Passwort-Hash">Ein Passwort-Hash</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Genau: Verschlüsselung auf dem Gerät kann gespeicherte Dateien schützen, wenn das Gerät ausgeschaltet und gesperrt ist." data-incorrect-feedback="Tipp: Hier geht es um Dateien, die auf dem Gerät gespeichert sind, nicht um eine Internetverbindung.">
+					<p class="task-story">Miras ausgeschalteter Laptop wird im Zug gestohlen. Sie hatte den Gerätespeicher verschlüsselt.</p>
+					<p class="task-prompt">Was sollte diese Verschlüsselung vor allem erschweren?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Schutzziel für den Laptop auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="Festplattenverschlüsselung">Die gespeicherten Dateien ohne den Schlüssel zu lesen</option>
+							<option value="TLS">Die Verbindung zwischen Browser und Webseite mitzulesen</option>
+							<option value="Unsichtbarkeit">Zu verbergen, dass der Laptop existiert</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Bei echter Ende-zu-Ende-Verschlüsselung sollen nur die beteiligten Geräte den Nachrichteninhalt lesen können." data-incorrect-feedback="Tipp: „Ende zu Ende“ meint hier die Geräte der sendenden und empfangenden Personen.">
+					<p class="task-story">Mira sendet Noé eine Ende-zu-Ende-verschlüsselte Nachricht über eine Chat-App.</p>
+					<p class="task-prompt">Wer soll den Nachrichteninhalt lesen können?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Wer die Nachricht lesen kann auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="Sender und Empfänger">Mira und Noé auf ihren Geräten</option>
+							<option value="Alle im WLAN">Alle Personen im selben WLAN</option>
+							<option value="Nur der App-Anbieter">Nur das Unternehmen, das die App betreibt</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+
+				<article class="exercise-task" data-solution-index="3" data-correct-feedback="Genau: Symmetrische Verschlüsselung ist schnell, aber der gemeinsame Schlüssel muss geheim und sicher bleiben." data-incorrect-feedback="Tipp: Denk daran, was beide Seiten gemeinsam haben müssen und was passiert, wenn eine fremde Person es erhält.">
+					<p class="task-story">Ein Team möchte viele grosse Backups symmetrisch verschlüsseln, bevor es sie speichert.</p>
+					<p class="task-prompt">Welche Aussage beschreibt einen Vorteil und eine Herausforderung?</p>
+					<div class="task-answer-row">
+						<select class="task-answer" aria-label="Vorteil und Herausforderung auswählen">
+							<option value="">Bitte auswählen</option>
+							<option value="Schlüsselmanagement">Das Verfahren ist schnell, aber der Schlüssel muss sicher geschützt werden</option>
+							<option value="keine Schlüssel">Das Verfahren braucht keinen Schlüssel und funktioniert nur für kurze Nachrichten</option>
+							<option value="öffentlicher Schlüssel">Der Schlüssel darf öffentlich sein, denn niemand kann damit Daten entschlüsseln</option>
+						</select>
+						<button class="check-answer" type="button" disabled>Prüfen</button>
+					</div>
+					<p class="task-feedback" role="status" aria-live="polite"></p>
+				</article>
+			</div>
+			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle Aufgaben richtig gelöst. Die Lektion wird jetzt als abgeschlossen markiert.</p>
+		</section>
+	</main>
+</body>
+</html>

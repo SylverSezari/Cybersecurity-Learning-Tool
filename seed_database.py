@@ -2,10 +2,11 @@
 
 import asyncio
 
-from sqlalchemy import select
+from sqlalchemy import select, update
 
 from database import AsyncSessionLocal, engine, init_db
-from models import Chapter, Exercise
+from models import Account, Challenge, Chapter, Exercise
+from randomized_challenges import is_randomized_challenge
 
 CHAPTERS = (
     {
@@ -14,8 +15,45 @@ CHAPTERS = (
         "position": 0,
         "active": True,
     },
-    {"title": "Passwörter", "picture": None, "position": 1, "active": True},
-    {"title": "Phishing", "picture": None, "position": 2, "active": True},
+    {
+        "title": "Symmetrische Verschlüsselung",
+        "picture": "Symmetrische_Verschlüsselung.png",
+        "position": 1,
+        "active": True,
+    },
+    {
+        "title": "Asymmetrische Verschlüsselung",
+        "picture": "Asymmetrische_Verschlüsselung.jpg",
+        "position": 2,
+        "active": True,
+    },
+    {
+        "title": "Passwörter",
+        "picture": "Passwörter.jpg",
+        "position": 3,
+        "active": True,
+    },
+)
+
+REMOVED_CHAPTERS = ("Phishing",)
+
+CHALLENGES = (
+    {
+        "title": "Caesar verschlüsseln",
+        "html_filename": "caesar_encrypt.html",
+    },
+    {
+        "title": "Caesar entschlüsseln",
+        "html_filename": "caesar_decrypt.html",
+    },
+    {
+        "title": "Vigenère verschlüsseln",
+        "html_filename": "vigenere_encrypt.html",
+    },
+    {
+        "title": "Vigenère entschlüsseln",
+        "html_filename": "vigenere_decrypt.html",
+    },
 )
 
 EXERCISES = (
@@ -32,48 +70,65 @@ EXERCISES = (
         "html_filename": "symmetric.html",
         "solution": ["same-key", "AES", True],
         "requires_previous": False,
-        "position": 1,
-        "chapter_title": "Kryptografie",
+        "position": 0,
+        "chapter_title": "Symmetrische Verschlüsselung",
     },
     {
         "title": "Caesar-Verschlüsselung",
         "html_filename": "caesar.html",
         "solution": ["UEBER DIE ALPEN", "KDQQLEDO", 7],
         "requires_previous": True,
-        "position": 2,
-        "chapter_title": "Kryptografie",
+        "position": 1,
+        "chapter_title": "Symmetrische Verschlüsselung",
     },
     {
         "title": "Caesar Python",
         "html_filename": "caesar_python.html",
         "solution": ["KDOOR", "AVE CAESAR"],
         "requires_previous": True,
-        "position": 3,
-        "chapter_title": "Kryptografie",
+        "position": 2,
+        "chapter_title": "Symmetrische Verschlüsselung",
     },
     {
         "title": "Vigenère-Verschlüsselung",
         "html_filename": "vigenere.html",
         "solution": ["EQURWCYDPS", "SUPER", True],
         "requires_previous": True,
-        "position": 4,
-        "chapter_title": "Kryptografie",
+        "position": 3,
+        "chapter_title": "Symmetrische Verschlüsselung",
     },
     {
         "title": "Vigenère Python",
         "html_filename": "vigenere_python.html",
         "solution": ["EQURWCYDPS"],
         "requires_previous": True,
+        "position": 4,
+        "chapter_title": "Symmetrische Verschlüsselung",
+    },
+    {
+        "title": "Moderne Anwendungen symmetrischer Verschlüsselung",
+        "html_filename": "symmetric_uses.html",
+        "solution": [
+            "TLS",
+            "Festplattenverschlüsselung",
+            "Sender und Empfänger",
+            "Schlüsselmanagement",
+        ],
+        "requires_previous": True,
         "position": 5,
-        "chapter_title": "Kryptografie",
+        "chapter_title": "Symmetrische Verschlüsselung",
     },
     {
         "title": "Asymmetrische Verschlüsselung",
         "html_filename": "asymmetric.html",
-        "solution": ["key-pair", "Miras öffentlicher Schlüssel", "shared-secret"],
+        "solution": [
+            "key-pair",
+            "Miras öffentlicher Schlüssel",
+            "shared-secret",
+        ],
         "requires_previous": True,
-        "position": 6,
-        "chapter_title": "Kryptografie",
+        "position": 0,
+        "chapter_title": "Asymmetrische Verschlüsselung",
     },
     {
         "title": "RSA",
@@ -84,24 +139,38 @@ EXERCISES = (
             "signature",
         ],
         "requires_previous": True,
-        "position": 7,
-        "chapter_title": "Kryptografie",
+        "position": 1,
+        "chapter_title": "Asymmetrische Verschlüsselung",
     },
     {
         "title": "RSA mit Zahlen",
         "html_filename": "rsa_math.html",
         "solution": [15, 13, 7],
         "requires_previous": True,
-        "position": 8,
-        "chapter_title": "Kryptografie",
+        "position": 2,
+        "chapter_title": "Asymmetrische Verschlüsselung",
     },
     {
         "title": "RSA mit Python",
         "html_filename": "rsa_python.html",
         "solution": ["13", "7"],
         "requires_previous": True,
-        "position": 9,
-        "chapter_title": "Kryptografie",
+        "position": 3,
+        "chapter_title": "Asymmetrische Verschlüsselung",
+    },
+    {
+        "title": "Moderne Anwendungen asymmetrischer Verschlüsselung",
+        "html_filename": "asymmetric_uses.html",
+        "solution": [
+            "Serverzertifikat prüfen",
+            "Privater Schlüssel bleibt beim Gerät",
+            "Gemeinsamen Schlüssel vereinbaren",
+            "Öffentlicher Schlüssel",
+            "Langsamer",
+        ],
+        "requires_previous": True,
+        "position": 4,
+        "chapter_title": "Asymmetrische Verschlüsselung",
     },
 )
 
@@ -110,6 +179,25 @@ async def seed_content() -> None:
     await init_db()
 
     async with AsyncSessionLocal() as session, session.begin():
+        for chapter_title in REMOVED_CHAPTERS:
+            result = await session.execute(
+                select(Chapter).where(Chapter.title == chapter_title)
+            )
+            removed_chapter = result.scalar_one_or_none()
+            if removed_chapter is None:
+                continue
+
+            result = await session.execute(
+                select(Exercise.id)
+                .where(Exercise.chapter_id == removed_chapter.id)
+                .limit(1)
+            )
+            if result.first():
+                raise ValueError(
+                    f"Cannot remove chapter {chapter_title!r} while it contains exercises"
+                )
+            await session.delete(removed_chapter)
+
         chapters_by_title = {}
         for chapter_data in CHAPTERS:
             result = await session.execute(
@@ -203,7 +291,73 @@ async def seed_content() -> None:
             exercise.position = exercise_data["position"]
             exercise.chapter = chapters_by_title[exercise_data["chapter_title"]]
 
-    print(f"Seeded {len(CHAPTERS)} chapters and {len(EXERCISES)} exercises.")
+        result = await session.execute(select(Challenge))
+        existing_challenges = result.scalars().all()
+        unsupported_challenges = [
+            challenge
+            for challenge in existing_challenges
+            if not is_randomized_challenge(challenge.html_filename)
+        ]
+        if unsupported_challenges:
+            unsupported_ids = [challenge.id for challenge in unsupported_challenges]
+            await session.execute(
+                update(Account)
+                .where(Account.current_challenge_id.in_(unsupported_ids))
+                .values(
+                    start_time=None,
+                    end_time=None,
+                    previous_record_time=None,
+                    current_challenge_id=None,
+                    current_challenge_complete=False,
+                )
+            )
+            for challenge in unsupported_challenges:
+                await session.delete(challenge)
+
+        existing_challenges = [
+            challenge
+            for challenge in existing_challenges
+            if is_randomized_challenge(challenge.html_filename)
+        ]
+        challenges_by_filename = {
+            challenge.html_filename: challenge for challenge in existing_challenges
+        }
+        challenges_by_title = {
+            challenge.title: challenge for challenge in existing_challenges
+        }
+        next_position = max(
+            (challenge.position for challenge in existing_challenges),
+            default=-1,
+        ) + 1
+
+        for challenge_data in CHALLENGES:
+            filename_match = challenges_by_filename.get(
+                challenge_data["html_filename"]
+            )
+            title_match = challenges_by_title.get(challenge_data["title"])
+            if filename_match and title_match and filename_match is not title_match:
+                raise ValueError(
+                    "Challenge title and filename refer to different database rows: "
+                    f"{challenge_data['title']}"
+                )
+
+            challenge = filename_match or title_match
+            if challenge is None:
+                challenge = Challenge(
+                    title=challenge_data["title"],
+                    html_filename=challenge_data["html_filename"],
+                    position=next_position,
+                )
+                next_position += 1
+                session.add(challenge)
+            else:
+                challenge.title = challenge_data["title"]
+                challenge.html_filename = challenge_data["html_filename"]
+
+    print(
+        f"Seeded {len(CHAPTERS)} chapters, {len(EXERCISES)} exercises, "
+        f"and {len(CHALLENGES)} randomized challenges."
+    )
 
 
 async def main() -> None:

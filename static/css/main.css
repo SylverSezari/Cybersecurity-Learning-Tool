@@ -1760,3 +1760,245 @@ a {
 		transition: none;
 	}
 }
+
+/* Learner-facing timed challenge pages. */
+.challenge-page {
+	width: min(100%, 58rem);
+	margin: clamp(1.5rem, 6vh, 4rem) auto 0;
+}
+
+.challenge-intro,
+.challenge-victory {
+	padding: clamp(1.25rem, 4vw, 3rem);
+	border: 1px solid var(--border);
+	border-radius: 0.65rem;
+	background: var(--surface);
+}
+
+.challenge-page h1 {
+	margin: 0.25rem 0 0.75rem;
+	font-size: clamp(2rem, 5vw, 3.5rem);
+}
+
+.challenge-lead {
+	max-width: 46rem;
+	color: var(--muted-text);
+	font-size: 1.08rem;
+}
+
+.challenge-rules {
+	display: grid;
+	gap: 0.55rem;
+	margin: 1.5rem 0;
+	padding-left: 1.5rem;
+}
+
+.challenge-record {
+	padding: 0.9rem 1rem;
+	border-left: 3px solid var(--accent);
+	background: var(--page-background);
+}
+
+.challenge-primary-button {
+	display: inline-flex;
+	min-height: 3rem;
+	align-items: center;
+	justify-content: center;
+	padding: 0.7rem 1.4rem;
+	border: 1px solid #16834b;
+	border-radius: 0.35rem;
+	background: #16834b;
+	color: #fff;
+	font: inherit;
+	font-size: 1.05rem;
+	font-weight: 750;
+	text-decoration: none;
+	cursor: pointer;
+}
+
+.challenge-primary-button:hover:not(:disabled),
+.challenge-primary-button:focus-visible {
+	border-color: #116b3e;
+	background: #116b3e;
+	outline: 2px solid #16834b;
+	outline-offset: 3px;
+}
+
+.challenge-primary-button:disabled {
+	opacity: 0.55;
+	cursor: not-allowed;
+}
+
+.challenge-start-button {
+	width: min(100%, 24rem);
+	min-height: 4.25rem;
+	margin: 0.5rem 0 1rem;
+	font-size: 1.5rem;
+}
+
+.challenge-back-link {
+	display: block;
+	width: fit-content;
+	margin-top: 0.5rem;
+}
+
+.challenge-unavailable {
+	padding: 1rem;
+	border-left: 3px solid var(--muted-text);
+	background: var(--page-background);
+}
+
+.challenge-run {
+	width: min(100%, 72rem);
+}
+
+.challenge-run-heading {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 1rem;
+	margin-bottom: 1rem;
+}
+
+.challenge-run-heading h1 {
+	font-size: clamp(1.8rem, 4vw, 2.5rem);
+}
+
+.challenge-give-up-button {
+	min-height: 2.75rem;
+	padding: 0.55rem 1rem;
+	border: 1px solid var(--error);
+	border-radius: 0.3rem;
+	background: transparent;
+	color: var(--error);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.challenge-give-up-button:hover,
+.challenge-give-up-button:focus-visible {
+	background: var(--error);
+	color: #fff;
+	outline: 2px solid var(--error);
+	outline-offset: 2px;
+}
+
+.challenge-answer-status {
+	min-height: 1.6em;
+	color: var(--muted-text);
+}
+
+.challenge-actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 1rem;
+	margin-top: 1rem;
+}
+
+.challenge-progress-error {
+	margin: 0;
+	color: var(--error);
+}
+
+.challenge-new-record {
+	width: fit-content;
+	padding: 0.45rem 0.8rem;
+	border-radius: 0.3rem;
+	background: #16834b;
+	color: #fff;
+	font-size: 1.1rem;
+	font-weight: 800;
+}
+
+.challenge-results {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+	margin: 1.5rem 0;
+}
+
+.challenge-results > div {
+	padding: 1rem;
+	border: 1px solid var(--border);
+	border-radius: 0.35rem;
+	background: var(--page-background);
+}
+
+.challenge-results dt {
+	color: var(--muted-text);
+	font-size: 0.85rem;
+}
+
+.challenge-results dd {
+	margin: 0.3rem 0 0;
+	font-size: clamp(1.25rem, 3vw, 2rem);
+	font-variant-numeric: tabular-nums;
+	font-weight: 750;
+}
+
+.challenge-return-button {
+	margin-top: 0.5rem;
+}
+
+/* Admin layout for editing challenge order and metadata. */
+.challenge-manager {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) minmax(17rem, 22rem);
+	gap: 1.5rem;
+	align-items: start;
+}
+
+.challenge-manager[hidden] {
+	display: none;
+}
+
+.challenge-order-panel {
+	min-width: 0;
+}
+
+.challenge-order-panel .chapter-row {
+	grid-template-columns: minmax(0, 1fr) auto;
+}
+
+.challenge-order-panel .chapter-row > div:first-child {
+	display: grid;
+	min-width: 0;
+	gap: 0.1rem;
+}
+
+.challenge-order-controls {
+	display: flex;
+	gap: 0.15rem;
+}
+
+.challenge-manager .form-hint code {
+	overflow-wrap: anywhere;
+}
+
+@media (max-width: 48rem) {
+	.challenge-manager {
+		grid-template-columns: minmax(0, 1fr);
+	}
+
+	.challenge-results {
+		grid-template-columns: minmax(0, 1fr);
+	}
+}
+
+@media (max-width: 32rem) {
+	.challenge-run-heading {
+		align-items: flex-start;
+	}
+
+	.challenge-run-heading .section-kicker {
+		font-size: 0.68rem;
+	}
+
+	.challenge-give-up-button {
+		min-height: 2.4rem;
+		padding: 0.4rem 0.65rem;
+		font-size: 0.85rem;
+	}
+}

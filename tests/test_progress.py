@@ -4,6 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import main
 import models
+import seed_database
 
 
 async def add_chapter(db_session: AsyncSession) -> models.Chapter:
@@ -171,3 +172,56 @@ async def test_task_exercise_requires_correct_answers_before_completion(
         f"/api/progress/chapters/{chapter.id}", headers=user_auth_headers
     )
     assert progress.json()["completed_ids"] == [exercise.id]
+
+
+@pytest.mark.anyio
+async def test_vigenere_python_completion_unlocks_following_exercise(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    user_auth_headers: dict[str, str],
+):
+    chapter = await add_chapter(db_session)
+    previous = await add_exercise(db_session, chapter.id, "Previous lesson", 0)
+    vigenere_python = await add_exercise(
+        db_session,
+        chapter.id,
+        "Vigenère Python",
+        1,
+        requires_previous=True,
+    )
+    following = await add_exercise(
+        db_session, chapter.id, "Following lesson", 2, requires_previous=True
+    )
+    vigenere_python.solution = next(
+        item["solution"]
+        for item in seed_database.EXERCISES
+        if item["html_filename"] == "vigenere_python.html"
+    )
+    assert vigenere_python.solution == ["FRWMFEUEK", "GIB MIR DETAILS"]
+
+    await client.post(
+        f"/api/progress/exercises/{previous.id}/complete",
+        headers=user_auth_headers,
+    )
+    progress_before = await client.get(
+        f"/api/progress/chapters/{chapter.id}", headers=user_auth_headers
+    )
+    assert progress_before.json()["locked_by"] == {
+        str(following.id): vigenere_python.id
+    }
+
+    completed = await client.post(
+        f"/api/progress/exercises/{vigenere_python.id}/complete",
+        headers=user_auth_headers,
+        json={"answers": ["FRWMFEUEK", "GIB MIR DETAILS"]},
+    )
+
+    assert completed.status_code == 200
+    progress_after = await client.get(
+        f"/api/progress/chapters/{chapter.id}", headers=user_auth_headers
+    )
+    assert progress_after.json()["completed_ids"] == [
+        previous.id,
+        vigenere_python.id,
+    ]
+    assert progress_after.json()["locked_by"] == {}

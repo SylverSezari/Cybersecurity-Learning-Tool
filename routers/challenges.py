@@ -10,6 +10,7 @@ from answer_validation import answers_match
 from challenge_pages import abandon_active_run, ordered_challenges
 from database import get_db
 from randomized_challenges import (
+    generate_practice_challenge,
     generate_randomized_challenge,
     is_randomized_challenge,
 )
@@ -32,7 +33,8 @@ async def abandon_challenge_run(
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     """Abandon an active run when the learner navigates away from the player."""
-    await require_user_account(db, principal)
+    if principal["role"] == "user":
+        await require_user_account(db, principal)
     await abandon_active_run(db, principal)
 
 
@@ -247,17 +249,21 @@ async def check_challenge_answer(
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     """Check answers against the current item; progression is a separate action."""
-    account = await require_user_account(db, principal)
-    if account.start_time is None or account.end_time is not None:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="No active challenge run",
-        )
-    if account.current_challenge_id != challenge_id:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Challenge is not current",
-        )
+    is_admin = principal["role"] == "admin"
+    if is_admin:
+        account = None
+    else:
+        account = await require_user_account(db, principal)
+        if account.start_time is None or account.end_time is not None:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="No active challenge run",
+            )
+        if account.current_challenge_id != challenge_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Challenge is not current",
+            )
 
     challenges = await ordered_challenges(db)
     current_index = next(
@@ -269,7 +275,7 @@ async def check_challenge_answer(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Challenge not found",
         )
-    if account.current_challenge_complete:
+    if account is not None and account.current_challenge_complete:
         return ChallengeCheckResponse(
             completed=True,
             is_last=current_index == len(challenges) - 1,
@@ -281,11 +287,14 @@ async def check_challenge_answer(
             status_code=status.HTTP_409_CONFLICT,
             detail="Challenge file has no registered randomizer",
         )
-    randomized = generate_randomized_challenge(
-        challenge.html_filename,
-        account.id,
-        account.start_time,
-    )
+    if account is None:
+        randomized = generate_practice_challenge(challenge.html_filename)
+    else:
+        randomized = generate_randomized_challenge(
+            challenge.html_filename,
+            account.id,
+            account.start_time,
+        )
 
     if not answers_match(randomized.expected_answers, completion.answers):
         raise HTTPException(
@@ -293,8 +302,9 @@ async def check_challenge_answer(
             detail="Challenge answers are incorrect",
         )
 
-    account.current_challenge_complete = True
-    await db.commit()
+    if account is not None:
+        account.current_challenge_complete = True
+        await db.commit()
     return ChallengeCheckResponse(
         completed=True,
         is_last=current_index == len(challenges) - 1,

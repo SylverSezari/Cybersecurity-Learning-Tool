@@ -12,10 +12,11 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-import models
 import challenge_pages
+import models
 from database import engine, get_db, init_db
 from exercise_progress import get_exercise_progress
+from leaderboard import home_leaderboard
 from routers import accounts, challenges, chapters, exercises
 from routers import progress as progress_router
 from security import (
@@ -137,14 +138,16 @@ async def home(
         )
         completed_ids = set(completion_result.scalars().all())
 
+    leaderboard = await home_leaderboard(db, account_id)
     return templates.TemplateResponse(
         request,
         "home.html",
         {
             "chapters": chapters,
             "completed_exercise_ids": completed_ids,
-            # Admins manage challenge content but cannot start learner runs.
-            "can_run_challenges": principal["role"] == "user",
+            "leaderboard": leaderboard,
+            "can_run_challenges": principal["role"] in {"admin", "user"},
+            "is_admin": principal["role"] == "admin",
         },
     )
 

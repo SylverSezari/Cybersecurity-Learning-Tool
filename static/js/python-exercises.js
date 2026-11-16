@@ -1,5 +1,28 @@
 const pyodideVersion = "0.27.7";
 let pyodideInstancePromise;
+const expectedOutputs = new WeakMap();
+
+window.addEventListener("message", (event) => {
+	if (event.source !== parent || event.data?.type !== "exercise-solutions") return;
+	const solutions = Array.isArray(event.data.solutions) ? event.data.solutions : [];
+	document.querySelectorAll("[data-python-exercise]").forEach((pythonExercise) => {
+		const solutionIndex = Number(pythonExercise.dataset.solutionIndex);
+		const expectedOutput = solutions[solutionIndex];
+		const isSupportedOutput = typeof expectedOutput === "string"
+			|| typeof expectedOutput === "boolean"
+			|| (typeof expectedOutput === "number" && Number.isFinite(expectedOutput));
+		const runButton = pythonExercise.querySelector("[data-python-run]");
+		if (!Number.isInteger(solutionIndex) || !isSupportedOutput) {
+			runButton.disabled = true;
+			pythonExercise.querySelector("[data-python-output]").textContent =
+				"Die Musterlösung für diese Aufgabe fehlt in der Datenbank.";
+			return;
+		}
+
+		expectedOutputs.set(pythonExercise, String(expectedOutput));
+		runButton.disabled = false;
+	});
+});
 
 function getPyodideInstance() {
 	if (!pyodideInstancePromise) {
@@ -65,6 +88,7 @@ document.querySelectorAll("[data-python-exercise]").forEach((pythonExercise) => 
 	const editor = pythonExercise.querySelector(".python-code-editor");
 	const runButton = pythonExercise.querySelector("[data-python-run]");
 	const output = pythonExercise.querySelector("[data-python-output]");
+	runButton.disabled = true;
 	const editorShell = document.createElement("div");
 	const lineNumbers = document.createElement("div");
 	const highlightedCode = document.createElement("pre");
@@ -163,8 +187,9 @@ document.querySelectorAll("[data-python-exercise]").forEach((pythonExercise) => 
 			const result = printedLines.join("\n").trim();
 			pythonExercise.dataset.result = result;
 			const normalizeOutput = (value) => value.normalize("NFC").trim().toLocaleUpperCase("de-CH");
+			const expectedOutput = expectedOutputs.get(pythonExercise);
 			const isCorrect = normalizeOutput(result)
-				=== normalizeOutput(pythonExercise.dataset.expectedOutput);
+				=== normalizeOutput(expectedOutput);
 			pythonExercise.classList.toggle("is-correct", isCorrect);
 			pythonExercise.classList.toggle("is-incorrect", !isCorrect);
 			pythonExercise.dataset.solved = String(isCorrect);

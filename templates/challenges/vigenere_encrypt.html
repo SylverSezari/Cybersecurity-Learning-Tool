@@ -7,8 +7,9 @@
   <title>Vigenère verschlüsseln</title>
   <link rel="stylesheet" href="/static/css/theme.css">
   <link rel="stylesheet" href="/static/css/exercises.css">
+  <script src="/static/js/exercise-theme.js" defer></script>
   <script src="/static/js/exercise-tasks.js?v=8" defer></script>
-  <script src="/static/js/randomized-cipher.js?v=1" defer></script>
+  <script src="/static/js/randomized-cipher.js?v=2" defer></script>
 </head>
 <body>
   <main class="lesson">
@@ -27,6 +28,22 @@
           <p class="task-feedback" role="status" aria-live="polite"></p>
         </article>
       </div>
+      <section class="challenge-alphabet-section" aria-labelledby="alphabetTitle">
+        <h2 id="alphabetTitle">Alphabetrad</h2>
+        <div class="alphabet-tool">
+          <div class="alphabet-rows" aria-live="polite">
+            <div class="alphabet-row">
+              <strong>Schlüssel</strong>
+              <div class="alphabet-key-track">
+                <input id="caesarShift" type="range" min="0" max="25" value="0" aria-label="Verschiebung im Alphabet">
+                <output id="shiftValue" class="alphabet-key-marker" for="caesarShift">0</output>
+              </div>
+            </div>
+            <div class="alphabet-row"><strong>Klartext</strong><output id="plainAlphabet"></output></div>
+            <div class="alphabet-row"><strong>Geheimtext</strong><output id="cipherAlphabet"></output></div>
+          </div>
+        </div>
+      </section>
       <p class="tasks-complete" id="tasksComplete" role="status" hidden>Richtig. Du kannst fortfahren.</p>
     </section>
   </main>

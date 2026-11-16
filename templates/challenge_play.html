@@ -1,11 +1,12 @@
 {% extends "layout.html" %}
 
 {% block content %}
-{# The account pointer determines the only challenge the learner may open or complete. #}
+{# Learner access follows the saved pointer; admins can practice without saved state. #}
 <section
 	class="challenge-page challenge-run"
 	aria-labelledby="challenge-title"
 	data-challenge-active="true"
+	data-admin-practice="{{ 'true' if is_admin else 'false' }}"
 >
 	<header class="challenge-run-heading">
 		<div>
@@ -18,7 +19,9 @@
 	</header>
 
 	<p class="challenge-answer-status" id="challengeAnswerStatus" role="status" aria-live="polite">
+		{% if is_admin %}Löse die Aufgabe und prüfe deine Antwort oder fahre direkt fort.{% else %}
 		Löse die Aufgabe und prüfe deine Antwort, um fortzufahren.
+		{% endif %}
 	</p>
 	{% if error_message %}
 	<div class="task-error" role="alert">

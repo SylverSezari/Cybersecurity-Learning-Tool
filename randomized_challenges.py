@@ -5,7 +5,7 @@ import hmac
 import random
 import string
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import UTC, datetime
 
 from config import settings
 
@@ -65,6 +65,15 @@ def generate_randomized_challenge(
     }
     answer = plaintext if operation == "decrypt" else ciphertext
     return RandomizedChallenge(prompt=prompt, expected_answers=[answer])
+
+
+def generate_practice_challenge(filename: str) -> RandomizedChallenge:
+    """Generate a stable puzzle for admin practice without starting a timed run."""
+    return generate_randomized_challenge(
+        filename,
+        account_id=0,
+        started_at=datetime(1970, 1, 1, tzinfo=UTC),
+    )
 
 
 def _transform(text: str, key: str | int) -> str:

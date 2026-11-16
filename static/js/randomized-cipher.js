@@ -2,6 +2,12 @@ const taskHeading = document.getElementById("cipherTaskHeading");
 const taskStory = document.getElementById("cipherTaskStory");
 const cipherText = document.getElementById("cipherText");
 const cipherKey = document.getElementById("cipherKey");
+const alphabetShiftControl = document.getElementById("caesarShift");
+
+function setAlphabetShift(shift) {
+	alphabetShiftControl.value = String(shift);
+	alphabetShiftControl.dispatchEvent(new Event("input", { bubbles: true }));
+}
 
 window.addEventListener("message", (event) => {
 	if (event.source !== parent || event.data?.type !== "challenge-mode") return;
@@ -15,4 +21,11 @@ window.addEventListener("message", (event) => {
 		: `Entschlüssle den Geheimtext mit dem angegebenen Schlüssel.`;
 	cipherText.textContent = prompt.text;
 	cipherKey.textContent = String(prompt.key);
+
+	const initialShift = prompt.cipher === "Caesar"
+		? Number(prompt.key)
+		: prompt.cipher === "Vigenère" && typeof prompt.key === "string"
+			? prompt.key.charCodeAt(0) - 65
+			: null;
+	if (initialShift !== null) setAlphabetShift(initialShift);
 });

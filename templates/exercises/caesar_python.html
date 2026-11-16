@@ -9,7 +9,7 @@
 	<link rel="stylesheet" href="/static/css/exercises.css">
 	<script src="/static/js/exercise-theme.js" defer></script>
 	<script src="/static/js/exercise-tasks.js?v=8" defer></script>
-	<script src="/static/js/python-exercises.js?v=9" defer></script>
+	<script src="/static/js/python-exercises.js?v=10" defer></script>
 </head>
 <body>
 	<main class="lesson">
@@ -18,7 +18,7 @@
 			<h1>Caesar-Nachrichten ver- und entschlüsseln</h1>
 			<p class="lead">
 				Ein römischer Bote soll eine Nachricht durchs feindliche Gebiet bringen. Du hilfst ihm,
-				jeden Buchstaben mit Python drei Stellen weiterzuschieben.
+				die Nachricht zu verschlüsseln.
 			</p>
 		</header>
 
@@ -47,16 +47,15 @@
 		<section class="lesson-section" aria-labelledby="python-task-title">
 			<p class="section-label">Auftrag des römischen Boten</p>
 			<h2 id="python-task-title">Verschlüsseln und entschlüsseln</h2>
-			<article class="python-exercise" data-python-exercise data-solution-index="0" data-expected-output="KDOOR" data-correct-feedback="Richtig: Der Bote erhält KDOOR. Jeder Buchstabe aus HALLO wurde drei Plätze weitergeschoben." data-incorrect-feedback="Noch nicht: Finde zuerst die Stelle des Buchstabens. Addiere dann 3 und verwende % 26, damit du nach Z wieder am Anfang des Alphabets weiterzählst." data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(encrypted) am Ende steht.">
+			<article class="python-exercise" data-python-exercise data-solution-index="0" data-correct-feedback="Richtig: Der Bote erhält JODGLDWRU. Jeder Buchstabe aus GLADIATOR wurde drei Plätze weitergeschoben." data-incorrect-feedback="Noch nicht: Finde zuerst die Stelle des Buchstabens. Addiere dann 3 und verwende % 26, damit du nach Z wieder am Anfang des Alphabets weiterzählst." data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(encrypted) am Ende steht.">
 				<p class="task-story">
-					Im römischen Lager muss ein Bote die Nachricht HALLO an seine Verbündeten schicken,
-					ohne dass der Feind sie sofort lesen kann. Der Hauptmann gibt ihm den Schlüssel 3:
+					Im römischen Lager bricht Panik aus. Die Gladiatoren wollen nicht mehr kämpfen und machen einen Aufstand. Deswegen muss ein Bote die Nachricht GLADIATOR an seine Verbündeten schicken,
+					ohne dass die Gladiatoren sie sofort lesen können. Der Hauptmann gibt ihm den Schlüssel 3:
 					Jeder Buchstabe soll drei Plätze im Alphabet vorrücken.
 				</p>
 				<p>
 					Der Code ist fast fertig. Ergänze die beiden TODO-Zeilen: Finde zuerst die Nummer des
-					aktuellen Buchstabens. Berechne danach seine neue Nummer, indem du den Schlüssel addierst
-					und mit <code>% 26</code> im Alphabet bleibst.
+					aktuellen Buchstabens. Berechne danach seine neue Nummer, indem du dein erworbenes Wissen anwendest.
 				</p>
 
 				<p><code>alphabet.index(letter)</code> liefert die Stelle des Buchstabens, zum Beispiel 0 für A.</p>
@@ -65,19 +64,25 @@
 					<li>
 						<details class="python-hint-disclosure">
 							<summary>Hinweis 1</summary>
-							<p>Die neue Stelle ist die alte Stelle plus <code>key</code>, gerechnet mit <code>% 26</code>.</p>
+							<p><code>alphabet[3]</code> lifert den Buchstaben an der 4 Position, da 0 den Buchstaben an der ersten Position enthält.</p>
 						</details>
 					</li>
 					<li>
 						<details class="python-hint-disclosure">
 							<summary>Hinweis 2</summary>
-							<p><code>alphabet[3]</code> lifert den Buchstaben an der 4 Position, da 0 den Buchstaben an der ersten Position enthält</p>
+							<p>Die neue Stelle ist die alte Stelle plus <code>key</code>, gerechnet mit <code>% 26</code>.</p>
+						</details>
+					</li>
+					<li>
+						<details class="python-hint-disclosure">
+							<summary>Hinweis 3</summary>
+							<p>Vergiss nicht, du musst immer noch korrekte Klammern setzten bei Rechnungen.</p>
 						</details>
 					</li>
 				</ol>
 				<label class="python-editor-label" for="caesarPythonCode">Dein Python-Code</label>
 				<textarea class="python-code-editor" id="caesarPythonCode" spellcheck="false" autocapitalize="off" aria-describedby="caesarPythonHelp">
-					text = "HALLO"
+					text = "GLADIATOR"
 					key = 3
 					alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 					encrypted = ""
@@ -100,14 +105,14 @@
 				</div>
 				<pre class="python-output" data-python-output role="status" aria-live="polite">Die Ausgabe erscheint hier.</pre>
 			</article>
-			<article class="python-exercise" data-python-exercise data-solution-index="1" data-expected-output="Ave Caesar" data-correct-feedback="Richtig: Die Nachricht lautet Ave Caesar. Das Leerzeichen bleibt unverändert, während jeder Buchstabe drei Stellen zurückrückt." data-incorrect-feedback="Noch nicht: Lass das Leerzeichen unverändert. Ziehe bei jedem Buchstaben den Schlüssel ab und verwende % 26, damit du vor A wieder bei Z weiterzählst." data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(decrypted) am Ende steht.">
+			<article class="python-exercise" data-python-exercise data-solution-index="1" data-correct-feedback="Richtig: Die Nachricht lautet Ave Caesar. Das Leerzeichen bleibt unverändert, während jeder Buchstabe neunzehn Stellen zurückrückt." data-incorrect-feedback="Noch nicht: Lass das Leerzeichen unverändert. Ziehe bei jedem Buchstaben den Schlüssel ab und verwende % 26, damit du vor A wieder bei Z weiterzählst." data-empty-feedback="Es wurde nichts ausgegeben. Ergänze beide TODO-Zeilen und prüfe, ob print(decrypted) am Ende steht.">
 				<p class="task-story">
 					Ein Bote fängt die verschlüsselte Nachricht <code>ToX VTxLTk</code> ab. Der Schlüssel ist 19.
-					Entschlüssle den Text, ohne das Leerzeichen zwischen den Wörtern zu verlieren und schreibe alles gross.
+					Entschlüssle den Text, ohne das Leerzeichen zwischen den Wörtern zu verlieren und schreibe alles GROSS.
 				</p>
 				<p>
 					Ergänze alle TODO-Zeilen, um die
-					 Buchstaben jeweils 19 Stellen zurückzuschieben.
+					 Buchstaben jeweils 19 Stellen zurückzuschieben. Funktionen wie <code>lower</code> und <code>upper</code> helfen dir, Buchstaben richtig zu kapitalisieren.
 				</p>
 				<ol class="python-hints">
 					<li>
@@ -125,7 +130,7 @@
 					<li>
 						<details class="python-hint-disclosure">
 							<summary>Hinweis 3</summary>
-							<p><code>alphabet</code> enthält nur Grrossbuchstaben, heisst du <code>index()</code> darf auuch nur Grossbuchstaben enthalten</p>
+							<p><code>alphabet</code> enthält nur Grossbuchstaben, heisst <code>index()</code> darf auch nur Grossbuchstaben enthalten</p>
 						</details>
 					</li>
 				</ol>

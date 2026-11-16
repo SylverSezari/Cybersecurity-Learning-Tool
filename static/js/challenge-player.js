@@ -3,6 +3,7 @@ const challengeStatus = document.getElementById("challengeAnswerStatus");
 const challengeContinue = document.getElementById("challengeContinue");
 const challengeLoadError = document.getElementById("challengeLoadError");
 const challengeToken = sessionStorage.getItem("access_token");
+const adminPractice = document.querySelector("[data-admin-practice]")?.dataset.adminPractice === "true";
 let challengeSubmissionPending = false;
 
 if (challengeFrame && challengeToken) {
@@ -94,7 +95,7 @@ async function checkChallengeAnswers(answers) {
 			);
 		}
 		challengeStatus.textContent = error.message;
-		challengeContinue.disabled = true;
+		challengeContinue.disabled = !adminPractice;
 		challengeSubmissionPending = false;
 	}
 }

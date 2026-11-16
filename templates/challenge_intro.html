@@ -1,18 +1,29 @@
 {% extends "layout.html" %}
 
 {% block content %}
-{# The run starts only from this form, so the server records the start timestamp on submit. #}
 <section class="challenge-page challenge-intro" aria-labelledby="challenge-title">
-	<p class="section-kicker">Zeit-Challenge</p>
+	<p class="section-kicker">{{ "Challenge-Übung" if is_admin else "Zeit-Challenge" }}</p>
 	<h1 id="challenge-title">Bist du bereit?</h1>
 	{% if challenge_count %}
+	{% if is_admin %}
+	<p class="challenge-lead">
+		Löse {{ challenge_count }} Challenges nacheinander. Du kannst jederzeit zur nächsten Challenge wechseln.
+		Deine Zeit und dein Fortschritt werden nicht gespeichert.
+	</p>
+	{% else %}
 	<p class="challenge-lead">
 		Löse {{ challenge_count }} Challenges nacheinander. Du kannst erst weitergehen,
 		wenn deine aktuelle Lösung richtig ist.
 	</p>
-	{% else %}
-	<p class="challenge-lead">Hier kannst du eine zeitlich gemessene Challenge-Reihe lösen.</p>
 	{% endif %}
+	{% else %}
+	<p class="challenge-lead">
+		{% if is_admin %}Hier kannst du die Challenges ohne Zeitmessung ausprobieren.{% else %}
+		Hier kannst du eine zeitlich gemessene Challenge-Reihe lösen.
+		{% endif %}
+	</p>
+	{% endif %}
+	{% if not is_admin %}
 	<ol class="challenge-rules">
 		<li>Die Zeit startet, sobald du auf „Start“ klickst.</li>
 		<li>Gib bei jeder Challenge deine Lösung ein und prüfe sie.</li>
@@ -23,6 +34,7 @@
 	<p class="challenge-record">Dein bisheriger Rekord: <strong>{{ record_time }}</strong></p>
 	{% else %}
 	<p class="challenge-record">Du hast noch keinen Rekord aufgestellt.</p>
+	{% endif %}
 	{% endif %}
 	{% if challenge_count %}
 	<form method="post" action="{{ url_for('challenge_start') }}">

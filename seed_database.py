@@ -84,7 +84,7 @@ EXERCISES = (
     {
         "title": "Caesar Python",
         "html_filename": "caesar_python.html",
-        "solution": ["KDOOR", "AVE CAESAR"],
+        "solution": ["JODGLDWRU", "AVE CAESAR"],
         "requires_previous": True,
         "position": 2,
         "chapter_title": "Symmetrische Verschlüsselung",
@@ -100,7 +100,7 @@ EXERCISES = (
     {
         "title": "Vigenère Python",
         "html_filename": "vigenere_python.html",
-        "solution": ["EQURWCYDPS"],
+        "solution": ["FRWMFEUEK", "GIB MIR DETAILS"],
         "requires_previous": True,
         "position": 4,
         "chapter_title": "Symmetrische Verschlüsselung",

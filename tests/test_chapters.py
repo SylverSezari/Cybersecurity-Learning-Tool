@@ -1,3 +1,5 @@
+import json
+
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import select
@@ -145,6 +147,67 @@ async def test_home_shows_ordered_chapter_exercise_progress(
 
 
 @pytest.mark.anyio
+async def test_home_leaderboard_shows_top_five_and_current_account(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    user_auth_headers: dict[str, str],
+):
+    account_result = await db_session.execute(
+        select(models.Account).where(models.Account.username == "test_user")
+    )
+    current_account = account_result.scalar_one()
+    current_account.record_time = 9_000
+    db_session.add_all(
+        [
+            models.Account(
+                username=f"leader_{rank}",
+                password_hash="test-hash",
+                record_time=rank * 1_000,
+            )
+            for rank in range(1, 8)
+        ]
+    )
+    await db_session.commit()
+
+    response = await client.get("/", headers=user_auth_headers)
+
+    assert response.status_code == 200
+    assert response.text.count('class="leaderboard-row') == 6
+    assert 'data-rank="1"' in response.text
+    assert 'data-rank="5"' in response.text
+    assert 'data-rank="8"' in response.text
+    assert "leader_6" not in response.text
+    assert "test_user" in response.text
+    assert "00:09.000" in response.text
+
+
+@pytest.mark.anyio
+async def test_home_leaderboard_omits_current_account_without_record(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    user_auth_headers: dict[str, str],
+):
+    db_session.add_all(
+        [
+            models.Account(
+                username=f"leader_{rank}",
+                password_hash="test-hash",
+                record_time=rank * 1_000,
+            )
+            for rank in range(1, 7)
+        ]
+    )
+    await db_session.commit()
+
+    response = await client.get("/", headers=user_auth_headers)
+
+    assert response.status_code == 200
+    assert response.text.count('class="leaderboard-row') == 5
+    assert "leader_6" not in response.text
+    assert "test_user" not in response.text
+
+
+@pytest.mark.anyio
 async def test_chapter_start_redirects_to_first_exercise(
     client: AsyncClient,
     db_session: AsyncSession,
@@ -194,6 +257,47 @@ async def test_task_page_lists_exercises_and_loads_database_filename(
     assert f"/exercise-content/{exercise.id}/{exercise.html_filename}" in page.text
     assert content.status_code == 200
     assert "Lesson content" in content.text
+
+
+@pytest.mark.anyio
+@pytest.mark.parametrize(
+    ("html_filename", "solutions"),
+    [
+        ("caesar_python.html", ["JODGLDWRU", "AVE CAESAR"]),
+        ("vigenere_python.html", ["FRWMFEUEK", "GIB MIR DETAILS"]),
+        ("rsa_python.html", ["13", "7"]),
+    ],
+)
+async def test_python_lessons_receive_expected_outputs_from_database(
+    client: AsyncClient,
+    db_session: AsyncSession,
+    user_auth_headers: dict[str, str],
+    html_filename: str,
+    solutions: list[str],
+):
+    chapter = await add_chapter(
+        db_session, f"Python chapter for {html_filename}", position=0, active=True
+    )
+    exercise = await add_chapter_exercise(
+        db_session, chapter.id, html_filename, html_filename, 0
+    )
+    exercise.solution = solutions
+    await db_session.commit()
+
+    page = await client.get(
+        f"/chapters/{chapter.id}/exercises/{exercise.id}",
+        headers=user_auth_headers,
+    )
+    content = await client.get(
+        f"/exercise-content/{exercise.id}/{html_filename}",
+        headers=user_auth_headers,
+    )
+
+    expected_json = json.dumps(solutions)
+    assert page.status_code == 200
+    assert f"data-exercise-solutions='{expected_json}'" in page.text
+    assert content.status_code == 200
+    assert "data-expected-output" not in content.text
 
 
 @pytest.mark.anyio

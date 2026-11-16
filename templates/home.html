@@ -36,11 +36,45 @@
 	</section>
 
 	{% if can_run_challenges %}
-	<a class="home-option home-option-link" href="{{ url_for('challenge_intro') }}">
-		<span class="home-option-title">Herausforderungen</span>
-		<span class="home-option-description">Löse mehrere Challenges nacheinander und stelle einen Zeitrekord auf.</span>
+	<a class="home-option home-option-link home-challenge-option" href="{{ url_for('challenge_intro') }}">
+		<span class="home-option-title home-challenge-title">Herausforderungen</span>
+		<span class="home-option-description">{% if is_admin %}Löse die Challenges ohne Zeitmessung und ohne gespeicherten Fortschritt.{% else %}Löse mehrere Challenges nacheinander und stelle einen Zeitrekord auf.{% endif %}</span>
 		<span class="home-option-arrow" aria-hidden="true">&#8594;</span>
 	</a>
 	{% endif %}
+
+		<section class="home-leaderboard" aria-labelledby="home-leaderboard-title">
+		<h2 class="home-progress-title" id="home-leaderboard-title">Bestenliste</h2>
+		{% if leaderboard %}
+		<table class="leaderboard-table">
+			<thead>
+				<tr>
+					<th scope="col">Platz</th>
+					<th scope="col">Name</th>
+					<th scope="col">Zeit</th>
+				</tr>
+			</thead>
+			<tbody>
+				{% for entry in leaderboard %}
+				<tr class="leaderboard-row{% if entry.is_current %} is-current{% endif %}" data-rank="{{ entry.rank }}">
+					<th scope="row">
+						<span class="leaderboard-rank{% if entry.rank == 1 %} is-gold{% elif entry.rank == 2 %} is-silver{% elif entry.rank == 3 %} is-bronze{% endif %}">
+							{{ entry.rank }}
+						</span>
+					</th>
+					<td>
+						{{ entry.username }}
+						{% if entry.is_current %}<span class="leaderboard-you">Du</span>{% endif %}
+					</td>
+					<td class="leaderboard-time">{{ entry.formatted_time }}</td>
+				</tr>
+				{% endfor %}
+			</tbody>
+		</table>
+		{% else %}
+		<p class="home-progress-empty">Noch keine Challenge-Zeiten vorhanden.</p>
+		{% endif %}
+	</section>
+
 </section>
 {% endblock content %}

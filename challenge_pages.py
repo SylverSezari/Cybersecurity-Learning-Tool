@@ -11,7 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 import models
 from account_access import require_user_account
 from database import get_db
+from leaderboard import challenge_end_leaderboard, format_time
 from randomized_challenges import (
+    generate_practice_challenge,
     generate_randomized_challenge,
     is_randomized_challenge,
 )
@@ -70,18 +72,6 @@ def _resolve_challenge_file(relative_path: str) -> Path | None:
     return file_path if file_path.is_file() else None
 
 
-def _format_time(milliseconds: int | None) -> str:
-    """Display integer millisecond durations as a stable clock value."""
-    if milliseconds is None:
-        return "—"
-    total_seconds, fraction = divmod(milliseconds, 1000)
-    minutes, seconds = divmod(total_seconds, 60)
-    hours, minutes = divmod(minutes, 60)
-    if hours:
-        return f"{hours:02d}:{minutes:02d}:{seconds:02d}.{fraction:03d}"
-    return f"{minutes:02d}:{seconds:02d}.{fraction:03d}"
-
-
 @router.get("/challenge", name="challenge_intro", include_in_schema=False)
 async def challenge_intro(
     request: Request,
@@ -89,17 +79,19 @@ async def challenge_intro(
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
     """Show run instructions, or resume the active run at its saved challenge."""
-    account = await require_user_account(db, principal)
-    if account.start_time is not None and account.end_time is None:
-        if account.current_challenge_id is not None:
-            return RedirectResponse(
-                url=request.url_for(
-                    "challenge_play",
-                    challenge_id=str(account.current_challenge_id),
-                ),
-                status_code=status.HTTP_303_SEE_OTHER,
-            )
-        await abandon_active_run(db, principal)
+    account = None
+    if principal["role"] == "user":
+        account = await require_user_account(db, principal)
+        if account.start_time is not None and account.end_time is None:
+            if account.current_challenge_id is not None:
+                return RedirectResponse(
+                    url=request.url_for(
+                        "challenge_play",
+                        challenge_id=str(account.current_challenge_id),
+                    ),
+                    status_code=status.HTTP_303_SEE_OTHER,
+                )
+            await abandon_active_run(db, principal)
 
     challenges = await ordered_challenges(db)
     return templates.TemplateResponse(
@@ -108,8 +100,9 @@ async def challenge_intro(
         {
             "title": "Herausforderung",
             "challenge_count": len(challenges),
-            "record_time": _format_time(account.record_time),
-            "has_record": account.record_time is not None,
+            "record_time": format_time(account.record_time) if account else None,
+            "has_record": account is not None and account.record_time is not None,
+            "is_admin": principal["role"] == "admin",
         },
     )
 
@@ -120,8 +113,30 @@ async def start_challenge(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
-    """Start the clock and persist the first challenge before redirecting."""
-    account = await require_user_account(db, principal)
+    """Start a learner's timed run or open the first admin practice challenge."""
+    account = (
+        await require_user_account(db, principal)
+        if principal["role"] == "user"
+        else None
+    )
+    challenges = await ordered_challenges(db)
+    if not challenges:
+        return RedirectResponse(
+            url=request.url_for("challenge_intro"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if principal["role"] == "admin":
+        return RedirectResponse(
+            url=request.url_for("challenge_play", challenge_id=str(challenges[0].id)),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    if account is None:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="User account required",
+        )
     if account.start_time is not None and account.end_time is None:
         if account.current_challenge_id is not None:
             return RedirectResponse(
@@ -131,13 +146,6 @@ async def start_challenge(
                 ),
                 status_code=status.HTTP_303_SEE_OTHER,
             )
-
-    challenges = await ordered_challenges(db)
-    if not challenges:
-        return RedirectResponse(
-            url=request.url_for("challenge_intro"),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
 
     account.start_time = datetime.now(UTC)
     account.end_time = None
@@ -158,7 +166,8 @@ async def abandon_challenge(
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
     """Let the learner give up and return to the challenge introduction."""
-    await require_user_account(db, principal)
+    if principal["role"] == "user":
+        await require_user_account(db, principal)
     await abandon_active_run(db, principal)
     return RedirectResponse(
         url=request.url_for("challenge_intro"),
@@ -172,7 +181,21 @@ async def challenge_victory(
     db: Annotated[AsyncSession, Depends(get_db)],
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
-    """Show the finished time and compare it with the saved previous record."""
+    """Show a learner's finished time or the leaderboard after admin practice."""
+    if principal["role"] == "admin":
+        return templates.TemplateResponse(
+            request,
+            "challenge_victory.html",
+            {
+                "title": "Geschafft!",
+                "current_time": None,
+                "previous_record": None,
+                "is_record": False,
+                "is_admin": True,
+                "leaderboard": await challenge_end_leaderboard(db, None),
+            },
+        )
+
     account = await require_user_account(db, principal)
     if account.start_time is None or account.end_time is None:
         return RedirectResponse(
@@ -183,16 +206,19 @@ async def challenge_victory(
     elapsed_ms = int((account.end_time - account.start_time).total_seconds() * 1000)
     previous_record = account.previous_record_time
     is_record = previous_record is None or elapsed_ms < previous_record
+    leaderboard = await challenge_end_leaderboard(db, account.id)
     return templates.TemplateResponse(
         request,
         "challenge_victory.html",
         {
             "title": "Geschafft!",
-            "current_time": _format_time(elapsed_ms),
+            "current_time": format_time(elapsed_ms),
             "previous_record": (
-                _format_time(previous_record) if previous_record is not None else None
+                format_time(previous_record) if previous_record is not None else None
             ),
             "is_record": is_record,
+            "is_admin": False,
+            "leaderboard": leaderboard,
         },
     )
 
@@ -209,38 +235,57 @@ async def play_challenge(
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
     """Render only the currently assigned step; refreshes resume this same step."""
-    account = await require_user_account(db, principal)
-    if account.start_time is None or account.end_time is not None:
+    is_admin = principal["role"] == "admin"
+    account = None if is_admin else await require_user_account(db, principal)
+    if account is not None and (
+        account.start_time is None or account.end_time is not None
+    ):
         return RedirectResponse(
-            url=request.url_for("challenge_intro"),
+            url=request.url_for("challenge_victory"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
 
     challenges = await ordered_challenges(db)
     challenge_ids = [item.id for item in challenges]
-    current_id = account.current_challenge_id
-    if current_id not in challenge_ids:
-        await abandon_active_run(db, principal)
-        return RedirectResponse(
-            url=request.url_for("challenge_intro"),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
-    if challenge_id != current_id:
-        return RedirectResponse(
-            url=request.url_for("challenge_play", challenge_id=str(current_id)),
-            status_code=status.HTTP_303_SEE_OTHER,
-        )
+    if is_admin:
+        if challenge_id not in challenge_ids:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Challenge not found",
+            )
+        current_id = challenge_id
+    else:
+        if account is None:
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="User account required",
+            )
+        current_id = account.current_challenge_id
+        if current_id not in challenge_ids:
+            await abandon_active_run(db, principal)
+            return RedirectResponse(
+                url=request.url_for("challenge_intro"),
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
+        if challenge_id != current_id:
+            return RedirectResponse(
+                url=request.url_for("challenge_play", challenge_id=str(current_id)),
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
 
     current_index = challenge_ids.index(current_id)
     challenge = challenges[current_index]
     challenge_prompt = None
     solution_types = []
     if is_randomized_challenge(challenge.html_filename):
-        randomized = generate_randomized_challenge(
-            challenge.html_filename,
-            account.id,
-            account.start_time,
-        )
+        if account is None:
+            randomized = generate_practice_challenge(challenge.html_filename)
+        else:
+            randomized = generate_randomized_challenge(
+                challenge.html_filename,
+                account.id,
+                account.start_time,
+            )
         challenge_prompt = randomized.prompt
         solution_types = ["text"] * len(randomized.expected_answers)
 
@@ -269,7 +314,9 @@ async def play_challenge(
             "challenge_index": current_index + 1,
             "challenge_count": len(challenges),
             "next_challenge": next_challenge,
-            "is_complete": account.current_challenge_complete,
+            "is_complete": is_admin
+            or (account is not None and account.current_challenge_complete),
+            "is_admin": is_admin,
             "error_message": error_message,
             "challenge_url": (
                 request.url_for(
@@ -298,6 +345,26 @@ async def next_challenge(
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
     """Advance only after the current challenge has been marked correct."""
+    if principal["role"] == "admin":
+        challenges = await ordered_challenges(db)
+        challenge_ids = [item.id for item in challenges]
+        if challenge_id not in challenge_ids:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Challenge not found",
+            )
+        current_index = challenge_ids.index(challenge_id)
+        if current_index + 1 >= len(challenges):
+            return RedirectResponse(
+                url=request.url_for("challenge_play", challenge_id=str(challenge_id)),
+                status_code=status.HTTP_303_SEE_OTHER,
+            )
+        next_id = challenges[current_index + 1].id
+        return RedirectResponse(
+            url=request.url_for("challenge_play", challenge_id=str(next_id)),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
     account = await require_user_account(db, principal)
     if (
         account.start_time is None
@@ -347,6 +414,18 @@ async def finish_challenge(
     principal: Annotated[Principal, Depends(get_page_principal)],
 ):
     """Stop the clock on the final step and update the best time if improved."""
+    if principal["role"] == "admin":
+        challenges = await ordered_challenges(db)
+        if not challenges or challenges[-1].id != challenge_id:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="The last challenge has not been reached",
+            )
+        return RedirectResponse(
+            url=request.url_for("challenge_victory"),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
     account = await require_user_account(db, principal)
     if (
         account.start_time is None
@@ -398,16 +477,17 @@ async def challenge_content(
     principal: Annotated[Principal, Depends(get_current_principal)],
 ):
     """Serve assets only for the learner's current challenge and its HTML entrypoint."""
-    account = await require_user_account(db, principal)
-    if (
-        account.start_time is None
-        or account.end_time is not None
-        or account.current_challenge_id != challenge_id
-    ):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Challenge is not current",
-        )
+    if principal["role"] == "user":
+        account = await require_user_account(db, principal)
+        if (
+            account.start_time is None
+            or account.end_time is not None
+            or account.current_challenge_id != challenge_id
+        ):
+            raise HTTPException(
+                status_code=status.HTTP_403_FORBIDDEN,
+                detail="Challenge is not current",
+            )
     result = await db.execute(
         select(models.Challenge).where(models.Challenge.id == challenge_id)
     )

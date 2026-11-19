@@ -870,6 +870,13 @@ body {
 	transition: background-color 150ms ease, transform 150ms ease;
 }
 
+.login-submit-link {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	text-decoration: none;
+}
+
 .login-submit:hover:not(:disabled) {
 	background: var(--accent-hover);
 	transform: translateY(-1px);

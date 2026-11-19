@@ -18,7 +18,10 @@
 		/>
 		<script>
 			// Avoid flashing protected content while the async session check is pending.
-			if (window.location.pathname !== "/login") {
+			if (
+				window.location.pathname !== "/login"
+				&& window.location.pathname !== "/session-expired"
+			) {
 				document.documentElement.dataset.authPending = "true";
 			}
 		</script>
@@ -119,7 +122,7 @@
 				setTheme(nextTheme);
 			});
 		</script>
-		<script src="{{ url_for('static', path='js/auth-guard.js') }}?v=2"></script>
+		<script src="{{ url_for('static', path='js/auth-guard.js') }}?v=3"></script>
 		<script src="{{ url_for('static', path='js/logout.js') }}"></script>
 
 		{% block scripts %}{% endblock scripts %}

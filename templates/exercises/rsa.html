@@ -87,15 +87,15 @@
 			<p class="section-label">Drei kurze Situationen</p>
 			<h2 id="aufgaben-title">Kannst du RSA richtig anwenden?</h2>
 			<div class="task-list">
-				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Noé verschlüsselt mit Miras öffentlichem Schlüssel. Miras passender privater Schlüssel wird zum Entschlüsseln gebraucht." data-incorrect-feedback="Tipp: Für eine geheime Nachricht an Mira nimmt Noé den Schlüssel, den Mira öffentlich teilen darf.">
-					<p class="task-story">Noé möchte Mira eine vertrauliche Nachricht schicken.</p>
-					<p class="task-prompt">Welchen Schlüssel verwendet Noé zum Verschlüsseln?</p>
+				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Dieses Prinzip nennt sich auch 'Integer Factorization'." data-incorrect-feedback="Tipp: Multiplizieren und grosse Zahlen berechnen können Computer gut.">
+					<p class="task-story">RSA wurde in 1977 entwickelt und ist heute immer noch in Gebrauch.</p>
+					<p class="task-prompt">Auf was basiert die Sicherheit von RSA</p>
 					<div class="task-answer-row">
 						<select class="task-answer" aria-label="Schlüssel zum Verschlüsseln auswählen">
 							<option value="">Bitte auswählen</option>
-							<option value="Noés privater Schlüssel">Noés privater Schlüssel</option>
-							<option value="Miras privater Schlüssel">Miras privater Schlüssel</option>
-							<option value="Miras öffentlicher Schlüssel">Miras öffentlicher Schlüssel</option>
+							<option value="zwei grosse Zahlen">Auf die Schwierigkeit, zwei grosse Zahlen zu multiplizieren</option>
+							<option value="grosse Primzahl">Auf die Schwierigkeit, eine genug grosse Primzahl zu finden</option>
+							<option value="Zwei Primzahlen">Auf die Schwierigkeit, die ursprünglichen Primzahlen aus einer Zahl zu berechnen</option>
 						</select>
 						<button class="check-answer" type="button" disabled>Prüfen</button>
 					</div>
@@ -117,7 +117,7 @@
 					<p class="task-feedback" role="status" aria-live="polite"></p>
 				</article>
 
-				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Noé erstellt die Signatur mit seinem privaten Schlüssel. Mira prüft sie mit Noés öffentlichem Schlüssel. Die Signatur bestätigt nicht die Geheimhaltung des Inhalts." data-incorrect-feedback="Tipp: Zum Erstellen einer Signatur verwendet Noé den Schlüssel, den nur er besitzt. Mira prüft sie mit dem passenden öffentlichen Schlüssel.">
+				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Noé erstellt die Signatur mit seinem privaten Schlüssel. Mira prüft sie mit Noés öffentlichem Schlüssel. Die Signatur bestätigt nicht die Geheimhaltung des Inhalts." data-incorrect-feedback="Tipp: Den Geheimschlüssel von Noé besitzt nur er. Die Signatur muss jedoch von anderen geprüft werden.">
 					<p class="task-story">Noé möchte zeigen, dass eine Nachricht wirklich von ihm stammt.</p>
 					<p class="task-prompt">Wie kann eine RSA-Signatur geprüft werden?</p>
 					<div class="task-answer-row">

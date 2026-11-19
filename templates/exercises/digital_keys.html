@@ -1,0 +1,511 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Digitale Schlüssel</title>
+    <link rel="stylesheet" href="/static/css/theme.css" />
+    <link rel="stylesheet" href="/static/css/exercises.css" />
+    <script src="/static/js/exercise-theme.js" defer></script>
+    <script src="/static/js/exercise-tasks.js?v=8" defer></script>
+  </head>
+  <body>
+    <main class="lesson">
+      <header class="lesson-header">
+        <p class="eyebrow">Wie wir beweisen, wer wir sind</p>
+        <h1>Digitale Schlüssel</h1>
+        <p class="lead">
+          Jeden Tag entsperrst du mehrmals dein Smartphone, loggst dich in den
+          Schul-Account der Kanti ein, öffnest Instagram oder kaufst ein Billett
+          in der SBB-App. Jedes Mal stellt sich für das System im Hintergrund
+          dieselbe entscheidende Frage: Bist wirklich du es, der gerade Zugriff
+          verlangt – oder gibt sich jemand anderes als du aus?
+        </p>
+      </header>
+
+      <section class="lesson-section" aria-labelledby="password-basics-title">
+        <p class="section-label">Drei Arten</p>
+        <h2 id="password-basics-title">Die drei Arten, sich auszuweisen</h2>
+        <p>
+          Im Alltag sprechen wir meist pauschal von «Passwörtern». In der
+          IT-Sicherheit geht man jedoch einen Schritt weiter und spricht von
+          Authentifizierungsfaktoren. Ein solcher Faktor ist ein Beweis für
+          deine digitale Identität. Grundsätzlich lassen sich alle digitalen
+          Zugangsmethoden in drei fundamentale Kategorien einteilen:
+        </p>
+        <div class="worked-example">
+          <p><strong>Etwas, das du weisst (Wissensfaktor)</strong></p>
+          <p><strong>Etwas, das du besitzt (Besitzfaktor)</strong></p>
+          <p>
+            <strong>Etwas, das du bist (Inhärenz- oder Biometriefaktor)</strong>
+          </p>
+        </div>
+        <p>
+          In den folgenden drei Unterkapiteln schauen wir uns genauer an, wie
+          diese Methoden funktionieren, wo ihre Stärken liegen und welche
+          Risiken du kennen musst.
+        </p>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="factor-kinds-title">
+        <p class="section-label">Wissensfaktor</p>
+        <h2 id="factor-kinds-title">Etwas, das du weisst</h2>
+        <p>
+          Der Wissensfaktor ist die älteste und bekannteste Form der digitalen
+          Absicherung. Das Prinzip ist simpel: Du und das System teilen ein
+          Geheimnis. Nur wer dieses Geheimnis korrekt eingibt, erhält Zutritt.
+          Da diese Information ausschliesslich in deinem Gedächtnis gespeichert
+          ist (oder in einem Passwort-Manager), musst du keinen speziellen
+          Gegenstand bei dir tragen.
+        </p>
+        <div class="worked-example">
+          <h3>Typische Beispiele</h3>
+          <p>
+            <strong>Klassische Passwörter:</strong>Eine Kombination aus
+            Buchstaben, Zahlen und Sonderzeichen – zum Beispiel für deinen
+            Microsoft-365-Zugang.
+          </p>
+          <p>
+            <strong>PINs (Persönliche Identifikationsnummern):</strong>Ein meist
+            vier- bis sechsstelliger Zahlencode, etwa für deine SIM-Karte oder
+            zum Entsperren des Smartphones.
+          </p>
+          <p>
+            <strong>Entsperrmuster:</strong>Eine geometrische Linie auf einem
+            Punkteraster (häufig bei Android-Geräten).
+          </p>
+          <p>
+            <strong>Sicherheitsfragen:</strong>Fragen wie «Wie hiess dein erstes
+            Haustier?» (heute aus Sicherheitsgründen kaum noch empfohlen, da
+            Antworten oft über Social Media recherchierbar sind).
+          </p>
+        </div>
+        <h3>Chancen und Risiken</h3>
+        <p>
+          Der grösste Vorteil des Wissensfaktors ist seine Unabhängigkeit: Du
+          kannst dich von jedem beliebigen Computer auf der Welt einloggen,
+          solange du deine Zugangsdaten im Kopf hast. Gleichzeitig liegt genau
+          hier die grösste Schwachstelle – der Mensch selbst. Weil wir uns
+          komplexe Zeichenfolgen wie <code>k9#mP2$vL8!q</code> schlecht merken
+          können, neigen viele zu unsicheren Gewohnheiten:
+        </p>
+        <p>
+          Zu einfache Passwörter: Wörter wie Passwort123 oder Geburtsdaten
+          werden von automatisierten Programmen (Brute-Force-Angriffen) in
+          Sekundenbruchteilen erraten.
+        </p>
+        <p>
+          Passwort-Recycling: Wer dasselbe Passwort für den Gaming-Account, den
+          Online-Shop und die E-Mail-Adresse nutzt, riskiert einen Dominoeffekt,
+          sobald einer dieser Dienste gehackt wird.
+        </p>
+        <p>
+          Phishing: Angreifer täuschen gefälschte Login-Seiten vor, um dir dein
+          Wissen direkt zu entlocken.
+        </p>
+        <p>
+          Merksatz für die Praxis: Ein gutes Passwort muss nicht kompliziert,
+          sondern lang sein. Eine sogenannte Passphrase aus vier zufälligen
+          Wörtern (z. B. Kaktus-Velofahren-Mondlicht-Kaffee) ist für dich leicht
+          zu merken, für Computer aber extrem schwer zu knacken.
+        </p>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="factor-kinds-title">
+        <p class="section-label">Besitzfaktor</p>
+        <h2 id="factor-kinds-title">Etwas, das du besitzt</h2>
+        <p>
+          Beim Besitzfaktor beweist du deine Identität nicht durch ein Geheimnis
+          im Kopf, sondern durch einen konkreten Gegenstand, der sich in deiner
+          Hand befindet. Das System prüft, ob du tatsächlich im Besitz dieses
+          Objekts bist. Selbst wenn ein Hacker dein Passwort kennt, scheitert er
+          am Login, solange ihm dieser physische Gegenstand fehlt.
+        </p>
+        <div class="worked-example">
+          <h3>Typische Beispiele</h3>
+          <p>
+            <strong
+              >Authenticator-Apps (z. B. Microsoft Authenticator, Google
+              Authenticator):</strong
+            >Dein Smartphone erzeugt alle 30 Sekunden einen neuen sechsstelligen
+            Einmalcode. Da diese App fest mit deinem Gerät verknüpft ist, gilt
+            dein Handy hier als Besitzfaktor.
+          </p>
+          <p>
+            <strong>Bankkarte und Kartenleser:</strong>Beim E-Banking (z. B. bei
+            der ZKB, UBS oder PostFinance) musst du eine Zahlung oft zusätzlich
+            über eine registrierte Access-App auf dem Smartphone oder mit deiner
+            physischen Bankkarte bestätigen.
+          </p>
+          <p>
+            <strong>Hardware-Sicherheitsschlüssel:</strong>Ein kleiner USB- oder
+            NFC-Stick, den du in den Laptop steckst oder ans Handy hältst und
+            kurz berührst, um dich einzuloggen.
+          </p>
+          <p>
+            <strong>SMS-Codes:</strong>Ein Einmalcode, der an deine Mobilnummer
+            geschickt wird (basiert auf dem Besitz deiner SIM-Karte).
+          </p>
+        </div>
+        <h3>Chancen und Risiken</h3>
+        <p>
+          Der Besitzfaktor erhöht die Sicherheit massiv, weil Angreifer aus dem
+          Internet nicht einfach durch dein Wohnzimmer greifen und dein
+          Smartphone oder deinen USB-Stick stehlen können. Das Risiko verlagert
+          sich von der digitalen in die physische Welt. Allerdings bringt dieser
+          Faktor eigene Herausforderungen mit sich:
+        </p>
+        <p>
+          Verlust oder Defekt: Wenn dein Smartphone gestohlen wird oder der Akku
+          leer ist, sperrst du dich unter Umständen selbst aus deinen Accounts
+          aus. Deshalb sind Backup-Codes so wichtig.
+        </p>
+        <p>
+          Schwächen bei SMS: Ein Code per SMS gilt heute als der unsicherste
+          Besitzfaktor. Kriminelle können über Tricks beim Mobilfunkanbieter
+          («SIM-Swapping») oder Schadsoftware SMS-Nachrichten abfangen.
+          App-basierte Codes oder Hardware-Sticks sind deutlich sicherer.
+        </p>
+        <p>
+          Merksatz für die Praxis: Ein Besitzfaktor schützt dich zuverlässig vor
+          Angriffen aus der Ferne – vorausgesetzt, du bewahrst den Gegenstand
+          sicher auf und richtest für den Notfall (z. B. Handyverlust)
+          Wiederherstellungscodes ein.
+        </p>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="factor-kinds-title">
+        <p class="section-label">Biometriefaktor</p>
+        <h2 id="factor-kinds-title">Etwas, das du bist</h2>
+        <p>
+          Beim dritten Faktor wird dein eigener Körper zum Schlüssel. Die
+          Biometrie nutzt unverwechselbare körperliche Merkmale (statische
+          Biometrie) oder typische Verhaltensweisen (Verhaltensbiometrie), um
+          dich eindeutig zu identifizieren. Ein Sensor misst diese Merkmale,
+          wandelt sie in ein mathematisches Muster um und vergleicht dieses mit
+          dem gespeicherten Referenzwert.
+        </p>
+        <div class="worked-example">
+          <h3>Typische Beispiele</h3>
+          <p>
+            <strong>Fingerabdrucksensor (Touch ID):</strong>Der Sensor erfasst
+            die feinen Hautlinien und Verzweigungen deiner Fingerkuppe.
+          </p>
+          <p>
+            <strong>Gesichtserkennung (Face ID):</strong>Moderne Smartphones
+            projizieren tausende unsichtbare Infrarotpunkte auf dein Gesicht, um
+            ein dreidimensionales Tiefenprofil zu erstellen – ein einfaches Foto
+            von dir reicht zum Entsperren also nicht aus.
+          </p>
+          <p>
+            <strong>Iris- oder Netzhautscan:</strong>Hochsicherheitsbereiche
+            oder bestimmte Smartphones analysieren die einzigartige Struktur
+            deiner Regenbogenhaut im Auge.
+          </p>
+          <p>
+            <strong>Verhaltensbiometrie:</strong>Manche Banken analysieren im
+            Hintergrund unbemerkt, wie schnell du tippst, wie du die Maus
+            bewegst oder wie du dein Smartphone hältst, um Betrüger zu erkennen.
+          </p>
+          <p>
+            <strong>Biometrischer Schweizer Pass:</strong>Auf dem Chip deines
+            Passes sind dein Gesichtsbild und deine Fingerabdrücke digital
+            gespeichert, um deine Identität an Grenzkontrollen zweifelsfrei zu
+            prüfen.
+          </p>
+        </div>
+        <h3>Chancen und Risiken</h3>
+        <p>
+          Biometrie ist unschlagbar bequem: Du kannst deinen Fingerabdruck weder
+          zu Hause liegen lassen noch vergessen, und das Entsperren dauert
+          weniger als eine Sekunde. Dennoch gibt es zwei entscheidende Haken,
+          die in der IT-Sicherheit intensiv diskutiert werden:
+        </p>
+        <p>
+          Unveränderbarkeit: Ein geleaktes Passwort kannst du in zehn Sekunden
+          ändern. Deinen Fingerabdruck oder dein Gesicht kannst du nicht
+          wechseln. Wenn biometrische Daten einmal in falsche Hände geraten,
+          sind sie für den Rest deines Lebens kompromittiert.
+        </p>
+        <p>
+          Datenschutz und lokale Speicherung: Moderne Smartphones lösen dieses
+          Problem, indem dein Gesichts- oder Fingerabdruckprofil niemals in die
+          Cloud geschickt wird, sondern verschlüsselt in einem speziellen
+          Sicherheitschip direkt auf deinem Gerät bleibt (z. B. in der Secure
+          Enclave).
+        </p>
+        <p>
+          Merksatz für die Praxis: Biometrie ist extrem praktisch für den
+          schnellen Zugriff im Alltag – aber weil du deinen Körper nicht
+          «zurücksetzen» kannst, müssen biometrische Daten besonders gut vor
+          Missbrauch geschützt werden.
+        </p>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="factor-kinds-title">
+        <p class="section-label">Zusammenspiel</p>
+        <h2 id="factor-kinds-title">
+          Warum zwei Faktoren besser sind als einer
+        </h2>
+        <p>
+          Jeder der drei Faktoren hat eine eigene Schwachstelle: Wissen kann
+          erraten, Besitz gestohlen und Biometrie im schlimmsten Fall kopiert
+          werden. Deshalb setzt man heute bei wichtigen Konten auf die
+          Zwei-Faktor-Authentifizierung (2FA). Entscheidend ist dabei eine
+          goldene Regel: Du musst zwei Faktoren aus unterschiedlichen Kategorien
+          kombinieren.
+        </p>
+        <div class="worked-example">
+          <h3>Beispiel</h3>
+          <p>
+            <strong>Echte 2FA:</strong>Du gibst dein Passwort ein (Wissen) und
+            bestätigst den Login anschliessend in deiner Authenticator-App auf
+            dem Smartphone (Besitz).
+          </p>
+          <p>
+            <strong>Keine echte 2FA:</strong>Du gibst ein Passwort ein (Wissen)
+            und danach noch eine vierstellige Geheimzahl (ebenfalls Wissen).
+            Hier hast du zwar zwei Schritte, aber nur einen einzigen Faktor
+            genutzt.
+          </p>
+        </div>
+        <p>
+          Erst wenn zwei verschiedene Säulen zusammenarbeiten, wird dein
+          digitaler Schutzwall so stabil, dass ein einzelner Fehler nicht gleich
+          zum Verlust deines Accounts führt.
+        </p>
+      </section>
+
+      <section class="lesson-section" aria-labelledby="password-tasks-title">
+        <p class="section-label">Kurz prüfen</p>
+        <h2 id="password-tasks-title">
+          Erkenne Faktoren und sichere Speicherung
+        </h2>
+        <div class="task-list">
+          <article
+            class="exercise-task"
+            data-solution-index="0"
+            data-correct-feedback="Richtig: Für echte 2FA müssen zwei unterschiedliche Kategorien kombiniert werden; sowohl ein Passwort als auch die Antwort auf eine Sicherheitsfrage beruhen ausschliesslich auf Wissen.."
+            data-incorrect-feedback="Tipp: Wissensfaktoren beruhen auf Sachen, die du dir merken musst."
+          >
+            <p class="task-prompt">
+              Für den Zugang zu einer neuen Lernplattform muss Mira zuerst ihr
+              persönliches Passwort eingeben und anschliessend eine
+              Sicherheitsfrage («Wie hiess deine erste Primarlehrperson?»)
+              beantworten. Warum handelt es sich hierbei sicherheitstechnisch
+              gesehen nicht um eine echte Zwei-Faktor-Authentifizierung (2FA)?
+            </p>
+            <div class="task-answer-row">
+              <select class="task-answer" aria-label="Grund auswählen">
+                <option value="">Bitte auswählen</option>
+                <option value="Eigener Faktor">
+                  Passwörter gelten nicht als eigener Faktor
+                </option>
+                <option value="Fingerabdruck">
+                  Echte 2FA erfordert zwingend einen Fingerabdruck
+                </option>
+                <option value="Sicherheitsfragen">
+                  Sicherheitsfragen gehören zum Besitzfaktor
+                </option>
+                <option value="Beide Wissensfaktor">
+                  Beide Schritte basieren auf dem Wissensfaktor
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+          <article
+            class="exercise-task"
+            data-solution-index="1"
+            data-correct-feedback="Richtig: Während ein kompromittiertes Passwort sofort geändert werden kann, bleiben körperliche Merkmale wie Fingerabdrücke ein Leben lang unveränderbar.."
+            data-incorrect-feedback="Tipp: Schau dir die unterschiedlichen Vorteile und Nachteile der beiden Faktoren an."
+          >
+            <p class="task-prompt">
+              Bei einem Cyberangriff auf ein Fitnessstudio werden sowohl die
+              gespeicherten Login-Passwörter als auch die digitalen
+              Fingerabdruck-Muster der Mitglieder gestohlen. Welches spezifische
+              Problem entsteht dadurch beim Biometriefaktor im Vergleich zum
+              Wissensfaktor?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Passwort-Speicherung auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Mehrfach verwendet">
+                  Passwörter können nicht mehrfach verwendet werden
+                </option>
+                <option value="Nicht austauschen">
+                  Biometrische Merkmale kann man nicht austauschen
+                </option>
+                <option value="Verfallen">
+                  Biometrische Daten verfallen nach einem Monat
+                </option>
+                <option value="Fingerabdrücke">
+                  Fingerabrücke werden unverschlüsselt abgespeichert
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+          <article
+            class="exercise-task"
+            data-solution-index="2"
+            data-correct-feedback="Genau: Da der zeitbasierte Einmalcode direkt in der verknüpften App berechnet wird, muss er nicht ungeschützt über das Mobilfunknetz übertragen werden und ist immun gegen SIM-Swapping."
+            data-incorrect-feedback="Tipp: Denke daran, über welchen Weg eine SMS zugestellt wird und wo im Vergleich dazu der Code einer Authenticator-App entsteht.."
+          >
+            <p class="task-prompt">
+              Noé möchte sein E-Banking-Konto besser schützen und wählt zwischen
+              einem per SMS versendeten Einmalcode und einer Authenticator-App
+              auf dem Smartphone. Warum bietet die Authenticator-App einen
+              besseren Schutz als der SMS-Code?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Grund für einzigartige Passwörter auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Smartphone">
+                  Authenticator-Apps funktionieren ganz ohne Smartphone
+                </option>
+                <option value="Hauptpasswort">
+                  SMS-Nachrichten enthalten immer das Hauptpasswort
+                </option>
+                <option value="Gerät">
+                  Der Code wird lokal auf dem Gerät generiert
+                </option>
+                <option value="Biometriefaktor">
+                  SMS-Codes basieren auf dem Biometriefaktor
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+          <article
+            class="exercise-task"
+            data-solution-index="3"
+            data-correct-feedback="Richtig: Die sogenannte Verhaltensbiometrie identifiziert Personen anhand charakteristischer Muster wie Tipp-Rhythmus oder Mausführung und gehört zur Kategorie «Etwas, das du bist»."
+            data-incorrect-feedback="Tipp: Schau dir nochmals die Beispiele oben an."
+          >
+            <p class="task-prompt">
+              Ein Online-Bezahldienst blockiert eine Überweisung vorsorglich,
+              obwohl sowohl das Passwort als auch der Bestätigungscode korrekt
+              eingegeben wurden. Im Hintergrund hat das System bemerkt, dass der
+              Tipp-Rhythmus und die Mausbewegungen völlig untypisch für die
+              Kontoinhaberin sind. Welcher Kategorie lässt sich diese
+              Sicherheitsprüfung zuordnen?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Passwort-Faktorkategorie auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Geräteerkennung">
+                  Dem Besitzfaktor durch Geräteerkennung
+                </option>
+                <option value="Verhaltensanalyse">
+                  Dem Biometriefaktor durch Verhaltensanalyse
+                </option>
+                <option value="Sicherheitsalgorithmen">
+                  Dem Zufallsfaktor durch Sicherheitsalgorithmen
+                </option>
+                <option value="Tippgeschwindigkeit">
+                  Dem Wissensfaktor durch Tippgeschwindigkeit
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+          <article
+            class="exercise-task"
+            data-solution-index="4"
+            data-correct-feedback="Richtig: Bei Brute-Force-Angriffen wächst der Rechenaufwand exponentiell mit jedem zusätzlichen Zeichen, weshalb lange Passphrasen kurzen Passwörtern weit überlegen sind.."
+            data-incorrect-feedback="Tipp: Überlege dir, welcher Faktor bei der mathematischen Berechnung aller möglichen Zeichenkombinationen den grössten Einfluss hat."
+          >
+            <p class="task-prompt">
+              Mira und Noé erstellen für ihren Schul-Account ein neues Passwort.
+              Mira wählt Kanti2026!, während Noé sich für
+              Giraffe-Velopumpe-Schneesturm-Kaktus entscheidet. Weshalb ist Noès
+              Variante deutlich widerstandsfähiger gegen automatisierte
+              Brute-Force-Angriffe?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Sicherheitsschlüssel-Faktorkategorie auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Sonderzeichen">
+                  Sonderzeichen am Wortende schwächen die Verschlüsselung
+                </option>
+                <option value="Bindestriche">
+                  Bindestriche werden von üblichen Hackersoftwaren nicht erkannt
+                </option>
+                <option value="Deutsch">
+                  Deutsche Wörter sind schwieriger zum herausfinden
+                </option>
+                <option value="Kombinationen">
+                  Die grössere Zeichenlänge erhöht die Anzahl an Kombinationen
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+          <article
+            class="exercise-task"
+            data-solution-index="5"
+            data-correct-feedback="Richtig: Face ID nutzt Biometrie, das registrierte Smartphone dient als Besitzfaktor und die auswendig gelernte Geheimzahl repräsentiert den Wissensfaktor."
+            data-incorrect-feedback="Tipp: Prüfe jeden einzelnen Schritt: Das Gesicht, das physisch verknüpfte Smartphone selbst und die auswendig gelernte Zahl."
+          >
+            <p class="task-prompt">
+              Um eine Zahlung im E-Banking freizugeben, entsperrt Noé sein
+              Smartphone mit seinem Gesicht (Face ID), öffnet die Bank-App und
+              bestätigt die Transaktion mit einer sechsstelligen Geheimzahl, die
+              er auswendig kennt. Welche Authentifizierungsfaktoren kommen in
+              diesem gesamten Ablauf zum Einsatz?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Fingerabdruck-Faktorkategorie auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Standort">Biometrie, Besitz und Standort</option>
+                <option value="BesitzWissen">Ausschliesslich Besitz und Wissen</option>
+                <option value="BiometrieWissen">Ausschliesslich Biometrie und Wissen</option>
+                <option value="BioBesitzWissen">Biometrie, Besitz und Wissen</option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+        </div>
+        <p class="tasks-complete" id="tasksComplete" role="status" hidden>
+          Alle Aufgaben richtig gelöst. Die Lektion wird jetzt als abgeschlossen
+          markiert.
+        </p>
+      </section>
+    </main>
+  </body>
+</html>

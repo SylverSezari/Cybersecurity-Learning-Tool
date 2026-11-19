@@ -111,45 +111,45 @@
 			<p class="section-label">Vier kurze Situationen</p>
 			<h2 id="aufgaben-title">Finde die passende Anwendung</h2>
 			<div class="task-list">
-				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Bei einer HTTPS-Verbindung schützt TLS die übertragenen Daten mit symmetrischen Sitzungsschlüsseln." data-incorrect-feedback="Tipp: Gesucht ist der verbreitete Schutz für die Verbindung zwischen Browser und Webseite.">
-					<p class="task-story">Noé meldet sich im Browser bei seiner Bank an. Er möchte verhindern, dass andere im WLAN die übertragenen Daten mitlesen.</p>
-					<p class="task-prompt">Welche Technologie schützt typischerweise die Verbindung?</p>
+				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Bei einer HTTPS-Verbindung schützt TLS die übertragenen Daten mit symmetrischen Sitzungsschlüsseln." data-incorrect-feedback="Tipp: TLS wird jeden Tag beim Gebrauch vom Internet verwendet.">
+					<p class="task-story">Noé findet die ganze Zeit Referenzen zu TLS, weiss jedoch nicht, was das ist.</p>
+					<p class="task-prompt">Was bringt TLS?</p>
 					<div class="task-answer-row">
 						<select class="task-answer" aria-label="Technologie für die Webverbindung auswählen">
 							<option value="">Bitte auswählen</option>
-							<option value="TLS">TLS bei einer HTTPS-Verbindung</option>
-							<option value="Festplattenverschlüsselung">Festplattenverschlüsselung</option>
-							<option value="Passwort-Hash">Ein Passwort-Hash</option>
+							<option value="TLS">TLS verschlüsselt deine Verbindung mit dem Browser</option>
+							<option value="Festplattenverschlüsselung">TLS verschlüsselt deine Festplatte</option>
+							<option value="Virensuche">TLS sucht nach Viren</option>
 						</select>
 						<button class="check-answer" type="button" disabled>Prüfen</button>
 					</div>
 					<p class="task-feedback" role="status" aria-live="polite"></p>
 				</article>
 
-				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Genau: Verschlüsselung auf dem Gerät kann gespeicherte Dateien schützen, wenn das Gerät ausgeschaltet und gesperrt ist." data-incorrect-feedback="Tipp: Hier geht es um Dateien, die auf dem Gerät gespeichert sind, nicht um eine Internetverbindung.">
-					<p class="task-story">Miras ausgeschalteter Laptop wird im Zug gestohlen. Sie hatte den Gerätespeicher verschlüsselt.</p>
-					<p class="task-prompt">Was sollte diese Verschlüsselung vor allem erschweren?</p>
+				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Genau: Verschlüsselung auf dem Gerät kann gespeicherte Dateien schützen, wenn das Gerät ausgeschaltet und gesperrt ist." data-incorrect-feedback="Tipp: Moderne Verschlüsselungsalgorithmen haben um die 340282366920938463463374607431768211456 verschiedene Kombination.">
+					<p class="task-story">Miras ausgeschalteter Laptop wird im Zug gestohlen. Sie hatte den Gerätespeicher mit neustem Standard verschlüsselt.</p>
+					<p class="task-prompt">Wie kann der Dieb trotzdem an ihre Daten kommen?</p>
 					<div class="task-answer-row">
 						<select class="task-answer" aria-label="Schutzziel für den Laptop auswählen">
 							<option value="">Bitte auswählen</option>
-							<option value="Festplattenverschlüsselung">Die gespeicherten Dateien ohne den Schlüssel zu lesen</option>
-							<option value="TLS">Die Verbindung zwischen Browser und Webseite mitzulesen</option>
-							<option value="Unsichtbarkeit">Zu verbergen, dass der Laptop existiert</option>
+							<option value="Computer">Indem er versucht, die Festplatte in ein anderen Computer zu installieren.</option>
+							<option value="Festplattenverschlüsselung">Indem Mira ihr Passwort nicht gut versteckt hat.</option>
+							<option value="Knacken">Indem er versucht, mit Tools ihr Passwort zu knacken.</option>
 						</select>
 						<button class="check-answer" type="button" disabled>Prüfen</button>
 					</div>
 					<p class="task-feedback" role="status" aria-live="polite"></p>
 				</article>
 
-				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Bei echter Ende-zu-Ende-Verschlüsselung sollen nur die beteiligten Geräte den Nachrichteninhalt lesen können." data-incorrect-feedback="Tipp: „Ende zu Ende“ meint hier die Geräte der sendenden und empfangenden Personen.">
+				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Bei echter Ende-zu-Ende-Verschlüsselung sollen nur die beteiligten Geräte den Nachrichteninhalt lesen können." data-incorrect-feedback="Tipp: Whats-App kann deine Nachrichten nicht lesen.">
 					<p class="task-story">Mira sendet Noé eine Ende-zu-Ende-verschlüsselte Nachricht über eine Chat-App.</p>
 					<p class="task-prompt">Wer soll den Nachrichteninhalt lesen können?</p>
 					<div class="task-answer-row">
 						<select class="task-answer" aria-label="Wer die Nachricht lesen kann auswählen">
 							<option value="">Bitte auswählen</option>
+							<option value="Alle">Mira, Noé und das Unternehmen, welches die Chats speichert</option>
+							<option value="Angreifer">Ein Angreifer, welcher die Nachricht abfängt</option>
 							<option value="Sender und Empfänger">Mira und Noé auf ihren Geräten</option>
-							<option value="Alle im WLAN">Alle Personen im selben WLAN</option>
-							<option value="Nur der App-Anbieter">Nur das Unternehmen, das die App betreibt</option>
 						</select>
 						<button class="check-answer" type="button" disabled>Prüfen</button>
 					</div>
@@ -157,14 +157,14 @@
 				</article>
 
 				<article class="exercise-task" data-solution-index="3" data-correct-feedback="Genau: Symmetrische Verschlüsselung ist schnell, aber der gemeinsame Schlüssel muss geheim und sicher bleiben." data-incorrect-feedback="Tipp: Denk daran, was beide Seiten gemeinsam haben müssen und was passiert, wenn eine fremde Person es erhält.">
-					<p class="task-story">Ein Team möchte viele grosse Backups symmetrisch verschlüsseln, bevor es sie speichert.</p>
+					<p class="task-story">Wieso braucht man nicht immer Symmetrische Verschlüsselung?</p>
 					<p class="task-prompt">Welche Aussage beschreibt einen Vorteil und eine Herausforderung?</p>
 					<div class="task-answer-row">
 						<select class="task-answer" aria-label="Vorteil und Herausforderung auswählen">
 							<option value="">Bitte auswählen</option>
 							<option value="Schlüsselmanagement">Das Verfahren ist schnell, aber der Schlüssel muss sicher geschützt werden</option>
-							<option value="keine Schlüssel">Das Verfahren braucht keinen Schlüssel und funktioniert nur für kurze Nachrichten</option>
-							<option value="öffentlicher Schlüssel">Der Schlüssel darf öffentlich sein, denn niemand kann damit Daten entschlüsseln</option>
+							<option value="kurze Nachrichten">Das Verfahren braucht nur einen Schlüssel, funktioniert aber nur für kurze Nachrichten</option>
+							<option value="öffentlicher Schlüssel">Der Schlüssel darf öffentlich sein, denn nur du kannst damit Daten entschlüsseln</option>
 						</select>
 						<button class="check-answer" type="button" disabled>Prüfen</button>
 					</div>

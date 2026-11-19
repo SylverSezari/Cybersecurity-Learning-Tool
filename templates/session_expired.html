@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<section class="login-page" aria-labelledby="session-expired-title">
+	<div class="login-copy">
+		<p class="section-kicker">Sitzung beendet</p>
+		<h1 id="session-expired-title">Deine Anmeldung ist abgelaufen.</h1>
+		<p>Aus Sicherheitsgründen musst du dich erneut anmelden, um weiterzulernen.</p>
+	</div>
+
+	<div class="login-panel">
+		<h2>Bitte erneut anmelden</h2>
+		<p>Deine Lernfortschritte bleiben erhalten.</p>
+		<a class="login-submit login-submit-link" href="{{ url_for('login_page') }}">
+			Zur Anmeldung
+		</a>
+	</div>
+</section>
+{% endblock content %}

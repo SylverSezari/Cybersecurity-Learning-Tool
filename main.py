@@ -1,16 +1,19 @@
 # FastAPI application, API router registration, and learning-page handlers.
 
+import logging
 from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Annotated
 
 from fastapi import Depends, FastAPI, HTTPException, Request, status
-from fastapi.responses import FileResponse, RedirectResponse
+from fastapi.exception_handlers import http_exception_handler
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 import challenge_pages
 import models
@@ -25,6 +28,8 @@ from security import (
     get_optional_page_principal,
     get_page_principal,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @asynccontextmanager
@@ -42,6 +47,69 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
 EXERCISES_DIRECTORY = Path(__file__).resolve().parent / "templates" / "exercises"
+
+
+def _is_html_page_request(request: Request) -> bool:
+    return (
+        "text/html" in request.headers.get("accept", "")
+        and not request.url.path.startswith("/api/")
+    )
+
+
+@app.exception_handler(StarletteHTTPException)
+async def handle_http_exception(
+    request: Request,
+    error: StarletteHTTPException,
+):
+    if not _is_html_page_request(request):
+        return await http_exception_handler(request, error)
+
+    if error.status_code == status.HTTP_401_UNAUTHORIZED:
+        has_session = (
+            request.cookies.get("access_token") is not None
+            or request.headers.get("authorization") is not None
+        )
+        destination = "session_expired_page" if has_session else "login_page"
+        return RedirectResponse(
+            url=request.url_for(destination),
+            status_code=status.HTTP_303_SEE_OTHER,
+        )
+
+    messages = {
+        status.HTTP_403_FORBIDDEN: "Du hast keine Berechtigung für diese Seite.",
+        status.HTTP_404_NOT_FOUND: "Die angeforderte Seite wurde nicht gefunden.",
+    }
+    return templates.TemplateResponse(
+        request,
+        "error.html",
+        {
+            "status_code": error.status_code,
+            "message": messages.get(
+                error.status_code,
+                "Die Anfrage konnte nicht abgeschlossen werden.",
+            ),
+        },
+        status_code=error.status_code,
+    )
+
+
+@app.exception_handler(Exception)
+async def handle_unexpected_exception(request: Request, _error: Exception):
+    logger.exception("Unhandled error while serving %s", request.url.path)
+    if _is_html_page_request(request):
+        return templates.TemplateResponse(
+            request,
+            "error.html",
+            {
+                "status_code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+                "message": "Ein unerwarteter Fehler ist aufgetreten. Bitte versuche es später erneut.",
+            },
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+        )
+    return JSONResponse(
+        {"detail": "Internal Server Error"},
+        status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+    )
 
 
 def _resolve_exercise_file(relative_path: str) -> Path | None:
@@ -103,7 +171,11 @@ async def home(
     # Render active chapters with the current learner's completion state.
     if principal is None:
         return RedirectResponse(
-            url=request.url_for("login_page"),
+            url=request.url_for(
+                "session_expired_page"
+                if request.cookies.get("access_token")
+                else "login_page"
+            ),
             status_code=status.HTTP_303_SEE_OTHER,
         )
     try:
@@ -112,7 +184,7 @@ async def home(
         if error.status_code != status.HTTP_401_UNAUTHORIZED:
             raise
         return RedirectResponse(
-            url=request.url_for("login_page"),
+            url=request.url_for("session_expired_page"),
             status_code=status.HTTP_303_SEE_OTHER,
         )
     await challenge_pages.abandon_active_run(db, principal)
@@ -162,6 +234,27 @@ async def login_page(
     # Render the sign-in form.
     await challenge_pages.abandon_active_run(db, principal)
     return templates.TemplateResponse(request, "login.html", {"title": "Anmelden"})
+
+
+@app.get(
+    "/session-expired",
+    include_in_schema=False,
+    name="session_expired_page",
+)
+async def session_expired_page(request: Request):
+    response = templates.TemplateResponse(
+        request,
+        "session_expired.html",
+        {"title": "Sitzung abgelaufen"},
+    )
+    response.delete_cookie(
+        "access_token",
+        path="/",
+        secure=request.url.scheme == "https",
+        httponly=True,
+        samesite="lax",
+    )
+    return response
 
 
 @app.get("/logout", include_in_schema=False, name="logout")

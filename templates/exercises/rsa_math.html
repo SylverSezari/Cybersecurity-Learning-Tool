@@ -1,115 +1,334 @@
 <!doctype html>
 <html lang="de">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="color-scheme" content="light dark">
-	<title>RSA mit Zahlen</title>
-	<link rel="stylesheet" href="/static/css/theme.css">
-	<link rel="stylesheet" href="/static/css/exercises.css">
-	<script src="/static/js/exercise-theme.js" defer></script>
-	<script src="/static/js/exercise-tasks.js?v=8" defer></script>
-</head>
-<body>
-	<main class="lesson">
-		<header class="lesson-header">
-			<p class="eyebrow">Lektion 09 · RSA zum Nachrechnen</p>
-			<h1>RSA mit kleinen Zahlen</h1>
-			<p class="lead">
-				Bei RSA werden Zahlen verschlüsselt und entschlüsselt. Wir rechnen mit winzigen
-				Beispielschlüsseln, damit du den Ablauf nachvollziehen kannst.
-			</p>
-		</header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>RSA mit Zahlen</title>
+    <link rel="stylesheet" href="/static/css/theme.css" />
+    <link rel="stylesheet" href="/static/css/exercises.css" />
+    <script src="/static/js/exercise-theme.js" defer></script>
+    <script src="/static/js/rsa-math-calculators.js" defer></script>
+    <script src="/static/js/exercise-tasks.js?v=8" defer></script>
+  </head>
+  <body>
+    <main class="lesson">
+      <header class="lesson-header">
+        <p class="eyebrow">Lektion 09 · RSA zum Nachrechnen</p>
+        <h1>RSA mit kleinen Zahlen</h1>
+        <p class="lead">
+          Bei RSA werden Zahlen verschlüsselt und entschlüsselt. Wir rechnen mit
+          winzigen Beispielschlüsseln, damit du den Ablauf nachvollziehen
+          kannst.
+        </p>
+      </header>
 
-		<section class="lesson-section" aria-labelledby="schluessel-title">
-			<p class="section-label">Der Schlüssel entsteht</p>
-			<h2 id="schluessel-title">Von Primzahlen zu zwei Schlüsseln</h2>
-			<p>
-				Für ein vereinfachtes RSA-Beispiel wählen wir zwei Primzahlen, zum Beispiel
-				<strong>p = 3</strong> und <strong>q = 7</strong>. Wir multiplizieren sie:
-				<strong>n = p · q = 21</strong>. Die Zahl n kommt in den öffentlichen und den privaten
-				Schlüssel.
-			</p>
-			<p>
-				Für die nächste Rechnung bilden wir eine Hilfszahl aus den Vorgängern der Primzahlen:
-				<strong>(p − 1) · (q − 1) = 2 · 6 = 12</strong>. Wir wählen einen öffentlichen Exponenten
-				<strong>e = 5</strong> und einen privaten Exponenten <strong>d = 5</strong>, denn
-				5 · 5 = 25. Bei der Division von 25 durch 12 bleibt der Rest 1. Diese Rest-Eigenschaft
-				sorgt dafür, dass die Entschlüsselung die Verschlüsselung rückgängig macht.
-			</p>
-			<div class="worked-example" aria-label="Vereinfachtes RSA-Beispiel mit n gleich 21">
-				<p><strong>Öffentlicher Schlüssel:</strong> (n = 21, e = 5)</p>
-				<p><strong>Privater Schlüssel:</strong> (n = 21, d = 5)</p>
-				<p>Der öffentliche Schlüssel darf geteilt werden. Der private Schlüssel bleibt geheim.</p>
-			</div>
-		</section>
+      <section class="lesson-section" aria-labelledby="schluessel-title">
+        <p class="section-label">Der Schlüssel erklärt</p>
+        <h2 id="schluessel-title">Schlüssel als Rechnung</h2>
+        <p>
+          Die Schlüssel bestehen aus drei Zahlen: "e", "d" und "N". "e" wird zum
+          verschlüsseln (encryption) und "d" zum entschlüsseln (decryption)
+          gebraucht. N ist in beiden Schlüsseln enthalten. Somit ist das
+          Zahlenpaar (e, N) der öffentliche Schlüssel und (d, N) der private
+          Schlüssel.
+        </p>
+        <p>
+          Wie könnennun aber zwei Zahlen einen Schlüssel bilden? Ganz einfach,
+          der Schlüssel in RSA stellt nämlich mehr eine Rechnung dar, als eine
+          einzige Zahl. Diese ist unterschiedlich für das ver- und
+          entschlüsseln:
+        </p>
+        <div class="worked-example" aria-label="ver- und entschlüsseln">
+          <p class="equation">
+            <strong>Verschlüsseln:</strong> C = Rest von Pᵉ ÷ N
+          </p>
+          <p class="equation">
+            <strong>Entschlüsseln:</strong> P = Rest von Cᵈ ÷ N
+          </p>
+          <p>
+            C stellt den Geheimtext dar und P die Nachricht. N ist bei beiden
+            Rechnungen an der gleichen Stelle und dient als Modulo.
+          </p>
+          <p>
+            Machen wir ein Beispiel. Die Schlüssel von Noé haben die Werte e =
+            7, d = 23 und N = 55. Unsere Nachricht hat den Wert 8. Wir wollen
+            nun eine Nachricht an Noé verschicken. Für dies müssen wir zuerst
+            unsere Nachricht mit seinem öffentlichen Schlüssel verschlüsseln.
+            Das heisst wir machen:
+          </p>
+          <p class="equation">Verschlüsseln: C = Pᵉ ÷ N = 8⁷ ÷ 55 = 2</p>
+          <p>
+            Somit haben wir für den Geheimtext den Wert 2 erhalten. Diesen
+            können wir nun Noé schicken. Er erhält ihn und muss ihn noch
+            entschlüsseln, heisst er rechnet:
+          </p>
+          <p class="equation">Entschlüsseln: P = Cᵈ ÷ N = 2²³ ÷ 55 = 8</p>
+          <p>
+            Somit haben wir schon eine Nachricht ver- und entschlüsseln können.
+          </p>
+          <aside class="note">
+            <strong>Nur zum Lernen:</strong> Die Zahlen 7 und 23 sind viel zu
+            klein für echte Sicherheit. Reale RSA-Schlüssel sind enorm gross. In
+            echten Anwendungen sollte man dafür bewährte
+            Kryptografie-Bibliotheken verwenden und RSA nicht selbst
+            implementieren.
+          </aside>
+        </div>
+      </section>
 
-		<section class="lesson-section" aria-labelledby="rechnen-title">
-			<p class="section-label">Verschlüsseln und entschlüsseln</p>
-			<h2 id="rechnen-title">Immer den Rest nehmen</h2>
-			<p>
-				Für unser Beispiel ist die Nachricht eine Zahl <strong>P = 2</strong>. Zum Verschlüsseln
-				rechnen wir P hoch e und nehmen den Rest bei der Division durch n:
-			</p>
-			<div class="worked-example" aria-label="Verschlüsselung und Entschlüsselung des Zahlenwerts 2">
-				<p class="equation">Verschlüsseln: C = Rest von Pᵉ ÷ n</p>
-				<p>2⁵ = 32. Bei 32 ÷ 21 bleibt Rest 11. Der Geheimtext ist also C = 11.</p>
-				<p class="equation">Entschlüsseln: P = Rest von Cᵈ ÷ n</p>
-				<p>
-					11⁵ ist eine grosse Zahl. Wir können zwischendurch immer wieder den Rest nehmen:
-					11² = 121, Rest 16 bei Division durch 21; 11⁴ hat dann denselben Rest wie
-					16² = 256, also 4; 11⁵ hat denselben Rest wie 4 · 11 = 44, also 2. Die Nachricht
-					kommt wieder als P = 2 heraus.
-				</p>
-			</div>
-			<p>
-				<strong>Rest</strong> bedeutet, was bei einer Division übrig bleibt. In der Schreibweise
-				„mod n“ nehmen wir genau diesen Rest. So bleiben die Zahlen im Bereich von 0 bis n − 1.
-			</p>
-			<aside class="note">
-				<strong>Nur zum Lernen:</strong> Die Zahlen 3 und 7 sind viel zu klein für echte Sicherheit.
-				Reale RSA-Schlüssel sind enorm gross. In echten Anwendungen sollte man dafür bewährte
-				Kryptografie-Bibliotheken verwenden und RSA nicht selbst implementieren.
-			</aside>
-		</section>
+      <section class="lesson-section" aria-labelledby="rechnen-title">
+        <p class="section-label">Den Schlüssel berechnen</p>
+        <h2 id="rechnen-title">Zwei Primzahlen zum Erfolg</h2>
+        <p>
+          Wie kommen wir nun jedoch auf "N", "e" und "d"? Für dies benötigen wir
+          die bereits erwähnten Primzahlen. N wird nämlich aus zwei
+          verschiedenen Primzahlen berechnet. Diese nennen wir "p" und "q". Die
+          Rechnung sieht somit so aus:
+        </p>
+        <p class="equation">N = p * q</p>
+        <p>
+          Als nächstes benötigen wir eine spezielle Zahl, nämlich Φ(N). Das
+          Symbol vor dem N steht für die Eulerische Funktion. Diese ist nicht
+          unbedingt relevant zu diesem Thema, deshalb wird sie hier nicht weiter
+          erklärt. Um aber auf Φ(N) zu kommen, ist nicht sehr kompliziert. Diese
+          ergibt sich nämlich aus der Rechnung:
+        </p>
+        <p class="equation">Φ(N) = (p-1) * (q-1)</p>
+        <p>
+          Die Zahl e können wir nun schon frei wählen, indem wir einfach
+          beachten, dass e kleiner ist als Φ(N), aber grösser als 0 und dass e
+          und Φ(N) keinen gemeinsamen Teiler haben ausser 1.
+        </p>
+        <p>
+          Um nun auf die letzte Zahl d zu kommen, müssen wir ein Multiplikative
+          Inverses von e mod Φ(N) bekommen. Dies tönt zuerst sehr kompliziert,
+          ist im Prinzip aber ganz einfach. Es bedeutet, dass das Produkt von e
+          und d beim Teilen durch Φ(N) den Rest 1 ergeben sollte. In Rechnung
+          dargestellt, würde das so aussehen:
+        </p>
+        <p class="equation">(e * d) Φ(N) = 1 oder auch (d * e) ≡ 1 mod Φ(N)</p>
+        <p>
+          Bei kleineren Zahlen kann man dies mit ausprobieren ausrechnen, bei
+          grösseren Zahlen muss man jedoch verschiedene Methoden anwenden. Eine
+          solche Methode ist der Erweiterte Euklidische Algorithmus. Dieser ist
+          jedoch komplizierter und benötigt fortgeschrittenes mathematisches
+          Wissen, weshalb er übersprungen wird. Falls ihr an ihm interessiert
+          seid, gibt es ganz viele Tutorials dazu im Internet. Für den Wert d
+          kann es mehrere Lösungen geben, alle sind auch gültig, denn man kommt
+          bei allen auf das gleiche Resultat.
+        </p>
+        <p>
+          Somit haben wir nun alle Zahlen berechnet, welchhe wir benötigen. Wir
+          probieren dies direkt an einem Beispiel aus.
+        </p>
+        <div class="worked-example" aria-label="Berechnen des Schlüssels">
+          <p>
+            Starten wir mit den Werten p = 3 und q = 11. Zuerst müssen wir N
+            berechnen. Dies machen wir ganz einfach mit:
+          </p>
+          <p class="equation">N = p * q = 3 * 11 = 33</p>
+          <p>
+            Als nächstes müssen wir die beiden Werte e und d bekommen. Für diese
+            brauchen wir jedoch die Zahl Φ(N), weswegen wir zuerst diese
+            Rechnung lösen:
+          </p>
+          <p class="equation">N = (p-1) * (q-1) = (3-1) * (11-1) = 20</p>
+          <p>
+            Jetzt können wir e frei wählen, solange es grösser als 0, kleiner
+            als 20 ist und keine gemeinsamen Teiler mit 20 hat. In unserem Fall
+            wählen wir die Zahl 7, den sie entspricht all diesen Vorgaben.
+          </p>
+          <p>
+            Nun kommen wir zum finalen Wert, dem d. Da wir den euklidischen
+            Algorithmus nicht kennen, müssen wir es mit ausprobieren
+            herausfinden. Glücklicherweise benutzen wir nur kleine Zahlen,
+            weshalb das Resultat nicht allzu schwierig ist. d ist in unserem
+            Fall die Zahl 3. Dies können wir auch überprüfen indem wir die
+            richtigen Zahlen in der Rechnung einsetzen:
+          </p>
+          <p class="equation">(e * d) Φ(N) = 1 => (7 * 3) mod 20 = 1</p>
+          <p>
+            Somit haben wir schon unseren ersten öffentlichen Schlüssel (7, 33)
+            und unseren ersten privaten Schlüssel (3, 33) selber berechnet.
+          </p>
+        </div>
+      </section>
 
-		<section class="lesson-section" aria-labelledby="aufgaben-title">
-			<p class="section-label">Jetzt selbst rechnen</p>
-			<h2 id="aufgaben-title">Drei RSA-Schritte</h2>
-			<p>Verwende für alle Aufgaben diesen Spielzeugschlüssel: p = 3, q = 5, n = 15, e = 3 und d = 3.</p>
-			<div class="task-list">
-				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: n ist das Produkt der beiden Primzahlen, also 3 · 5 = 15." data-incorrect-feedback="Tipp: Multipliziere p und q, um n zu erhalten.">
-					<p class="task-story">Der öffentliche und der private Schlüssel enthalten beide n.</p>
-					<p class="task-prompt">Berechne n aus p = 3 und q = 5.</p>
-					<div class="task-answer-row">
-						<input class="task-answer" type="number" step="1" aria-label="Wert von n">
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
+      <section class="lesson-section" aria-labelledby="bytes-and-numbers">
+        <p class="section-label">Text zu Zahlen</p>
+        <h2 id="bytes-and-numbers">Wie funktioniert das?</h2>
+        <p>
+          <strong
+            >Aber wir haben doch jetzt immer nur Zahlen gebraucht, was hat das
+            mit meiner Nachricht zu tun?</strong
+          >
+        </p>
+        <p>
+          Ein Computer denkt anders als wir Menschen. Für ihn sind ein Text
+          immer Zahlen, denn er speichert ihn als Bytes ab. Darum kann er diese
+          Zahl nehmen und direkt RSA anwenden. Natürlich werden in modernen RSA
+          Methoden noch zusätzliche Sicherheitsprinzipen, wie zum Beispiel extra
+          Zahlen vorne und hinten angewendet.
+        </p>
+        <p>
+          Naja, so simpel ist es leider auch nicht. Viele Nachrichten, wie zum
+          Beispiel Fotos oder Videos, sind viel zu gross, um sie direkt zu
+          verschlüsseln. Die Nachricht, also die Länge der Bytes, muss nämlich
+          kleiner sein als "N", da man sonst gar nicht mehr auf die originale
+          Nachricht kommt. Ein 2048-bit grösser Schlüssel kann in Wahrheit nur
+          ungefähr 190 bytes verschlüsseln. Aus diesem Grund wird in der
+          Realität oft nicht deine wirkliche Nachricht mit RSA verschlüsselt,
+          sondern ein Schlüssel, der für eine symmetrische Verschlüsselung
+          angewendet werden kann. Somit werden beide Prinzipien verbunden.
+        </p>
+      </section>
 
-				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Richtig: 7³ = 343. Beim Teilen durch 15 bleibt Rest 13, also ist der Geheimtext C = 13." data-incorrect-feedback="Tipp: Rechne 7 · 7 · 7 und teile das Ergebnis durch n = 15. Gib den Rest ein.">
-					<p class="task-story">Noé möchte die Zahl P = 7 mit dem öffentlichen Exponenten e = 3 verschlüsseln.</p>
-					<p class="task-prompt">Welcher Geheimtext entsteht bei n = 15? Gib den Rest von 7³ ÷ 15 ein.</p>
-					<div class="task-answer-row">
-						<input class="task-answer" type="number" step="1" aria-label="RSA-Geheimtext">
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
+      <section class="lesson-section" aria-labelledby="aufgaben-title">
+        <p class="section-label">Jetzt selbst rechnen</p>
+        <h2 id="aufgaben-title">Drei RSA-Schritte</h2>
+        <div class="calculator-tools" aria-label="Rechenhilfen">
+          <h3>Rechenhilfen</h3>
+          <article class="calculator">
+            <h3>Multiplikation</h3>
+            <form data-calculator="multiply">
+              <label>
+                <input
+                  data-value="left"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  aria-label="Erste Zahl für die Multiplikation"
+                  required
+                />
+              </label>
+              <span class="calculator-operator" aria-hidden="true">×</span>
+              <label>
+                <input
+                  data-value="right"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  aria-label="Zweite Zahl für die Multiplikation"
+                  required
+                />
+              </label>
+              <button type="submit">Berechnen</button>
+              <output data-result aria-live="polite"></output>
+            </form>
+          </article>
+          <article class="calculator">
+            <h3>Modulo</h3>
+            <form data-calculator="modulo">
+              <label>
+                Zahl
+                <input
+                  data-value="dividend"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  aria-label="Zahl für die Modulo-Rechnung"
+                  required
+                />
+              </label>
+              <span class="calculator-operator" aria-hidden="true">mod</span>
+              <label>
+                <input
+                  data-value="modulus"
+                  type="text"
+                  inputmode="numeric"
+                  autocomplete="off"
+                  aria-label="Positiver Modulo"
+                  required
+                />
+              </label>
+              <button type="submit">Berechnen</button>
+              <output data-result aria-live="polite"></output>
+            </form>
+          </article>
+        </div>
+        <div class="task-list">
+          <article
+            class="exercise-task"
+            data-solution-index="0"
+            data-correct-feedback="Richtig: Φ(N) ist das Produkt von (p-1) * (q-1)."
+            data-incorrect-feedback="Tipp: Zieh 1 ab von p und q, um Φ(N) zu erhalten."
+          >
+            <p class="task-story">
+              Um d und e herauszufinden, brauchen wir Φ(N).
+            </p>
+            <p class="task-prompt">Berechne Φ(N) aus p = 7 und q = 21.</p>
+            <div class="task-answer-row">
+              <input
+                class="task-answer"
+                type="number"
+                step="1"
+                aria-label="Wert von n"
+              />
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
 
-				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: 13³ = 2197. Bei der Division durch 15 bleibt Rest 7, also erhält Mira die ursprüngliche Nachricht P = 7 zurück." data-incorrect-feedback="Tipp: Rechne 13 · 13 · 13 und teile durch n = 15. Der Rest ist die entschlüsselte Nachricht.">
-					<p class="task-story">Mira erhält C = 13. Zum Entschlüsseln verwendet sie d = 3 und n = 15.</p>
-					<p class="task-prompt">Welche Zahl bleibt als Rest von 13³ ÷ 15?</p>
-					<div class="task-answer-row">
-						<input class="task-answer" type="number" step="1" aria-label="Entschlüsselte RSA-Nachricht">
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
-			</div>
-			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle RSA-Rechnungen gelöst. Die Lektion wird jetzt als abgeschlossen markiert.</p>
-		</section>
-	</main>
-</body>
+          <article
+            class="exercise-task"
+            data-solution-index="1"
+            data-correct-feedback="Richtig: 7³ = 343. Beim Teilen durch 15 bleibt Rest 13, also ist der Geheimtext C = 13."
+            data-incorrect-feedback="Tipp: Gib den Rest der Rechnung ein."
+          >
+            <p class="task-story">
+              Noé möchte die Zahl P = 7 mit dem öffentlichen Exponenten e = 3
+              verschlüsseln.
+            </p>
+            <p class="task-prompt">Welcher Geheimtext entsteht bei n = 15?</p>
+            <div class="task-answer-row">
+              <input
+                class="task-answer"
+                type="number"
+                step="1"
+                aria-label="RSA-Geheimtext"
+              />
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+
+          <article
+            class="exercise-task"
+            data-solution-index="2"
+            data-correct-feedback="Richtig: (9 * 39) mod 70 = 1. Da Φ(N) mit 0 endet kannst du bei 9 immer 10er Schritte mit 9, 19, 29... machen. Dies geht nur bei Φ(N), welche mit 0 enden."
+            data-incorrect-feedback="Tipp: Weil Φ(N) mit 0 endet, muss e * d immer mit 1 enden. 9 * d endet nur bei einer Rechnung mit 1. Danach kannst du immer 10er Schritte nach oben gehen."
+          >
+            <p class="task-story">
+              Mira hat p = 7 und q = 11. Sie hat sich (9, 77) als öffentlichen
+              Schlüssel genommen.
+            </p>
+            <p class="task-prompt">
+              Wie lautet d? (Oben hat es Rechenhilfen für deinen Gebrauch)
+            </p>
+            <div class="task-answer-row">
+              <input
+                class="task-answer"
+                type="number"
+                step="1"
+                aria-label="Entschlüsselte RSA-Nachricht"
+              />
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+        </div>
+        <p class="tasks-complete" id="tasksComplete" role="status" hidden>
+          Alle RSA-Rechnungen gelöst. Die Lektion wird jetzt als abgeschlossen
+          markiert.
+        </p>
+      </section>
+    </main>
+  </body>
 </html>

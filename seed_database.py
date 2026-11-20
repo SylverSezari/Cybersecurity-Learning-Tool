@@ -54,6 +54,18 @@ CHALLENGES = (
         "title": "Vigenère entschlüsseln",
         "html_filename": "vigenere_decrypt.html",
     },
+    {
+        "title": "RSA-Schlüssel berechnen",
+        "html_filename": "rsa_key_generation.html",
+    },
+    {
+        "title": "RSA verschlüsseln",
+        "html_filename": "rsa_encrypt.html",
+    },
+    {
+        "title": "RSA entschlüsseln",
+        "html_filename": "rsa_decrypt.html",
+    },
 )
 
 EXERCISES = (
@@ -196,25 +208,9 @@ EXERCISES = (
         "chapter_title": "Passwörter",
     },
     {
-        "title": "Good Passwords",
-        "html_filename": "good_passwords.html",
-        "solution": ["long-unique", "no-composition", "when-compromised"],
-        "requires_previous": True,
-        "position": 2,
-        "chapter_title": "Passwörter",
-    },
-    {
-        "title": "Two-Factor Authentication",
-        "html_filename": "two_factor.html",
-        "solution": ["different-types", "security-key", "important-accounts"],
-        "requires_previous": True,
-        "position": 3,
-        "chapter_title": "Passwörter",
-    },
-    {
-        "title": "Password Managers",
+        "title": "Passwort Managers",
         "html_filename": "password_managers.html",
-        "solution": ["generator", "encrypted-before-sync", "master-plus-2fa"],
+        "solution": [],
         "requires_previous": True,
         "position": 4,
         "chapter_title": "Passwörter",
@@ -223,9 +219,11 @@ EXERCISES = (
 
 
 async def seed_content() -> None:
+    """Synchronize the configured chapter, exercise, and challenge catalog."""
     await init_db()
 
     async with AsyncSessionLocal() as session, session.begin():
+        # Retired chapters can be removed only when no exercise still references them.
         for chapter_title in REMOVED_CHAPTERS:
             result = await session.execute(
                 select(Chapter).where(Chapter.title == chapter_title)
@@ -245,6 +243,7 @@ async def seed_content() -> None:
                 )
             await session.delete(removed_chapter)
 
+        # Upsert chapter metadata so rerunning the seed is safe.
         chapters_by_title = {}
         for chapter_data in CHAPTERS:
             result = await session.execute(
@@ -262,6 +261,7 @@ async def seed_content() -> None:
 
         await session.flush()
 
+        # Match seeded exercises by either stable filename or display title.
         result = await session.execute(select(Exercise))
         existing_exercises = result.scalars().all()
         by_filename = {
@@ -303,6 +303,7 @@ async def seed_content() -> None:
                     f"position={exercise_data['position']}"
                 )
 
+        # Move seeded exercises temporarily to avoid unique-position collisions.
         existing_seeded = [
             exercise for _, exercise in seeded_exercises if exercise is not None
         ]
@@ -338,6 +339,7 @@ async def seed_content() -> None:
             exercise.position = exercise_data["position"]
             exercise.chapter = chapters_by_title[exercise_data["chapter_title"]]
 
+        # Remove unsupported challenges and clear any learner run pointing to them.
         result = await session.execute(select(Challenge))
         existing_challenges = result.scalars().all()
         unsupported_challenges = [
@@ -408,6 +410,7 @@ async def seed_content() -> None:
 
 
 async def main() -> None:
+    """Seed content and always release the shared database engine."""
     try:
         await seed_content()
     finally:

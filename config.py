@@ -1,3 +1,5 @@
+"""Load application settings and secrets from the environment or `.env`."""
+
 from pydantic import SecretStr
 from pydantic_settings import BaseSettings, SettingsConfigDict
 

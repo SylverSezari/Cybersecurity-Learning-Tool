@@ -9,10 +9,37 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 import challenge_pages
 import models
+from answer_validation import answers_match
 from randomized_challenges import (
+    GERMAN_4_LETTER_WORDS,
+    GERMAN_8_LETTER_WORDS,
+    decrypt_cipher_text,
+    encrypt_cipher_text,
     generate_practice_challenge,
     generate_randomized_challenge,
 )
+
+
+def test_caesar_reported_example_round_trips():
+    ciphertext = encrypt_cipher_text("MEHAIXEF", 16)
+    assert ciphertext == "CUXQYNUV"
+    assert decrypt_cipher_text(ciphertext, 16) == "MEHAIXEF"
+
+
+def test_reported_caesar_decryption_challenge_uses_original_word_as_answer():
+    plaintext = decrypt_cipher_text("YLZGCRCP", 24)
+    assert plaintext == "ANBIETER"
+    assert plaintext in GERMAN_8_LETTER_WORDS
+    assert encrypt_cipher_text(plaintext, 24) == "YLZGCRCP"
+    assert answers_match([plaintext], [plaintext])
+    assert not answers_match([plaintext], ["WJXEAPAN"])
+
+
+def test_vigenere_word_list_example_round_trips():
+    plaintext = "ABFLUGZE"
+    key = "TEST"
+    ciphertext = encrypt_cipher_text(plaintext, key)
+    assert decrypt_cipher_text(ciphertext, key) == plaintext
 
 
 async def add_challenge(
@@ -40,7 +67,7 @@ async def add_challenge(
         ("vigenere_decrypt.html", "Vigenère", "decrypt"),
     ],
 )
-def test_randomized_challenge_is_stable_and_uses_eight_distinct_letters(
+def test_randomized_challenge_is_stable_and_uses_word_list(
     filename: str,
     cipher: str,
     operation: str,
@@ -64,7 +91,7 @@ def test_randomized_challenge_is_stable_and_uses_eight_distinct_letters(
         if operation == "encrypt"
         else challenge.expected_answers[0]
     )
-    assert len(set(plaintext)) == 8
+    assert plaintext in GERMAN_8_LETTER_WORDS
     key = challenge.prompt["key"]
     shifts = (
         [key] * len(plaintext)
@@ -79,9 +106,13 @@ def test_randomized_challenge_is_stable_and_uses_eight_distinct_letters(
         for letter, shift in zip(plaintext, shifts)
     )
     if operation == "encrypt":
+        assert plaintext == challenge.prompt["text"]
         assert challenge.expected_answers == [expected_ciphertext]
+        assert encrypt_cipher_text(plaintext, key) == challenge.expected_answers[0]
     else:
+        assert plaintext == challenge.expected_answers[0]
         assert challenge.prompt["text"] == expected_ciphertext
+        assert decrypt_cipher_text(challenge.prompt["text"], key) == plaintext
     assert challenge != next_run
     if cipher == "Caesar":
         assert isinstance(challenge.prompt["key"], int)
@@ -89,6 +120,43 @@ def test_randomized_challenge_is_stable_and_uses_eight_distinct_letters(
     else:
         assert isinstance(challenge.prompt["key"], str)
         assert len(challenge.prompt["key"]) == 4
+        assert challenge.prompt["key"] in GERMAN_4_LETTER_WORDS
+
+
+@pytest.mark.parametrize(
+    "filename, operation",
+    [
+        ("rsa_key_generation.html", "key_generation"),
+        ("rsa_encrypt.html", "encrypt"),
+        ("rsa_decrypt.html", "decrypt"),
+    ],
+)
+def test_rsa_challenges_are_stable_and_mathematically_consistent(
+    filename: str,
+    operation: str,
+):
+    started_at = datetime(2026, 11, 13, 7, tzinfo=UTC)
+    challenge = generate_randomized_challenge(filename, 12, started_at)
+    assert challenge == generate_randomized_challenge(filename, 12, started_at)
+    assert challenge != generate_randomized_challenge(
+        filename,
+        12,
+        started_at + timedelta(seconds=1),
+    )
+
+    prompt = challenge.prompt
+    if operation == "key_generation":
+        p, q = prompt["p"], prompt["q"]
+        modulus, phi = challenge.expected_answers
+        assert modulus == p * q
+        assert phi == (p - 1) * (q - 1)
+    elif operation == "encrypt":
+        assert challenge.expected_answers == [
+            pow(prompt["message"], prompt["e"], prompt["n"])
+        ]
+    else:
+        message = pow(prompt["ciphertext"], prompt["d"], prompt["n"])
+        assert challenge.expected_answers == [message]
 
 
 async def get_test_account(db_session: AsyncSession) -> models.Account:

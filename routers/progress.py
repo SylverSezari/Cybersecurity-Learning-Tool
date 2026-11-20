@@ -1,3 +1,5 @@
+"""Report learner progress and record completed exercises."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status

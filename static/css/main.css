@@ -1671,7 +1671,7 @@ button:not(:disabled):active {
 
 .account-list li {
 	display: grid;
-	grid-template-columns: 3rem minmax(0, 1fr);
+	grid-template-columns: 3rem minmax(0, 1fr) auto;
 	align-items: center;
 	gap: 0.75rem;
 	min-height: 2.9rem;
@@ -1689,6 +1689,11 @@ button:not(:disabled):active {
 	min-width: 0;
 	overflow-wrap: anywhere;
 	font-weight: 600;
+}
+
+.account-list-class {
+	color: var(--muted-text);
+	font-size: 0.82rem;
 }
 
 .catalog-title {

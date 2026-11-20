@@ -1,3 +1,4 @@
+{# Admin workspace for managing accounts and learning content. #}
 {% extends "layout.html" %}
 
 {% block content %}
@@ -264,9 +265,19 @@
 						<h3>Benutzerkonto erstellen</h3>
 						<label for="newAccountUsername">Benutzername</label>
 						<input id="newAccountUsername" type="text" maxlength="20" required />
+						<label for="newAccountKlasse">Klasse</label>
+						<input id="newAccountKlasse" type="text" maxlength="50" required />
 						<label for="newAccountPassword">Passwort</label>
 						<input id="newAccountPassword" type="password" minlength="4" required />
 						<button class="action-button" type="submit">Konto erstellen</button>
+					</form>
+
+					<form class="account-action-form" id="importAccountsForm">
+						<h3>Schülerkonten importieren</h3>
+						<p class="form-hint">CSV-Datei mit den Spalten Name, Vorname und Klasse auswählen. Die Datei muss mit Semikolon getrennt sein.</p>
+						<label for="accountCsvFile">CSV-Datei</label>
+						<input id="accountCsvFile" name="file" type="file" accept=".csv,text/csv" required />
+						<button class="action-button" type="submit">Konten importieren und Zugangsdaten herunterladen</button>
 					</form>
 
 					<form class="account-action-form" id="updateAccountForm">
@@ -275,6 +286,8 @@
 						<select id="updateAccountSelect" required></select>
 						<label for="updateAccountUsername">Benutzername</label>
 						<input id="updateAccountUsername" type="text" maxlength="20" required />
+						<label for="updateAccountKlasse">Klasse</label>
+						<input id="updateAccountKlasse" type="text" maxlength="50" required />
 						<label for="updateAccountPassword">Neues Passwort</label>
 						<input id="updateAccountPassword" type="password" minlength="4" autocomplete="new-password" />
 						<button class="action-button secondary-action" type="submit">Konto speichern</button>

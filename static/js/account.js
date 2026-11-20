@@ -591,6 +591,7 @@ function fillAccountUpdateForm() {
 	const account = accounts.find((item) => String(item.id) === updateAccountSelect.value);
 	if (!account) return;
 	document.getElementById("updateAccountUsername").value = account.username;
+	document.getElementById("updateAccountKlasse").value = account.klasse;
 	document.getElementById("updateAccountPassword").value = "";
 }
 
@@ -605,7 +606,10 @@ function renderAccounts() {
 		const username = document.createElement("span");
 		username.className = "account-list-username";
 		username.textContent = account.username;
-		item.append(id, username);
+		const klasse = document.createElement("span");
+		klasse.className = "account-list-class";
+		klasse.textContent = account.klasse;
+		item.append(id, username, klasse);
 		accountList.append(item);
 	}
 	document.getElementById("accountCount").textContent = `Benutzerkonten: ${accounts.length}`;
@@ -861,12 +865,13 @@ saveChallengeOrder.addEventListener("click", async () => {
 document.getElementById("addAccountForm").addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const username = document.getElementById("newAccountUsername").value.trim();
+	const klasse = document.getElementById("newAccountKlasse").value.trim();
 	const password = document.getElementById("newAccountPassword").value;
-	if (!username || !password) return;
+	if (!username || !klasse || !password) return;
 	try {
 		await apiRequest("/api/accounts", {
 			method: "POST",
-			body: JSON.stringify({ username, password }),
+			body: JSON.stringify({ username, password, klasse }),
 		});
 		event.target.reset();
 		await loadAccounts();
@@ -876,13 +881,48 @@ document.getElementById("addAccountForm").addEventListener("submit", async (even
 	}
 });
 
+document.getElementById("importAccountsForm").addEventListener("submit", async (event) => {
+	event.preventDefault();
+	const form = event.currentTarget;
+	try {
+		const response = await fetch("/api/accounts/import-csv", {
+			method: "POST",
+			headers: { Authorization: `Bearer ${accessToken}` },
+			body: new FormData(form),
+		});
+		if (!response.ok) {
+			const body = await response.json().catch(() => ({}));
+			throw new Error(typeof body.detail === "string"
+				? body.detail
+				: "Die CSV-Datei konnte nicht importiert werden.");
+		}
+
+		const downloadUrl = URL.createObjectURL(await response.blob());
+		const downloadLink = document.createElement("a");
+		downloadLink.href = downloadUrl;
+		downloadLink.download = "schueler-zugangsdaten.txt";
+		document.body.append(downloadLink);
+		downloadLink.click();
+		downloadLink.remove();
+		window.setTimeout(() => URL.revokeObjectURL(downloadUrl), 0);
+
+		const importedCount = response.headers.get("X-Imported-Count");
+		form.reset();
+		await loadAccounts();
+		setStatus(`${importedCount} Benutzerkonten importiert; Zugangsdaten heruntergeladen`);
+	} catch (error) {
+		showError(error);
+	}
+});
+
 document.getElementById("updateAccountForm").addEventListener("submit", async (event) => {
 	event.preventDefault();
 	const accountId = updateAccountSelect.value;
 	const username = document.getElementById("updateAccountUsername").value.trim();
+	const klasse = document.getElementById("updateAccountKlasse").value.trim();
 	const password = document.getElementById("updateAccountPassword").value;
-	if (!accountId || !username) return;
-	const update = { username };
+	if (!accountId || !username || !klasse) return;
+	const update = { username, klasse };
 	if (password) update.password = password;
 	try {
 		await apiRequest(`/api/accounts/update/${accountId}`, {

@@ -97,17 +97,20 @@ class ChapterActivationChange(BaseModel):
 class AccountResponse(BaseModel):
     id: int
     username: str
+    klasse: str
 
 
 ### for post requests
 class AccountCreate(BaseModel):
     username: str = Field(min_length=1, max_length=40)
     password: str = Field(min_length=4, max_length=20)
+    klasse: str | None = Field(default=None, min_length=1, max_length=50)
 
 
 class AccountPut(BaseModel):
     username: str | None = Field(default=None, min_length=1, max_length=40)
     password: str | None = Field(default=None, min_length=4, max_length=20)
+    klasse: str | None = Field(default=None, min_length=1, max_length=50)
 
 
 class AccountLogin(BaseModel):

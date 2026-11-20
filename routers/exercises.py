@@ -1,3 +1,5 @@
+"""Provide authenticated CRUD and assignment routes for learning exercises."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status

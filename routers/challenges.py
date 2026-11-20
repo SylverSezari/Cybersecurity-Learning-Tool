@@ -1,3 +1,5 @@
+"""Manage challenge definitions and validate answers for active timed runs."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status

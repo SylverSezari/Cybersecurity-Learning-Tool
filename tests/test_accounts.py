@@ -1,10 +1,12 @@
 from collections.abc import Awaitable, Callable
+from pathlib import Path
 
 import pytest
 from httpx import AsyncClient
 from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
+import account_helpers
 import models
 
 # Test Accounts
@@ -135,7 +137,11 @@ async def test_get_single_account_returns_account_to_admin(
     )
 
     assert response.status_code == 200
-    assert response.json() == {"id": account["id"], "username": "admin_lookup_user"}
+    assert response.json() == {
+        "id": account["id"],
+        "username": "admin_lookup_user",
+        "klasse": account["klasse"],
+    }
 
 
 @pytest.mark.anyio
@@ -215,6 +221,7 @@ async def test_create_account_stores_account_for_admin(
 
     assert response.status_code == 201
     assert response.json()["username"] == "new_account"
+    assert response.json()["klasse"]
     assert "password_hash" not in response.json()
 
 
@@ -265,6 +272,126 @@ async def test_create_account_rejects_regular_user(
     assert response.json()["detail"] == "Admin privileges required"
 
 
+@pytest.mark.anyio
+async def test_import_accounts_csv_creates_accounts_and_returns_credentials(
+    client: AsyncClient,
+    admin_auth_headers: dict[str, str],
+    test_account_factory: Callable[[str], Awaitable[dict]],
+):
+    await test_account_factory("amuster")
+    csv_content = (
+        "Name;Vorname;G;Ausbildung;Klasse\n"
+        "Muster;Anna;w;Gym-P;2gNP\n"
+        "Beispiel;Bernd;m;Gym-N;3aNP\n"
+        ";;;;\n"
+    )
+
+    response = await client.post(
+        "/api/accounts/import-csv",
+        files={"file": ("schueler.csv", csv_content, "text/csv")},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.headers["content-disposition"].endswith(
+        'filename="schueler-zugangsdaten.txt"'
+    )
+    assert response.headers["x-imported-count"] == "2"
+    assert "anmuster;" in response.text
+    assert "bbeispiel;" in response.text
+    assert "2gNP" in response.text
+    credentials = response.text.splitlines()[1:]
+    data_directory = Path(__file__).resolve().parents[1]
+    german_words = {
+        word.capitalize()
+        for word in (data_directory / "german_words.txt")
+        .read_text(encoding="utf-8-sig")
+        .splitlines()
+    }
+    english_words = {
+        word.capitalize()
+        for word in account_helpers._english_words()
+    }
+    capitalized_words = german_words | english_words
+    for line in credentials:
+        _, password, _ = line.split(";")
+        assert len(password) >= 20
+        assert "-" in password
+        password_words = password.split("-")
+        assert len(password_words) >= 4
+        assert all(word.capitalize() == word for word in password_words)
+        assert all(word in capitalized_words for word in password_words)
+        assert any(word in german_words for word in password_words)
+        assert any(word in english_words for word in password_words)
+    accounts_response = await client.get(
+        "/api/accounts", headers=admin_auth_headers
+    )
+    assert len(accounts_response.json()) == 3
+
+
+@pytest.mark.anyio
+async def test_import_accounts_csv_rejects_regular_user(
+    client: AsyncClient,
+    user_auth_headers: dict[str, str],
+):
+    response = await client.post(
+        "/api/accounts/import-csv",
+        files={"file": ("schueler.csv", "Name;Vorname;Klasse\nMuster;Anna;2A\n")},
+        headers=user_auth_headers,
+    )
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Admin privileges required"
+
+
+@pytest.mark.anyio
+async def test_import_accounts_csv_rejects_missing_required_columns(
+    client: AsyncClient,
+    admin_auth_headers: dict[str, str],
+):
+    response = await client.post(
+        "/api/accounts/import-csv",
+        files={"file": ("schueler.csv", "Name;Vorname\nMuster;Anna\n")},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == (
+        "Die CSV-Datei muss die Spalten Name, Vorname und Klasse enthalten."
+    )
+    accounts_response = await client.get(
+        "/api/accounts", headers=admin_auth_headers
+    )
+    assert accounts_response.json() == []
+
+
+def test_generate_password_mixes_german_and_english_words(monkeypatch):
+    monkeypatch.setattr(account_helpers.secrets, "choice", lambda values: values[-1])
+
+    password = account_helpers.generate_password()
+
+    english_words = set(
+        word.capitalize() for word in account_helpers._english_words()
+    )
+    german_words = set(
+        word.capitalize() for word in account_helpers._german_words()
+    )
+    password_words = password.split("-")
+    assert len(password_words) >= 4
+    assert len(password) >= 20
+    assert all(word.capitalize() == word for word in password_words)
+    assert any(word in english_words for word in password_words)
+    assert any(word in german_words for word in password_words)
+
+
+def test_english_wordlist_has_at_least_3000_unique_short_words():
+    words = account_helpers._english_words()
+
+    assert len(words) >= 3000
+    assert len(words) == len(set(words))
+    assert all(4 <= len(word) <= 10 for word in words)
+
+
 ## Test update_account
 # Verify username/password changes, duplicate usernames, and admin-only access.
 
@@ -278,12 +405,20 @@ async def test_update_account_changes_username_and_password(
     account = await test_account_factory("before_update")
     response = await client.put(
         f"/api/accounts/update/{account['id']}",
-        json={"username": "after_update", "password": "newpassword123"},
+        json={
+            "username": "after_update",
+            "password": "newpassword123",
+            "klasse": "2A",
+        },
         headers=admin_auth_headers,
     )
 
     assert response.status_code == 200
-    assert response.json() == {"id": account["id"], "username": "after_update"}
+    assert response.json() == {
+        "id": account["id"],
+        "username": "after_update",
+        "klasse": "2A",
+    }
     login_response = await client.post(
         "/api/accounts/token",
         json={"username": "after_update", "password": "newpassword123"},

@@ -1,0 +1,29 @@
+<!doctype html>
+<!-- Randomized challenge content loaded inside the sandboxed challenge iframe. -->
+<html lang="de">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+  <title>RSA entschlüsseln</title>
+  <link rel="stylesheet" href="/static/css/theme.css"><link rel="stylesheet" href="/static/css/exercises.css">
+  <script src="/static/js/exercise-theme.js" defer></script><script src="/static/js/rsa-math-calculators.js?v=2" defer></script><script src="/static/js/exercise-tasks.js?v=8" defer></script><script src="/static/js/rsa-challenge.js?v=1" defer></script>
+</head>
+<body><main class="lesson"><section class="lesson-section">
+  <p class="section-label">Zufällige RSA-Aufgabe</p><h1>RSA entschlüsseln</h1>
+  <p>Entschlüsse C und berechne die Nachricht M mit C = <strong id="rsaCiphertext"></strong>, d = <strong id="rsaD"></strong> und N = <strong id="rsaN"></strong>.</p>
+  <div class="task-list"><article class="exercise-task" data-solution-index="0"><div class="task-answer-row"><input class="task-answer" type="number" step="1" aria-label="Nachricht M"><button class="check-answer" type="button" disabled>Prüfen</button></div><p class="task-feedback" role="status"></p></article></div>
+  <section class="lesson-section" aria-labelledby="rsaCalculatorTitle">
+    <h2 id="rsaCalculatorTitle">RSA-Rechenhilfe</h2>
+    <p>Gib links eine Rechnung und rechts den Modulo ein. Unterstützt werden Klammern, +, −, ×, ÷ und ^ für Potenzen.</p>
+    <article class="calculator">
+      <h3>Rechnung modulo</h3>
+      <form data-rsa-expression-calculator>
+        <label>Rechnung<input data-expression type="text" maxlength="200" autocomplete="off" placeholder="z. B. 8^7" required></label>
+        <span class="calculator-operator" aria-hidden="true">mod</span>
+        <label>Modulo<input data-modulus type="text" inputmode="numeric" autocomplete="off" placeholder="z. B. 55" required></label>
+        <button type="submit">Berechnen</button>
+        <output data-result aria-live="polite"></output>
+      </form>
+    </article>
+  </section>
+  <p class="tasks-complete" id="tasksComplete" role="status" hidden>Richtig. Du kannst fortfahren.</p>
+</section></main></body></html>

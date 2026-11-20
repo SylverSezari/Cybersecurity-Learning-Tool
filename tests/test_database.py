@@ -44,6 +44,12 @@ async def test_init_db_migrates_exercise_fields_and_drops_challenge_solution(
         )
         await connection.execute(
             text(
+                "INSERT INTO accounts (id, username, password_hash) "
+                "VALUES (1, 'legacy_user', 'legacy_hash')"
+            )
+        )
+        await connection.execute(
+            text(
                 "CREATE TABLE challenges ("
                 "id INTEGER PRIMARY KEY, title VARCHAR(50) NOT NULL UNIQUE, "
                 "html_filename VARCHAR NOT NULL UNIQUE, "
@@ -111,6 +117,10 @@ async def test_init_db_migrates_exercise_fields_and_drops_challenge_solution(
                 text("SELECT id, position FROM challenges ORDER BY position")
             )
             assert challenge_result.all() == [(1, 0), (2, 1)]
+            klasse_result = await connection.execute(
+                text("SELECT klasse FROM accounts WHERE id = 1")
+            )
+            assert klasse_result.scalar_one() in database.RANDOM_CLASSES
         assert chapter_columns["picture"]["nullable"] is True
         assert "task" not in columns
         assert columns["solution"]["nullable"] is True
@@ -121,6 +131,7 @@ async def test_init_db_migrates_exercise_fields_and_drops_challenge_solution(
             "previous_record_time",
             "current_challenge_id",
             "current_challenge_complete",
+            "klasse",
         } <= account_columns
         assert "position" in challenge_columns
         assert "solution" not in challenge_columns

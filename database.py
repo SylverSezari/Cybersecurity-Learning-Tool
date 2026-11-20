@@ -1,11 +1,13 @@
 # Async SQLAlchemy setup and compatibility upgrades for the SQLite database.
 
 import json
+import secrets
 
 from sqlalchemy import inspect, text
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
 from sqlalchemy.orm import DeclarativeBase
 
+from account_helpers import RANDOM_CLASSES
 from config import settings
 
 engine = create_async_engine(
@@ -99,6 +101,37 @@ async def init_db():
                     "ALTER TABLE accounts ADD COLUMN "
                     "current_challenge_complete BOOLEAN NOT NULL DEFAULT 0"
                 )
+            )
+
+        if "klasse" not in account_columns:
+            await connection.execute(
+                text(
+                    "ALTER TABLE accounts ADD COLUMN "
+                    "klasse VARCHAR(50) NOT NULL DEFAULT '1A'"
+                )
+            )
+            account_ids = await connection.execute(
+                text("SELECT id FROM accounts")
+            )
+            for (account_id,) in account_ids:
+                await connection.execute(
+                    text("UPDATE accounts SET klasse = :klasse WHERE id = :id"),
+                    {
+                        "klasse": secrets.choice(RANDOM_CLASSES),
+                        "id": account_id,
+                    },
+                )
+
+        accounts_without_class = await connection.execute(
+            text(
+                "SELECT id FROM accounts "
+                "WHERE klasse IS NULL OR TRIM(klasse) = ''"
+            )
+        )
+        for (account_id,) in accounts_without_class:
+            await connection.execute(
+                text("UPDATE accounts SET klasse = :klasse WHERE id = :id"),
+                {"klasse": secrets.choice(RANDOM_CLASSES), "id": account_id},
             )
 
         # Upgrade older challenge tables and assign a stable initial order by ID.

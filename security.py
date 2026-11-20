@@ -1,3 +1,5 @@
+"""Hash passwords and validate the bearer tokens used by API and page routes."""
+
 from datetime import UTC, datetime, timedelta
 from typing import Annotated, Literal, TypedDict
 

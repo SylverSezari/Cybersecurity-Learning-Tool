@@ -1,3 +1,5 @@
+"""Provide authenticated CRUD and publication-order routes for chapters."""
+
 from typing import Annotated
 
 from fastapi import APIRouter, Depends, HTTPException, status

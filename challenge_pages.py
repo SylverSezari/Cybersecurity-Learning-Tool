@@ -1,3 +1,5 @@
+"""Render and advance timed challenge pages while keeping run state in the database."""
+
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated
@@ -287,7 +289,10 @@ async def play_challenge(
                 account.start_time,
             )
         challenge_prompt = randomized.prompt
-        solution_types = ["text"] * len(randomized.expected_answers)
+        solution_types = [
+            "number" if isinstance(answer, (int, float)) else "text"
+            for answer in randomized.expected_answers
+        ]
 
     next_challenge = (
         challenges[current_index + 1]

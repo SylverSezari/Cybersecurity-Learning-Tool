@@ -1,8 +1,10 @@
+// Add an in-browser Python editor and compare its output with the stored answer.
 const pyodideVersion = "0.27.7";
 let pyodideInstancePromise;
 const expectedOutputs = new WeakMap();
 
 window.addEventListener("message", (event) => {
+	// The parent supplies expected output after the lesson iframe has loaded.
 	if (event.source !== parent || event.data?.type !== "exercise-solutions") return;
 	const solutions = Array.isArray(event.data.solutions) ? event.data.solutions : [];
 	document.querySelectorAll("[data-python-exercise]").forEach((pythonExercise) => {
@@ -26,6 +28,7 @@ window.addEventListener("message", (event) => {
 
 function getPyodideInstance() {
 	if (!pyodideInstancePromise) {
+		// Share one lazy Pyodide download/runtime across every exercise on this page.
 		const baseUrl = `https://cdn.jsdelivr.net/pyodide/v${pyodideVersion}/full/`;
 		pyodideInstancePromise = new Promise((resolve, reject) => {
 			const script = document.createElement("script");
@@ -89,6 +92,7 @@ document.querySelectorAll("[data-python-exercise]").forEach((pythonExercise) => 
 	const runButton = pythonExercise.querySelector("[data-python-run]");
 	const output = pythonExercise.querySelector("[data-python-output]");
 	runButton.disabled = true;
+	// Layer highlighting and line numbers behind the textarea to keep editing native.
 	const editorShell = document.createElement("div");
 	const lineNumbers = document.createElement("div");
 	const highlightedCode = document.createElement("pre");
@@ -186,6 +190,7 @@ document.querySelectorAll("[data-python-exercise]").forEach((pythonExercise) => 
 
 			const result = printedLines.join("\n").trim();
 			pythonExercise.dataset.result = result;
+			// Normalize Unicode and casing so equivalent German output compares reliably.
 			const normalizeOutput = (value) => value.normalize("NFC").trim().toLocaleUpperCase("de-CH");
 			const expectedOutput = expectedOutputs.get(pythonExercise);
 			const isCorrect = normalizeOutput(result)

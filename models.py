@@ -15,6 +15,7 @@ from sqlalchemy import (
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from sqlalchemy.types import TypeDecorator
 
+from account_helpers import random_klasse
 from database import Base
 
 
@@ -90,6 +91,9 @@ class Account(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
     username: Mapped[str] = mapped_column(String(20), unique=True, nullable=False)
     password_hash: Mapped[str] = mapped_column(String(200), nullable=False)
+    klasse: Mapped[str] = mapped_column(
+        String(50), nullable=False, default=random_klasse
+    )
     # Best and active-run times are milliseconds and UTC timestamps, respectively.
     record_time: Mapped[int | None] = mapped_column(Integer, nullable=True)
     start_time: Mapped[datetime | None] = mapped_column(

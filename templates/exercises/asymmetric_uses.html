@@ -1,219 +1,374 @@
 <!doctype html>
 <!-- Lesson content loaded inside the sandboxed exercise iframe. -->
 <html lang="de">
-<head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<meta name="color-scheme" content="light dark">
-	<title>Asymmetrische Kryptografie im Alltag</title>
-	<link rel="stylesheet" href="/static/css/theme.css">
-	<link rel="stylesheet" href="/static/css/exercises.css">
-	<script src="/static/js/exercise-theme.js" defer></script>
-	<script src="/static/js/exercise-tasks.js?v=8" defer></script>
-</head>
-<body>
-	<main class="lesson">
-		<header class="lesson-header">
-			<p class="eyebrow">Lektion 12 · Öffentliche und private Schlüssel</p>
-			<h1>Asymmetrische Kryptografie im Alltag</h1>
-			<p class="lead">
-				Beim Surfen im Internet, Anmelden mit einem Passkey oder Installieren eines Updates
-				kommen oft asymmetrische Verfahren zum Einsatz. Sie helfen, Identitäten zu prüfen,
-				Schlüssel zu vereinbaren und digitale Signaturen zu kontrollieren.
-			</p>
-		</header>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="color-scheme" content="light dark" />
+    <title>Asymmetrische Kryptografie im Alltag</title>
+    <link rel="stylesheet" href="/static/css/theme.css" />
+    <link rel="stylesheet" href="/static/css/exercises.css" />
+    <script src="/static/js/exercise-theme.js" defer></script>
+    <script src="/static/js/exercise-tasks.js?v=8" defer></script>
+  </head>
+  <body>
+    <main class="lesson">
+      <header class="lesson-header">
+        <p class="eyebrow">Lektion 12 · Öffentliche und private Schlüssel</p>
+        <h1>Asymmetrische Kryptografie im Alltag</h1>
+        <p class="lead">
+          Beim Surfen im Internet, Anmelden mit einem Passkey oder Installieren
+          eines Updates kommen oft asymmetrische Verfahren zum Einsatz. Sie
+          helfen, Identitäten zu prüfen, Schlüssel zu vereinbaren und digitale
+          Signaturen zu kontrollieren.
+        </p>
+      </header>
 
-		<section class="lesson-section" aria-labelledby="prinzip-title">
-			<p class="section-label">Zwei zusammengehörige Schlüssel</p>
-			<h2 id="prinzip-title">Einer darf geteilt werden, einer bleibt geheim</h2>
-			<p>
-				Bei asymmetrischer Kryptografie gibt es ein <strong>Schlüsselpaar</strong>. Der
-				<strong>öffentliche Schlüssel</strong> darf geteilt werden. Der
-				<strong>private Schlüssel</strong> muss geschützt bleiben, zum Beispiel auf einem
-				Smartphone, Computer oder Sicherheitsschlüssel. Die Schlüssel haben unterschiedliche
-				Rollen und hängen miteinander zusammen.
-			</p>
-			<p>
-				Bei Verschlüsselung kann eine Person mit dem öffentlichen Schlüssel der Empfängerin
-				Daten für sie verschlüsseln; zum Entschlüsseln braucht die Empfängerin ihren privaten
-				Schlüssel. Bei einem <strong>Schlüsselaustausch</strong> können zwei Geräte stattdessen
-				einen gemeinsamen geheimen Schlüssel vereinbaren, ohne ihren privaten Schlüssel zu
-				verschicken.
-			</p>
-			<div class="worked-example" aria-label="Rollen der beiden Schlüssel">
-				<p><strong>Öffentlicher Schlüssel:</strong> teilen, prüfen oder für die Empfängerin verschlüsseln</p>
-				<p><strong>Privater Schlüssel:</strong> geheim halten, entschlüsseln oder signieren</p>
-				<p><strong>In vielen Apps:</strong> Der vereinbarte gemeinsame Schlüssel schützt danach die eigentlichen Daten symmetrisch.</p>
-			</div>
-		</section>
+      <section class="lesson-section" aria-labelledby="prinzip-title">
+        <p class="section-label">Wie RSA & Co. das Internet absichern</p>
+        <h2 id="prinzip-title">
+          Vier moderne Einsatzgebiete mit Beispielen aus dem Alltag
+        </h2>
+        <ol class="concept-list">
+          <li>
+            <p>
+              <strong
+                >Sicheres Surfen (HTTPS / TLS) – Hybride
+                Verschlüsselung:</strong
+              >
+            </p>
+            <p>
+              Jedes Mal, wenn du im Browser eine Webseite wie sbb.ch, dein
+              E-Banking oder die Lernplattform der Kanti aufrufst, arbeiten
+              symmetrische und asymmetrische Verschlüsselung Hand in Hand.
+              Dieses Zusammenspiel nennt man hybride Verschlüsselung:
+            </p>
+            <ul class="concept-list">
+              <li>
+                <strong>Schritt 1 (Asymmetrisch):</strong> Dein Browser und der
+                Webserver kennen sich noch nicht. Über das TLS-Protokoll nutzt
+                dein Browser den Public Key des Servers, um einen frisch
+                erzeugten, geheimen AES-Sitzungsschlüssel sicher mit dem Server
+                auszutauschen. Nur der Server kann diesen Schlüssel mit seinem
+                Private Key entschlüsseln.
+              </li>
+              <li>
+                <strong>Schritt 2 (Symmetrisch):</strong> Sobald beide Seiten
+                denselben geheimen AES-Schlüssel besitzen, schalten sie um. Der
+                gesamte restliche Datenverkehr (Webseite, Bilder,
+                Passworteingabe) läuft ab sofort blitzschnell über AES.
+              </li>
+            </ul>
+          </li>
+          <li>
+            <p>
+              <strong
+                >Digitale Signaturen und Software-Updates
+                (Echtheitsprüfung):</strong
+              >
+            </p>
+            <p>
+              Bei der asymmetrischen Kryptografie lässt sich das Prinzip auch
+              umdrehen, um die Echtheit (Integrität und Authentizität) von Daten
+              zu beweisen. Man spricht dann von einer digitalen Signatur:
+            </p>
+            <ul class="concept-list">
+              <li>
+                Der Absender berechnet einen digitalen Fingerabdruck (Hashwert)
+                einer Datei und verschlüsselt diesen mit seinem eigenen Private
+                Key.
+              </li>
+              <li>
+                Jede empfangende Person kann diese Signatur mit dem bekannten
+                Public Key des Absenders prüfen. Gelingt dies, ist mathematisch
+                bewiesen, dass die Datei wirklich vom Absender stammt und
+                unterwegs nicht manipuliert wurde.
+              </li>
+              <li>
+                <strong>Alltagsbeispiele:</strong> Bevor dein Smartphone oder
+                Laptop ein System-Update von Apple, Microsoft oder Google
+                installiert, prüft das Gerät dessen digitale Signatur. Auch
+                rechtsgültige elektronische Unterschriften auf PDF-Verträgen (z.
+                B. über SwissID oder Skribble in der Schweiz) funktionieren
+                genau nach diesem Prinzip.
+              </li>
+            </ul>
+          </li>
+          <li>
+            <p>
+              <strong
+                >Ende-zu-Ende-verschlüsselte Messenger (Threema, Signal,
+                WhatsApp)</strong
+              >
+            </p>
+            <p>
+              Wenn du über einen modernen Messenger wie den Schweizer Dienst
+              Threema oder Signal eine Nachricht verschickst, soll niemand
+              unterwegs mitlesen können – nicht einmal die Betreiberfirma der
+              Server selbst.
+            </p>
+            <ul class="concept-list">
+              <li>
+                <strong>Wie es funktioniert:</strong> Bei der Einrichtung der
+                App erzeugt dein Smartphone ein eigenes Schlüsselpaar. Der
+                Private Key verlässt dein Handy niemals; der Public Key wird auf
+                dem Server hinterlegt.
+              </li>
+              <li>
+                Wenn dir eine Kollegin schreibt, holt sich ihr Smartphone deinen
+                Public Key und verschlüsselt damit den Nachrichtenschlüssel.
+                Selbst wenn die Server des Messenger-Anbieters gehackt würden,
+                lägen dort nur unlesbare Daten, weil nur dein Smartphone den
+                passenden Private Key besitzt.
+              </li>
+            </ul>
+          </li>
+          <li>
+            <p>
+              <strong>Passkeys – Einloggen ohne klassisches Passwort</strong>
+            </p>
+            <p>
+              Moderne Logins setzen zunehmend auf Passkeys (z. B. bei Google,
+              Apple, Digitec Galaxus oder im Passwort-Manager Bitwarden). Auch
+              dahinter steckt reine asymmetrische Kryptografie:
+            </p>
+            <ul class="concept-list">
+              <li>
+                Beim Einrichten eines Passkeys erzeugt dein Smartphone ein
+                Schlüsselpaar. Der Public Key wird beim Online-Dienst
+                gespeichert, der Private Key bleibt geschützt im Sicherheitschip
+                deines Smartphones.
+              </li>
+              <li>
+                Beim Einloggen schickt dir der Server eine zufällige Zahlenfolge
+                (eine sogenannte Challenge). Dein Handy signiert diese Aufgabe –
+                nach deiner Freigabe per Face ID oder Fingerabdruck – mit dem
+                Private Key und schickt sie zurück. Der Server prüft die
+                Unterschrift mit deinem Public Key und lässt dich einloggen,
+                ohne dass jemals ein geheimes Passwort über das Internet
+                gesendet wurde.
+              </li>
+            </ul>
+          </li>
+        </ol>
+      </section>
 
-		<section class="lesson-section" aria-labelledby="https-title">
-			<p class="section-label">Beim Surfen</p>
-			<h2 id="https-title">HTTPS hilft, den Webserver zu erkennen</h2>
-			<p>
-				Wenn du eine Webseite mit <strong>HTTPS</strong> öffnest, erstellt <strong>TLS</strong>
-				eine geschützte Verbindung. Der Webserver zeigt ein digitales Zertifikat, das Browser
-				helfen soll, zu prüfen, ob der Schlüssel zum richtigen Webserver gehört. Beim
-				Verbindungsaufbau kommen ausserdem asymmetrische Signaturen und ein
-				Schlüsselaustausch zum Einsatz.
-			</p>
-			<p>
-				Nach dem Aufbau verschlüsselt TLS die vielen übertragenen Daten normalerweise
-				symmetrisch, weil das schneller ist. Asymmetrische Kryptografie verschlüsselt also
-				nicht einfach jede einzelne Webseite oder Nachricht. Das Schloss bedeutet auch nicht,
-				dass die Webseite ehrlich oder ihr Inhalt ungefährlich ist.
-			</p>
-		</section>
+      <section class="lesson-section" aria-labelledby="https-title">
+        <p class="section-label">Wie weiss ich, wem ein Public Key gehört?</p>
+        <h2 id="https-title">Digitale Zertifikate</h2>
+        <p>
+          Eine wichtige Sicherheitsfrage bleibt: Wenn jeder einen Public Key
+          veröffentlichen kann – woher weiss dein Browser beim E-Banking, dass
+          der empfangene Public Key tatsächlich deiner Bank gehört und nicht
+          einem Betrüger?
+        </p>
+        <p>
+          Die Antwort sind digitale Zertifikate. Ein digitales Zertifikat
+          funktioniert wie ein elektronischer Reisepass für Webseiten: Eine
+          weltweit anerkannte, vertrauenswürdige Prüfstelle – eine sogenannte
+          Zertifizierungsstelle (Certificate Authority, kurz CA) – bestätigt mit
+          ihrer eigenen digitalen Signatur, dass ein bestimmter Public Key
+          eindeutig zu einer bestimmten Domain (z. B. ubs.ch oder admin.ch)
+          gehört. Dein Browser prüft dieses Zertifikat bei jedem Seitenaufruf
+          automatisch im Hintergrund.
+        </p>
+        <p>
+          <strong>Merksatz:</strong> Symmetrische Verschlüsselung (AES) ist der
+          schnelle Transporter für grosse Datenmengen. Asymmetrische
+          Verschlüsselung (RSA / ECC) ist der sichere Schlüsselaustausch und der
+          digitale Notar, der Echtheit beweist.
+        </p>
+      </section>
 
-		<section class="lesson-section" aria-labelledby="passkey-title">
-			<p class="section-label">Beim Anmelden</p>
-			<h2 id="passkey-title">Passkeys nutzen ein Schlüsselpaar</h2>
-			<p>
-				Ein <strong>Passkey</strong> ist eine moderne Möglichkeit, sich bei einer Webseite
-				oder App anzumelden. Das Gerät bewahrt den privaten Schlüssel geschützt auf; der
-				Dienst erhält den passenden öffentlichen Schlüssel. Bei der Anmeldung prüft das
-				Gerät eine neue Anfrage der Webseite mit dem privaten Schlüssel. Die Webseite
-				kontrolliert das Ergebnis mit dem öffentlichen Schlüssel. Der private Schlüssel wird
-				dabei nicht an die Webseite gesendet.
-			</p>
-			<p>
-				Du bestätigst die Anmeldung zum Beispiel mit deinem Gerätecode oder Fingerabdruck.
-				Dein Fingerabdruck wird dabei nicht zum öffentlichen Schlüssel und normalerweise
-				nicht an die Webseite geschickt. Passkeys ersetzen keine Verschlüsselung deiner
-				Dateien; sie helfen dabei, deine Anmeldung zu bestätigen.
-			</p>
-		</section>
+      <section class="lesson-section" aria-labelledby="aufgaben-title">
+        <p class="section-label">Fünf kurze Situationen</p>
+        <h2 id="aufgaben-title">Wähle die Aufgabe des Schlüssels</h2>
+        <div class="task-list">
+          <article
+            class="exercise-task"
+            data-solution-index="0"
+            data-correct-feedback="Richtig: Zertifikate und digitale Signaturen helfen dem Browser, den Webserver zu überprüfen. TLS verwendet danach symmetrische Schlüssel für die grossen Datenmengen."
+            data-incorrect-feedback="Tipp: Asymmetrische Kryptografie hilft beim Prüfen des Webservers; sie verschlüsselt nicht jede einzelne Webseite."
+          >
+            <p class="task-story">
+              Dein Browser verwendet beim Öffnen einer Webseite über HTTPS nicht
+              ausschliesslich RSA, sondern kombiniert RSA (bzw. ein anderes
+              asymmetrisches Verfahren) mit dem symmetrischen Verfahren AES.
+            </p>
+            <p class="task-prompt">Weshalb werden beide Methoden angewendet?</p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Aufgabe asymmetrischer Kryptografie in HTTPS auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Nur Zahlen">
+                  Weil RSA nur Zahlen verschlüsseln kann, aber keine Buchstaben
+                  oder Bilder.
+                </option>
+                <option value="Zu langsam">
+                  Weil asymmetrische Verfahren für grosse Datenmengen viel zu
+                  langsam sind und deshalb nur zum sicheren Austausch eines
+                  schnellen AES-Schlüssels genutzt werden.
+                </option>
+                <option value="Keinen gehemein Schlüssel">
+                  Weil AES keinen geheimen Schlüssel benötigt und deshalb
+                  sicherer ist als RSA.
+                </option>
+                <option value="Maximum">
+                  Weil Browser aus rechtlichen Gründen maximal 128 Bit mit RSA
+                  verschlüsseln dürfen.
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
 
-		<section class="lesson-section" aria-labelledby="chat-title">
-			<p class="section-label">Beim Chatten</p>
-			<h2 id="chat-title">Nachrichten sicher beginnen</h2>
-			<p>
-				Manche Ende-zu-Ende-verschlüsselten Chat-Apps nutzen öffentliche Schlüssel, damit
-				zwei Personen auch dann einen gemeinsamen geheimen Schlüssel vereinbaren können,
-				wenn eine Person gerade offline ist. Dieser gemeinsame Schlüssel wird danach für
-				symmetrische Verschlüsselung der Nachrichten verwendet.
-			</p>
-			<p>
-				So müssen nicht alle Nachrichten mit einem langsamen öffentlichen-Schlüssel-Verfahren
-				verschlüsselt werden. Die App muss aber die Schlüssel den richtigen Personen zuordnen.
-				Wenn ein Gerät oder ein privater Schlüssel kompromittiert ist, kann Kryptografie
-				allein das Gerät und seine Nachrichten nicht retten.
-			</p>
-		</section>
+          <article
+            class="exercise-task"
+            data-solution-index="1"
+            data-correct-feedback="Genau: Bei einem Passkey bleibt der private Schlüssel geschützt und wird nicht an die Webseite gesendet. Die Webseite prüft mit dem öffentlichen Schlüssel."
+            data-incorrect-feedback="Tipp: Der öffentliche Schlüssel darf geteilt werden. Welcher Schlüssel muss geheim bleiben?"
+          >
+            <p class="task-story">
+              Du meldest dich mit einem Passkey auf deinem Smartphone bei einem
+              Online-Dienst an.
+            </p>
+            <p class="task-prompt">
+              Weshalb ist diese Methode so gut gegen klassische
+              Phishing-Websites geschützt?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Schlüssel bei einem Passkey auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Lokale Signatur">
+                  Weil dein geheimer Private Key niemals dein Smartphone
+                  verlässt und nicht als Passwort über das Internet übertragen
+                  wird, sondern lokal eine Signatur berechnet.
+                </option>
+                <option value="Fünf Minuten">
+                  Weil Passkeys dein Passwort automatisch alle fünf Minuten per
+                  SMS an den Server schicken.
+                </option>
+                <option value="Ohne Verschlüsselung">
+                  Weil Passkeys komplett ohne Verschlüsselung auskommen.
+                </option>
+                <option value="HTTPS-Verbindung">
+                  Weil gefälschte Webseiten keine HTTPS-Verbindung aufbauen
+                  können.
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
 
-		<section class="lesson-section" aria-labelledby="signatur-title">
-			<p class="section-label">Beim Installieren</p>
-			<h2 id="signatur-title">Digitale Signaturen prüfen Software</h2>
-			<p>
-				Apps und Updates können eine <strong>digitale Signatur</strong> tragen. Der Anbieter
-				erstellt sie mit einem privaten Schlüssel. Dein Gerät prüft sie mit dem passenden
-				öffentlichen Schlüssel. Eine gültige Signatur hilft zu erkennen, ob die Datei seit
-				dem Signieren verändert wurde und ob sie zu diesem Schlüssel passt.
-			</p>
-			<aside class="note">
-				<strong>Achtung:</strong> Eine Signatur verschlüsselt den Inhalt nicht und beweist
-				nicht, dass ein Programm frei von Fehlern oder Schadsoftware ist. Wichtig ist auch,
-				dem richtigen öffentlichen Schlüssel zu vertrauen.
-			</aside>
-		</section>
+          <article
+            class="exercise-task"
+            data-solution-index="2"
+            data-correct-feedback="Richtig: Bei echter Ende-zu-Ende-Verschlüsselung verlassen die privaten Schlüssel niemals die Endgeräte der Nutzerinnen und Nutzer. Da der Server nur als Vermittler dient und lediglich die öffentlichen Schlüssel kennt, sind die transportierten Nachrichten für ihn nicht entschlüsselbar."
+            data-incorrect-feedback="Tipp: Ohne private Schlüssel kann die Nachricht nicht entschlüsselt werden."
+          >
+            <p class="task-story">
+              Zwei Kantonsschülerinnen chatten über einen
+              Ende-zu-Ende-verschlüsselten Messenger wie Threema oder Signal
+              miteinander.
+            </p>
+            <p class="task-prompt">
+              Weshalb kann selbst der Betreiber der Server, über welche die
+              Nachrichten weitergeleitet werden, den Inhalt des Chats nicht
+              lesen?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Aufgabe bei sicherem Chat auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Gelöscht">
+                  Weil die Nachrichten vor dem Senden unverschlüsselt gelöscht
+                  werden.
+                </option>
+                <option value="Wegschauen">
+                  Weil der Serverbetreiber gesetzlich verpflichtet ist, bei
+                  allen Nachrichten wegzuschauen, obwohl er den Schlüssel
+                  besitzt.
+                </option>
+                <option value="Privaten Schlüssel">
+                  Weil auf den Servern nur die öffentlichen Schlüssel liegen,
+                  während die privaten Schlüssel zum Entschlüsseln
+                  ausschliesslich auf den Smartphones der beiden Schülerinnen
+                  gespeichert sind.
+                </option>
+                <option value="Caesar-Chiffre">
+                  Weil Threema und Signal alle Nachrichten mit der
+                  Caesar-Chiffre verschlüsseln.
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
 
-		<section class="lesson-section" aria-labelledby="vorteile-title">
-			<p class="section-label">Stärken und Grenzen</p>
-			<h2 id="vorteile-title">Wann ist asymmetrische Kryptografie nützlich?</h2>
-			<ul class="concept-list">
-				<li><strong>Vorteil – einfacher Schlüsselstart:</strong> Öffentliche Schlüssel können verteilt werden, ohne ein gemeinsames Geheimnis direkt weiterzugeben.</li>
-				<li><strong>Vorteil – Identität und Änderungen prüfen:</strong> Zertifikate und Signaturen helfen, Webseiten, Anmeldungen oder Dateien zu überprüfen.</li>
-				<li><strong>Nachteil – langsamer:</strong> Asymmetrische Verfahren benötigen mehr Rechenaufwand als symmetrische. Sie sind deshalb nicht die beste Wahl, um grosse Dateien direkt zu verschlüsseln.</li>
-				<li><strong>Nachteil – privaten Schlüssel schützen:</strong> Wer den privaten Schlüssel stiehlt oder kontrolliert, kann sich möglicherweise als dessen Besitzer ausgeben oder geschützte Daten lesen.</li>
-				<li><strong>Nachteil – öffentlichen Schlüssel zuordnen:</strong> Man muss sicher sein, dass der öffentliche Schlüssel wirklich zur richtigen Webseite oder Person gehört.</li>
-			</ul>
-			<div class="worked-example" aria-label="Asymmetrische und symmetrische Verfahren zusammen">
-				<p><strong>Typische Kombination:</strong> Asymmetrische Kryptografie hilft beim Prüfen der Identität oder beim Vereinbaren eines Schlüssels.</p>
-				<p><strong>Danach:</strong> Symmetrische Verschlüsselung schützt schnell die grossen Datenmengen.</p>
-			</div>
-		</section>
-
-		<section class="lesson-section" aria-labelledby="aufgaben-title">
-			<p class="section-label">Fünf kurze Situationen</p>
-			<h2 id="aufgaben-title">Wähle die Aufgabe des Schlüssels</h2>
-			<div class="task-list">
-				<article class="exercise-task" data-solution-index="0" data-correct-feedback="Richtig: Zertifikate und digitale Signaturen helfen dem Browser, den Webserver zu überprüfen. TLS verwendet danach symmetrische Schlüssel für die grossen Datenmengen." data-incorrect-feedback="Tipp: Asymmetrische Kryptografie hilft beim Prüfen des Webservers; sie verschlüsselt nicht jede einzelne Webseite.">
-					<p class="task-story">Mira öffnet die Webseite ihres Online-Shops mit HTTPS.</p>
-					<p class="task-prompt">Wobei hilft asymmetrische Kryptografie beim Aufbau der Verbindung?</p>
-					<div class="task-answer-row">
-						<select class="task-answer" aria-label="Aufgabe asymmetrischer Kryptografie in HTTPS auswählen">
-							<option value="">Bitte auswählen</option>
-							<option value="Serverzertifikat prüfen">Das Zertifikat des Webservers prüfen</option>
-							<option value="Webseite sicher machen">Garantieren, dass der Shop ehrlich ist</option>
-							<option value="Daten direkt verschlüsseln">Alle übertragenen Daten einzeln mit dem privaten Schlüssel verschlüsseln</option>
-						</select>
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
-
-				<article class="exercise-task" data-solution-index="1" data-correct-feedback="Genau: Bei einem Passkey bleibt der private Schlüssel geschützt und wird nicht an die Webseite gesendet. Die Webseite prüft mit dem öffentlichen Schlüssel." data-incorrect-feedback="Tipp: Der öffentliche Schlüssel darf geteilt werden. Welcher Schlüssel muss geheim bleiben?">
-					<p class="task-story">Noé meldet sich mit einem Passkey bei einem Online-Konto an.</p>
-					<p class="task-prompt">Welche Aussage über die Schlüssel stimmt?</p>
-					<div class="task-answer-row">
-						<select class="task-answer" aria-label="Schlüssel bei einem Passkey auswählen">
-							<option value="">Bitte auswählen</option>
-							<option value="Privater Schlüssel bleibt beim Gerät">Der private Schlüssel bleibt geschützt und wird nicht an die Webseite gesendet</option>
-							<option value="Öffentlicher Schlüssel bleibt geheim">Der öffentliche Schlüssel muss geheim bleiben</option>
-							<option value="Passwort wird übertragen">Der Passkey sendet das Gerätepasswort an die Webseite</option>
-						</select>
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
-
-				<article class="exercise-task" data-solution-index="2" data-correct-feedback="Richtig: Public-Key-Verfahren können helfen, einen gemeinsamen Schlüssel zu vereinbaren. Mit ihm werden Nachrichten oft symmetrisch verschlüsselt." data-incorrect-feedback="Tipp: Der Schlüssel wird vereinbart, nicht der private Schlüssel verschickt. Danach schützt meist ein schnelles symmetrisches Verfahren die Nachrichten.">
-					<p class="task-story">Eine Ende-zu-Ende-Chat-App möchte eine Unterhaltung beginnen, obwohl Noé gerade offline ist.</p>
-					<p class="task-prompt">Wobei kann asymmetrische Kryptografie helfen?</p>
-					<div class="task-answer-row">
-						<select class="task-answer" aria-label="Aufgabe bei sicherem Chat auswählen">
-							<option value="">Bitte auswählen</option>
-							<option value="Gemeinsamen Schlüssel vereinbaren">Einen gemeinsamen geheimen Schlüssel zu vereinbaren</option>
-							<option value="Privaten Schlüssel senden">Miras privaten Schlüssel an Noé zu schicken</option>
-							<option value="Nachrichten öffentlich machen">Alle Nachrichten für den Server lesbar zu machen</option>
-						</select>
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
-
-				<article class="exercise-task" data-solution-index="3" data-correct-feedback="Genau: Das Gerät nutzt einen öffentlichen Schlüssel, um die digitale Signatur zu prüfen und Veränderungen an der signierten Datei zu erkennen." data-incorrect-feedback="Tipp: Zum Prüfen einer Signatur wird der öffentliche Schlüssel verwendet. Eine Signatur versteckt den Inhalt nicht.">
-					<p class="task-story">Ein Computer prüft die digitale Signatur eines Updates für eine App.</p>
-					<p class="task-prompt">Welcher Schlüssel wird zum Prüfen der Signatur verwendet?</p>
-					<div class="task-answer-row">
-						<select class="task-answer" aria-label="Schlüssel für die Signaturprüfung auswählen">
-							<option value="">Bitte auswählen</option>
-							<option value="Öffentlicher Schlüssel">Der öffentliche Schlüssel des Anbieters</option>
-							<option value="Privater Schlüssel">Der private Schlüssel des Anbieters</option>
-							<option value="Gerätesperrcode">Der Sperrcode des Computers</option>
-						</select>
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
-
-				<article class="exercise-task" data-solution-index="4" data-correct-feedback="Richtig: Asymmetrische Verfahren brauchen mehr Rechenaufwand. Deshalb schützen sie häufig den Schlüsselaustausch, während symmetrische Verfahren grosse Datenmengen verschlüsseln." data-incorrect-feedback="Tipp: Vergleiche den Rechenaufwand mit symmetrischer Verschlüsselung und überlege, welches Verfahren sich besser für grosse Dateien eignet.">
-					<p class="task-story">Mira möchte ein sehr grosses Video sicher an Noé senden.</p>
-					<p class="task-prompt">Warum wird das Video normalerweise nicht vollständig mit einem asymmetrischen Verfahren verschlüsselt?</p>
-					<div class="task-answer-row">
-						<select class="task-answer" aria-label="Nachteil asymmetrischer Verschlüsselung auswählen">
-							<option value="">Bitte auswählen</option>
-							<option value="Langsamer">Asymmetrische Verfahren sind aufwendiger und langsamer als symmetrische</option>
-							<option value="Öffentlicher Schlüssel fehlt">Öffentliche Schlüssel können nie geteilt werden</option>
-							<option value="Dateien nicht möglich">Asymmetrische Verfahren können überhaupt keine Dateien schützen</option>
-						</select>
-						<button class="check-answer" type="button" disabled>Prüfen</button>
-					</div>
-					<p class="task-feedback" role="status" aria-live="polite"></p>
-				</article>
-			</div>
-			<p class="tasks-complete" id="tasksComplete" role="status" hidden>Alle Aufgaben richtig gelöst. Die Lektion wird jetzt als abgeschlossen markiert.</p>
-		</section>
-	</main>
-</body>
+          <article
+            class="exercise-task"
+            data-solution-index="3"
+            data-correct-feedback="Genau: Bei einer digitalen Signatur wird die Schlüsselrolle gegenüber der Verschlüsselung umgekehrt: Nur der Hersteller besitzt seinen geheimen Private Key und kann damit eine gültige Unterschrift erzeugen. Da der zugehörige Public Key öffentlich bekannt ist, kann jedes Gerät weltweit prüfen, ob die Signatur echt ist."
+            data-incorrect-feedback="Tipp: Der Nutzer muss die Signatur überprüfen können."
+          >
+            <p class="task-story">
+              Ein Softwarehersteller möchte ein wichtiges Sicherheitsupdate
+              veröffentlichen. Damit alle Nutzerinnen und Nutzer überprüfen
+              können, dass die Update-Datei tatsächlich vom Hersteller stammt
+              und unterwegs nicht verändert wurde, versieht der Hersteller die
+              Datei mit einer digitalen Signatur.
+            </p>
+            <p class="task-prompt">
+              Welcher Schlüssel wird für das Erstellen dieser Signatur verwendet
+              und welcher für die Überprüfung durch die Nutzer?
+            </p>
+            <div class="task-answer-row">
+              <select
+                class="task-answer"
+                aria-label="Schlüssel für die Signaturprüfung auswählen"
+              >
+                <option value="">Bitte auswählen</option>
+                <option value="Public Private">
+                  Der Hersteller signiert mit seinem Public Key; die Nutzer
+                  prüfen mit dem Private Key des Herstellers.
+                </option>
+                <option value="AES Schlüssel">
+                  Beide Seiten verwenden denselben geheimen AES-Schlüssel.
+                </option>
+                <option value="Signieren Selbst">
+                  Die Nutzer signieren das Update selbst mit ihrem eigenen Passwort.
+                </option>
+                <option value="Private Public">
+                  Der Hersteller signiert mit seinem Private Key; die Nutzer prüfen mit dem Public Key des Herstellers.
+                </option>
+              </select>
+              <button class="check-answer" type="button" disabled>
+                Prüfen
+              </button>
+            </div>
+            <p class="task-feedback" role="status" aria-live="polite"></p>
+          </article>
+        </div>
+        <p class="tasks-complete" id="tasksComplete" role="status" hidden>
+          Alle Aufgaben richtig gelöst. Die Lektion wird jetzt als abgeschlossen
+          markiert.
+        </p>
+      </section>
+    </main>
+  </body>
 </html>

@@ -121,7 +121,7 @@ EXERCISES = (
         "title": "Moderne Anwendungen symmetrischer Verschlüsselung",
         "html_filename": "symmetric_uses.html",
         "solution": [
-            "TLS",
+            "Vielfaches Schneller",
             "Festplattenverschlüsselung",
             "Sender und Empfänger",
             "Schlüsselmanagement",
@@ -174,11 +174,10 @@ EXERCISES = (
         "title": "Moderne Anwendungen asymmetrischer Verschlüsselung",
         "html_filename": "asymmetric_uses.html",
         "solution": [
-            "Serverzertifikat prüfen",
-            "Privater Schlüssel bleibt beim Gerät",
+            "Zu langsam",
+            "Lokale Signatur",
             "Gemeinsamen Schlüssel vereinbaren",
-            "Öffentlicher Schlüssel",
-            "Langsamer",
+            "Private Public",
         ],
         "requires_previous": True,
         "position": 5,

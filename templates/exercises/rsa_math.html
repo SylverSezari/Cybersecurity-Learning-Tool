@@ -105,7 +105,7 @@
           Um nun auf die letzte Zahl d zu kommen, müssen wir ein Multiplikative
           Inverses von e mod Φ(N) bekommen. Dies tönt zuerst sehr kompliziert,
           ist im Prinzip aber ganz einfach. Es bedeutet, dass das Produkt von e
-          und d beim Teilen durch Φ(N) den Rest 1 ergeben sollte. In Rechnung
+          und d beim Teilen durch Φ(N) den Rest 1 ergeben sollte. In einer Rechnung
           dargestellt, würde das so aussehen:
         </p>
         <p class="equation">(e * d) Φ(N) = 1 oder auch (d * e) ≡ 1 mod Φ(N)</p>
@@ -138,13 +138,13 @@
           <p>
             Jetzt können wir e frei wählen, solange es grösser als 0, kleiner
             als 20 ist und keine gemeinsamen Teiler mit 20 hat. In unserem Fall
-            wählen wir die Zahl 7, den sie entspricht all diesen Vorgaben.
+            wählen wir die Zahl 7, denn sie entspricht all diesen Vorgaben.
           </p>
           <p>
             Nun kommen wir zum finalen Wert, dem d. Da wir den euklidischen
             Algorithmus nicht kennen, müssen wir es mit ausprobieren
             herausfinden. Glücklicherweise benutzen wir nur kleine Zahlen,
-            weshalb das Resultat nicht allzu schwierig ist. d ist in unserem
+            weshalb das Resultat zu finden nicht allzu schwierig ist. d ist in unserem
             Fall die Zahl 3. Dies können wir auch überprüfen indem wir die
             richtigen Zahlen in der Rechnung einsetzen:
           </p>
@@ -177,7 +177,8 @@
           Beispiel Fotos oder Videos, sind viel zu gross, um sie direkt zu
           verschlüsseln. Die Nachricht, also die Länge der Bytes, muss nämlich
           kleiner sein als "N", da man sonst gar nicht mehr auf die originale
-          Nachricht kommt. Ein 2048-bit grösser Schlüssel kann in Wahrheit nur
+          Nachricht kommt. Ein 2048-bit gro
+          sser Schlüssel kann in Wahrheit nur
           ungefähr 190 bytes verschlüsseln. Aus diesem Grund wird in der
           Realität oft nicht deine wirkliche Nachricht mit RSA verschlüsselt,
           sondern ein Schlüssel, der für eine symmetrische Verschlüsselung

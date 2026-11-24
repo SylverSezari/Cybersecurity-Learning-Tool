@@ -15,6 +15,7 @@ const accountStatus = document.getElementById("accountsStatus");
 const challengeStatus = document.getElementById("challengeStatus");
 const updateAccountSelect = document.getElementById("updateAccountSelect");
 const deleteAccountSelect = document.getElementById("deleteAccountSelect");
+const deleteAccountsByKlasseSelect = document.getElementById("deleteAccountsByKlasseSelect");
 const updateChallengeSelect = document.getElementById("updateChallengeSelect");
 const deleteChallengeSelect = document.getElementById("deleteChallengeSelect");
 const challengeOrderList = document.getElementById("challengeOrderList");
@@ -584,6 +585,18 @@ function updateAccountOptions() {
 		}
 		select.disabled = accounts.length === 0;
 	}
+	const selectedKlasse = deleteAccountsByKlasseSelect.value;
+	const classes = [...new Set(accounts.map((account) => account.klasse))]
+		.filter((klasse) => klasse.trim())
+		.sort((first, second) => first.localeCompare(second, "de"));
+	deleteAccountsByKlasseSelect.replaceChildren(new Option("Klasse auswählen", ""));
+	for (const klasse of classes) {
+		deleteAccountsByKlasseSelect.add(new Option(klasse, klasse));
+	}
+	if (classes.includes(selectedKlasse)) {
+		deleteAccountsByKlasseSelect.value = selectedKlasse;
+	}
+	deleteAccountsByKlasseSelect.disabled = classes.length === 0;
 	fillAccountUpdateForm();
 }
 
@@ -945,6 +958,26 @@ document.getElementById("deleteAccountForm").addEventListener("submit", async (e
 		await apiRequest(`/api/accounts/delete/${accountId}`, { method: "DELETE" });
 		await loadAccounts();
 		setStatus("Benutzerkonto gelöscht");
+	} catch (error) {
+		showError(error);
+	}
+});
+
+document.getElementById("deleteAccountsByKlasseForm").addEventListener("submit", async (event) => {
+	event.preventDefault();
+	const klasse = deleteAccountsByKlasseSelect.value;
+	if (!klasse) return;
+	const matchingCount = accounts.filter((account) => account.klasse === klasse).length;
+	if (!window.confirm(
+		`Möchtest du wirklich alle ${matchingCount} Benutzerkonten der Klasse „${klasse}“ löschen?`
+	)) return;
+	try {
+		const result = await apiRequest(
+			`/api/accounts/delete-by-klasse?klasse=${encodeURIComponent(klasse)}`,
+			{ method: "DELETE" },
+		);
+		await loadAccounts();
+		setStatus(`${result.deleted} Benutzerkonten der Klasse „${klasse}“ gelöscht`);
 	} catch (error) {
 		showError(error);
 	}

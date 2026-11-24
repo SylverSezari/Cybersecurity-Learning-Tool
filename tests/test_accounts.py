@@ -1,5 +1,4 @@
 from collections.abc import Awaitable, Callable
-from pathlib import Path
 
 import pytest
 from httpx import AsyncClient
@@ -7,6 +6,7 @@ from sqlalchemy import delete
 from sqlalchemy.ext.asyncio import AsyncSession
 
 import account_helpers
+from config import settings
 import models
 
 # Test Accounts
@@ -301,10 +301,9 @@ async def test_import_accounts_csv_creates_accounts_and_returns_credentials(
     assert "bbeispiel;" in response.text
     assert "2gNP" in response.text
     credentials = response.text.splitlines()[1:]
-    data_directory = Path(__file__).resolve().parents[1]
     german_words = {
         word.capitalize()
-        for word in (data_directory / "german_words.txt")
+        for word in settings.resolve_path(settings.german_words_file)
         .read_text(encoding="utf-8-sig")
         .splitlines()
     }
@@ -651,6 +650,113 @@ async def test_delete_account_rejects_regular_user(
     user_auth_headers: dict[str, str],
 ):
     response = await client.delete("/api/accounts/delete/1", headers=user_auth_headers)
+
+    assert response.status_code == 403
+    assert response.json()["detail"] == "Admin privileges required"
+
+
+## Test delete accounts by Klasse
+# Check bulk removal, exact class matching, counts, and admin-only access.
+
+
+@pytest.mark.anyio
+async def test_delete_accounts_by_klasse_removes_matching_accounts(
+    client: AsyncClient,
+    admin_auth_headers: dict[str, str],
+    test_account_factory: Callable[[str], Awaitable[dict]],
+):
+    first_account = await test_account_factory("bulk_delete_first")
+    second_account = await test_account_factory("bulk_delete_second")
+    other_account = await test_account_factory("bulk_delete_other")
+
+    for account in (first_account, second_account):
+        response = await client.put(
+            f"/api/accounts/update/{account['id']}",
+            json={"klasse": "2A"},
+            headers=admin_auth_headers,
+        )
+        assert response.status_code == 200
+
+    response = await client.put(
+        f"/api/accounts/update/{other_account['id']}",
+        json={"klasse": "2B"},
+        headers=admin_auth_headers,
+    )
+    assert response.status_code == 200
+
+    response = await client.delete(
+        "/api/accounts/delete-by-klasse",
+        params={"klasse": "2A"},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"deleted": 2}
+
+    accounts_response = await client.get(
+        "/api/accounts", headers=admin_auth_headers
+    )
+    remaining = {
+        account["username"]: account["klasse"]
+        for account in accounts_response.json()
+    }
+    assert "bulk_delete_first" not in remaining
+    assert "bulk_delete_second" not in remaining
+    assert remaining["bulk_delete_other"] == "2B"
+
+
+@pytest.mark.anyio
+async def test_delete_accounts_by_klasse_returns_zero_for_no_matches(
+    client: AsyncClient,
+    admin_auth_headers: dict[str, str],
+):
+    response = await client.delete(
+        "/api/accounts/delete-by-klasse",
+        params={"klasse": "unknown-class"},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 200
+    assert response.json() == {"deleted": 0}
+
+
+@pytest.mark.anyio
+async def test_delete_accounts_by_klasse_rejects_empty_klasse(
+    client: AsyncClient,
+    admin_auth_headers: dict[str, str],
+):
+    response = await client.delete(
+        "/api/accounts/delete-by-klasse",
+        params={"klasse": "  "},
+        headers=admin_auth_headers,
+    )
+
+    assert response.status_code == 422
+    assert response.json()["detail"] == "A class is required"
+
+
+@pytest.mark.anyio
+async def test_delete_accounts_by_klasse_rejects_missing_token(
+    client: AsyncClient,
+):
+    response = await client.delete(
+        "/api/accounts/delete-by-klasse",
+        params={"klasse": "2A"},
+    )
+
+    assert response.status_code == 401
+
+
+@pytest.mark.anyio
+async def test_delete_accounts_by_klasse_rejects_regular_user(
+    client: AsyncClient,
+    user_auth_headers: dict[str, str],
+):
+    response = await client.delete(
+        "/api/accounts/delete-by-klasse",
+        params={"klasse": "2A"},
+        headers=user_auth_headers,
+    )
 
     assert response.status_code == 403
     assert response.json()["detail"] == "Admin privileges required"

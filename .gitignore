@@ -3,3 +3,5 @@
 *.db*
 *.sqlite3
 __pycache__/
+words_english.txt
+words_german.txt

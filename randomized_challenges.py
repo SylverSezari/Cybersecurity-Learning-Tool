@@ -9,27 +9,24 @@ from pathlib import Path
 
 from config import settings
 
-WORD_LIST_DIRECTORY = Path(__file__).resolve().parent
 
-
-def _read_word_list(filename: str, word_length: int) -> tuple[str, ...]:
+def _read_word_list(word_list: Path, word_length: int) -> tuple[str, ...]:
+    path = settings.resolve_path(word_list)
     words = tuple(
         word.strip().upper()
-        for word in (WORD_LIST_DIRECTORY / filename)
-        .read_text(encoding="utf-8")
-        .splitlines()
+        for word in path.read_text(encoding="utf-8").splitlines()
         if word.strip()
     )
     if any(
         len(word) != word_length or not word.isascii() or not word.isalpha()
         for word in words
     ):
-        raise ValueError(f"{filename} must contain only {word_length}-letter words")
+        raise ValueError(f"{path} must contain only {word_length}-letter words")
     return words
 
 
-GERMAN_8_LETTER_WORDS = _read_word_list("german_words_8letters.txt", 8)
-GERMAN_4_LETTER_WORDS = _read_word_list("german_words_4letters.txt", 4)
+GERMAN_8_LETTER_WORDS = _read_word_list(settings.german_8_letter_words_file, 8)
+GERMAN_4_LETTER_WORDS = _read_word_list(settings.german_4_letter_words_file, 4)
 RANDOMIZED_CHALLENGES = {
     "caesar_encrypt.html": ("Caesar", "encrypt"),
     "caesar_decrypt.html": ("Caesar", "decrypt"),

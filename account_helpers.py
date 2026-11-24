@@ -1,8 +1,9 @@
 """Generate account defaults and memorable passwords from local word lists."""
 
 from functools import lru_cache
-from pathlib import Path
 import secrets
+
+from config import settings
 
 
 RANDOM_CLASSES = tuple(
@@ -20,7 +21,7 @@ def random_klasse() -> str:
 @lru_cache(maxsize=1)
 def _german_words() -> tuple[str, ...]:
     """Load the German password vocabulary once for reuse across imports."""
-    word_list = Path(__file__).resolve().parent / "german_words.txt"
+    word_list = settings.resolve_path(settings.german_words_file)
     words = tuple(
         word.strip()
         for word in word_list.read_text(encoding="utf-8-sig").splitlines()
@@ -34,7 +35,7 @@ def _german_words() -> tuple[str, ...]:
 @lru_cache(maxsize=1)
 def _english_words() -> tuple[str, ...]:
     """Load the English password vocabulary once for reuse across imports."""
-    word_list = Path(__file__).resolve().parent / "english_words.txt"
+    word_list = settings.resolve_path(settings.english_words_file)
     words = tuple(
         word.strip().lower()
         for word in word_list.read_text(encoding="utf-8-sig").splitlines()

@@ -450,3 +450,37 @@ async def delete_account(
     # delete account
     await db.delete(account)
     await db.commit()
+
+
+@router.delete("/delete-by-klasse")
+async def delete_accounts_by_klasse(
+    klasse: str,
+    db: Annotated[AsyncSession, Depends(get_db)],
+    principal: Annotated[Principal, Depends(get_current_principal)],
+):
+    # Delete every learner account with an exact, trimmed class attribute.
+    require_admin(principal)
+
+    normalized_klasse = klasse.strip()
+    if not normalized_klasse:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail="A class is required",
+        )
+
+    result = await db.execute(
+        select(models.Account.id).where(models.Account.klasse == normalized_klasse)
+    )
+    account_ids = list(result.scalars().all())
+    if account_ids:
+        await db.execute(
+            delete(models.ExerciseCompletion).where(
+                models.ExerciseCompletion.account_id.in_(account_ids)
+            )
+        )
+        await db.execute(
+            delete(models.Account).where(models.Account.id.in_(account_ids))
+        )
+        await db.commit()
+
+    return {"deleted": len(account_ids)}

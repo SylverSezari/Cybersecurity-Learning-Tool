@@ -1,15 +1,12 @@
 """Generate account defaults and memorable passwords from local word lists."""
 
-from functools import lru_cache
 import secrets
+from functools import lru_cache
 
 from config import settings
 
-
 RANDOM_CLASSES = tuple(
-    f"{grade}{section}"
-    for grade in range(1, 5)
-    for section in "ABC"
+    f"{grade}{section}" for grade in range(1, 5) for section in "ABC"
 )
 
 

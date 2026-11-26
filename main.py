@@ -10,7 +10,7 @@ from fastapi.exception_handlers import http_exception_handler
 from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import select
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 from starlette.exceptions import HTTPException as StarletteHTTPException
@@ -156,6 +156,19 @@ app.include_router(challenges.router, prefix="/api/challenges", tags=["challenge
 app.include_router(accounts.router, prefix="/api/accounts", tags=["accounts"])
 app.include_router(progress_router.router, prefix="/api/progress", tags=["progress"])
 app.include_router(challenge_pages.router)
+
+
+## Health Check Endpoint
+@app.get("/health")
+async def health_check(db: Annotated[AsyncSession, Depends(get_db)]):
+    try:
+        await db.execute(text("SELECT 1"))
+    except Exception as exc:
+        raise HTTPException(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            detail="Database unavailable",
+        ) from exc
+    return {"status": "healthy"}
 
 
 # Web functions
